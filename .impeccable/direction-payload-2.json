@@ -1,0 +1,103 @@
+{
+  "title": "Bolder hand — foreign forms only",
+  "question": "The roll leads with The Shore Road. Keep it, take an alternate, or re-roll again.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "The Shore Road",
+      "kicker": "THE ROLL",
+      "lineage": "city-pop airbrush sleeves — chrome script over a graded sunset, aqua sea, palms as punctuation",
+      "thesis": "Every put-in is a station along one evening horizon: Kaudiyala, Marine Drive, Shivpuri, Brahmpuri, Rishikesh — the kilometre sequence is a real road you glide down.",
+      "palette": ["#FFB98A", "#F2789F", "#A8C8E8", "#3FB8A8", "#16233F"],
+      "materials": ["airbrushed gradient", "chrome script", "aqua sea field", "palm silhouette", "windshield flare"],
+      "viewport": "One horizon pinned two-thirds down. Sky grades peach through rose into powder blue above it; the airbrushed Ganga runs aqua below. The chrome wordmark floats over the horizon, the headline sits in the sky band in balanced caps, and five marks stand along the waterline — the five put-ins, kilometres set beneath in tabular figures, the nearest one lit. The enquiry pill sits on the horizon itself at the left third, its reflection carrying today's river status.",
+      "risk": "Gradient grounds are murder on price legibility — this collapses into a pretty haze unless every number gets its own opaque field. And city-pop is a strongly nostalgic Japanese register; on an Indian river brand it has to be earned by the geography and the photography or it reads as a borrowed mood board.",
+      "raised": [
+        { "from": "challenger-ink-basin", "raise": "The sea field is a live material that answers the pointer rather than a painted backdrop — built in CSS and SVG, not a GPU solver, so a 4G phone still gets it and reduced motion gets a still frame." },
+        { "from": "challenger-provenance", "raise": "One continuous line carries the whole journey, and a closed season reads as an honest visible gap in that line — never a hidden card or a quietly disabled button." },
+        { "from": "challenger-cyclorama", "raise": "Availability is a named phase state, text-equivalent and deep-linkable, where colour is never the sole signal — a drained horizon always carries its label and its mark." }
+      ]
+    },
+    {
+      "id": "challenger-tdr",
+      "label": "Info-Noise Sleeve",
+      "verdict": "competitive",
+      "lineage": "Designers Republic sleeves — pseudo-corporate roundels, hazard sans, registration marks",
+      "thesis": "Stretches are product codes, grades are warning classes, and the closure notice is what the whole system was already built to shout.",
+      "palette": ["#000000", "#FF0090", "#FF6A00", "#FFFFFF"],
+      "materials": ["flat print, no gradients", "condensed hazard grotesk", "registration marks", "density as material"],
+      "viewport": "Absolute black gridded tight to the edge, roundels and barcode fragments crowding the margin, and one enormous condensed kilometre numeral shouting through the noise.",
+      "risk": "Cold and hostile by design — hard to sell a family hotel stay inside it, and it needs real discipline or it becomes decoration cosplaying as information.",
+      "case": "Beats the leader outright on product clarity. Its topology — move by product code, by roundel family, by warning class — maps one-to-one onto stretch, service line, and difficulty grade, and its density tiers reflow by dropping ornament layers in declared steps while the shouting word never shrinks, which is exactly the behaviour five priced options on a phone need. Loses audience identification: it is narrower and colder than the leader across hotels and families.",
+      "hero": "https://impeccable.style/worlds/cards/tdr-info-noise-sleeve-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/tdr-info-noise-sleeve.webp"
+    },
+    {
+      "id": "challenger-oscilloscope",
+      "label": "Signal Bench",
+      "verdict": "competitive",
+      "lineage": "CRT oscilloscope on a signal bench — phosphor trace over an etched graticule",
+      "thesis": "The graticule is the kilometre axis: ten divisions, every one meaning something, all five stretches overlaid on one measured grid instead of five separate cards.",
+      "palette": ["#050A08", "#39FF88", "#4A5A55", "#FFB020"],
+      "materials": ["phosphor glow", "etched graticule", "detented knob", "seven-segment readout"],
+      "viewport": "Near-black glass under a square graticule, the river's gauge riding as a live trace, condensed instrument caps on the bezel and amber readouts holding the armed and warning states.",
+      "risk": "An engineer's world. A traveller planning a weekend does not identify with a signal bench, and dark phosphor fights the daylight photography this product needs.",
+      "case": "Beats the leader on product clarity: measurement against a shared graticule is the strongest comparison grammar in the hand, seven-segment readouts make prices unmissable, and triggered, untriggered and freeze are a ready-made vocabulary for availability. Loses audience identification badly — it reads as instrumentation, not as a river you want to be on.",
+      "hero": "https://impeccable.style/worlds/cards/scientific-notation-oscilloscope-signal-bench-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/scientific-notation-oscilloscope-signal-bench.webp"
+    },
+    {
+      "id": "challenger-ink-basin",
+      "label": "Fluid Ink Basin",
+      "verdict": "declined",
+      "lineage": "suminagashi marbling in a shallow basin",
+      "thesis": "The page is water, and every swirl obeys real fluid law rather than decoration.",
+      "palette": ["#F7F5F0", "#1B2B6B", "#2A2A2A", "#9AA3B0"],
+      "materials": ["indigo sumi ink", "paper-white water", "feathered rain", "still margin"],
+      "viewport": "One continuous basin surface answering the pointer, with a quiet humanist sans held outside it in a still margin.",
+      "risk": "A WebGL fluid solver on a 4G Indian phone is a battery and performance failure, against this product's stated phone-first principle.",
+      "case": "Loses both axes. Suminagashi is Japanese and meditative — it belongs to Rishikesh's yoga identity, not its rafting one — and holding all content in a still margin leaves no grammar at all for comparing five priced stretches.",
+      "kept": "The surface itself as a live material that answers the pointer, the newest input always the darkest region.",
+      "hero": "https://impeccable.style/worlds/cards/medium-native-fluid-ink-basin-hero.webp"
+    },
+    {
+      "id": "challenger-provenance",
+      "label": "Provenance Ribbon",
+      "verdict": "declined",
+      "lineage": "museum custody ribbons tracing an object's whole life",
+      "thesis": "One continuous ribbon folds through every passage, with gaps left visible as unwoven thread.",
+      "palette": ["#EFE7D6", "#B4232A", "#8A8479", "#2B2620"],
+      "materials": ["archival buff", "red silk ribbon", "dealer stamp", "ledger serif"],
+      "viewport": "A single ribbon-led column, dated small caps at every fold, known passages solid and inferred ones hairline.",
+      "risk": "Ledger serifs on archival buff read as a museum label — slow and scholarly where a booking decision needs to be quick.",
+      "case": "Loses both axes. The entire system exists to express contested claims and uncertainty, which is the opposite of what a traveller deciding tonight needs, and no traveller identifies with custody records.",
+      "kept": "One continuous line carrying the whole journey, with gaps rendered honestly as breaks in the material rather than hidden.",
+      "hero": "https://impeccable.style/worlds/cards/exhibition-museum-curation-provenance-ribbon-hero.webp"
+    },
+    {
+      "id": "challenger-cyclorama",
+      "label": "Cyclorama Dawn",
+      "verdict": "declined",
+      "lineage": "stage cycloramas lit from black night through cobalt and rose into white day",
+      "thesis": "The day of a river trip staged by light alone — five in the morning dark, cobalt first light, rose over the ridge, full day on the water.",
+      "palette": ["#07080C", "#0B3C8C", "#E8809B", "#F6F4EF"],
+      "materials": ["depthless cyc black", "cobalt horizon band", "rose wash", "lighting-plot stencil caps"],
+      "viewport": "Horizontal horizon bands stacked dark to light, cue names in stencil caps with tabular numerals, the white-day wash reserved for the fully active state.",
+      "risk": "A dark-to-light gradient down the page makes price legibility inconsistent from band to band, and dawn romance sits oddly on a bungee platform.",
+      "case": "Loses audience identification to the leader, which owns the same horizon topology in a register this audience actually speaks, and does not gain enough clarity to compensate — the bands are handsome but they do not compare five numbers.",
+      "kept": "Named phase states that are text-equivalent and deep-linkable, where colour is never the sole signal.",
+      "hero": "https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn-hero.webp"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "What every Rishikesh operator ships, executed at the craft level of the best of them.",
+    "palette": ["#0F1C2E", "#FF7A00", "#FFFFFF", "#F1F5F9"],
+    "materials": ["full-bleed drone video", "dark scrim", "glassy rounded cards"],
+    "viewport": "Whitewater hero video under a dark gradient, white bold headline, orange rounded CTA, three glass cards with rating chips, trust badges, testimonial carousel, sticky WhatsApp bubble.",
+    "risk": "Indistinguishable from DroneCraft and every competitor by design — which is also exactly what the client pointed at."
+  },
+  "steer": true
+}

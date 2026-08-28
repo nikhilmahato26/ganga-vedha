@@ -1,0 +1,131 @@
+{
+  "title": "Choose Ganga Vedha's visual world",
+  "question": "The roll assigned The Gear Room. Keep it, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "The Gear Room",
+      "kicker": "THE ROLL",
+      "lineage": "river-safety gear: stencilled helmets, PFD webbing, riveted spec plates, laminated limit tags",
+      "thesis": "Rishikesh sold by the kilometre, with every limit printed on the tag — the operator that shows you the numbers instead of the drone footage.",
+      "palette": ["#E8E6E1", "#3F4A47", "#FF5A1F", "#12161A", "#1F7A4D"],
+      "materials": ["anodized aluminium", "nylon webbing", "stencil paint", "laminated tag", "wet river slate"],
+      "viewport": "Orange webbing status strap pinned across the top carrying today's river reading. Below it, a hard split: left, KM-scale headline in expanded grotesque on wet-slate ground with the enquiry action directly beneath; right, one hard-cropped photograph with a riveted spec plate clamped over its bottom edge. The three service plates break the fold.",
+      "risk": "Industrial can read cold or construction-site if the photography is weak — and there are no real photos yet. The type, colour fields and plates carry it alone, but the ceiling rises sharply once the client supplies images.",
+      "raised": [
+        { "from": "challenger-arcade-marquee", "raise": "Availability is now the loudest state in the system, not a badge — a running stretch is lit in full orange, a closed one drains to slate and takes the stamp." },
+        { "from": "challenger-crt-pixel", "raise": "Grade owns a colour by law — green, blue, orange — never decoration, and every plate snaps to a hard module with nothing off-grid." },
+        { "from": "challenger-darkroom", "raise": "Preview before commit: the enquiry stamps a full quote before submit is possible, and the admin closure control previews exactly what visitors will see." },
+        { "from": "challenger-telop", "raise": "Scale is mapped to decision weight — the kilometre numeral and the price are the largest things on a card, not uniform template slots." },
+        { "from": "challenger-rain-garden", "raise": "River status is one dominant global field governing the whole site's state, and the status strap is the single element that never scrolls away." }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "The River Chart",
+      "kicker": "IMPECCABLE'S PICK",
+      "lineage": "hand-inked expedition river-guide scroll maps",
+      "thesis": "The whole site drawn as a guide's river map: one blue line down the page, kilometres measured along it, rapids as named ticks.",
+      "palette": ["#F4EFE2", "#1B3A5C", "#C4442B", "#8B9A7A"],
+      "materials": ["surveyor's ink", "chart paper", "contour hatching", "brass dividers"],
+      "viewport": "The river line enters top-left and runs full height. The headline sits in the margin as a cartographer's note. The three services are three annotated nodes on the line, kilometres ticking between them.",
+      "risk": "This is the obvious answer. Map-as-navigation for a river product is where most runs land, and chart-cream plus ink plus one vermilion sits inside a known generated-interface cluster. It will be lovely and it will not surprise anyone.",
+      "case": "Topped my grounded list on resonance: it makes the kilometre mechanism literal and beautiful. Shown so the familiarity trade is yours to make, not mine."
+    },
+    {
+      "id": "challenger-jacquard",
+      "label": "Punched Brocade",
+      "verdict": "competitive",
+      "lineage": "jacquard loom brocade woven from punch-card instructions",
+      "thesis": "Each rafting stretch is a woven row; the kilometre sequence is the punch pattern, traceable from motif to row to single thread.",
+      "palette": ["#131A33", "#C9A227", "#EFE6CE", "#0A0D18"],
+      "materials": ["midnight silk", "gold weft float", "punch-card stock", "monospaced ledger digits"],
+      "viewport": "Banded rows down the page, one stretch per row, ledger digits carrying km, duration and price in strict columns, gold motif resolving across the band.",
+      "risk": "Reads as a wedding venue rather than a river operator, and gold-on-midnight fights daylight water photography.",
+      "case": "Holds product clarity outright — the row-banded ledger is a genuinely better grammar for comparing five stretches by number than anything else dealt, and its motif-row-card traceability maps cleanly onto service-stretch-rapid. Loses audience identification: a 25-year-old comparing operators on a phone does not identify with brocade.",
+      "hero": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-jacquard-punched-brocade-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-jacquard-punched-brocade.webp"
+    },
+    {
+      "id": "challenger-arcade-marquee",
+      "label": "Arcade Marquee Row",
+      "verdict": "declined",
+      "lineage": "backlit arcade marquees down a dark aisle",
+      "thesis": "Three services as three lit marquees, attract screens previewing before you commit a coin.",
+      "palette": ["#0B0B10", "#2BD9E8", "#E8399B", "#F6F2E8"],
+      "materials": ["backlit acrylic", "airbrush fade", "phosphor type"],
+      "viewport": "One cabinet per destination down a dark aisle, the glowing marquee band as signpost.",
+      "risk": "Undercuts the safety trust this product must earn, and a dark aisle hides the prices people came to compare.",
+      "case": "Loses both axes: rafting buyers do not live in arcades, and coin-in maps onto nothing in an enquiry flow.",
+      "kept": "Lit-state as primary wayfinding — one destination unmistakably on at a time.",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-arcade-marquee-row-hero.webp"
+    },
+    {
+      "id": "challenger-crt-pixel",
+      "label": "CRT Arcade Pixel Glow",
+      "verdict": "declined",
+      "lineage": "240-line sprite grids with scanline glow",
+      "thesis": "A sixteen-colour palette law where every state is a sprite swap and nothing sits off-grid.",
+      "palette": ["#0A0A0A", "#F8E44C", "#38B6FF", "#FF4D3D"],
+      "materials": ["phosphor black", "scanline gap", "integer-scaled sprite"],
+      "viewport": "Tile-grid playfield with eight-by-eight caps pinned to the top edge.",
+      "risk": "Pixel art cannot show real Himalayan water, which this product must show.",
+      "case": "Loses both axes on fusion: the grid discipline is real, but sprite rendering is in direct conflict with the photography the product depends on.",
+      "kept": "Palette as law — grade colours encode meaning, never decorate — and a hard module with nothing off-grid.",
+      "hero": "https://impeccable.style/worlds/cards/medium-native-crt-arcade-pixel-glow-hero.webp"
+    },
+    {
+      "id": "challenger-darkroom",
+      "label": "Darkroom Safelight Bay",
+      "verdict": "declined",
+      "lineage": "amber-lit printing darkrooms with timed baths",
+      "thesis": "Booking staged as an irreversible chemical process through fixed stations.",
+      "palette": ["#1A1208", "#D98324", "#8C8C8C", "#F2F0EB"],
+      "materials": ["amber safelight", "wet silver print", "enamel tray", "grease pencil"],
+      "viewport": "Fixed stations in order — compose, expose, develop, fix, wash — linearising on phones.",
+      "risk": "Amber monochrome drains the river imagery the product is selling.",
+      "case": "Loses both axes: the staged flow is elegant but travellers do not identify with darkroom craft, and a monochrome wash defeats the photography.",
+      "kept": "Test-strip discipline — preview the result before the action commits.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-darkroom-safelight-bay-hero.webp"
+    },
+    {
+      "id": "challenger-telop",
+      "label": "Variety Telop Field",
+      "verdict": "declined",
+      "lineage": "Japanese variety-show caption fields",
+      "thesis": "Outlined captions placed free in the frame, scaled to the emotion of the moment.",
+      "palette": ["#FFE500", "#E01B24", "#101010", "#FFFFFF"],
+      "materials": ["contrast outline", "drop shadow", "high-chroma fill"],
+      "viewport": "Captions landing free across the frame, rotation as punctuation, no fixed band.",
+      "risk": "Free placement destroys the price and kilometre scanability the whole product rests on.",
+      "case": "Loses both axes: it is a Japanese broadcast grammar with no purchase on an Indian adventure audience, and unfixed placement is fatal to comparison.",
+      "kept": "Scale mapped to intensity — hierarchy driven by meaning rather than by slot.",
+      "hero": "https://impeccable.style/worlds/cards/variety-telop-caption-field-hero.webp"
+    },
+    {
+      "id": "challenger-rain-garden",
+      "label": "Gravity-Rain Garden",
+      "verdict": "declined",
+      "lineage": "surreal gardens where rain falls by the colour of its cloud",
+      "thesis": "One dominant field governs everything; only the legend is held level.",
+      "palette": ["#3D4A42", "#4A7DD9", "#C43B3B", "#0D0D0D"],
+      "materials": ["dusk garden wash", "directional rain", "bent baseline"],
+      "viewport": "A garden of local gravities, labels falling toward their clouds, the legend the only level thing.",
+      "risk": "Dreamlike surrealism reads as unserious for an operator whose core promise is safety.",
+      "case": "Loses both axes: the monsoon rhyme is tempting, but bent baselines wreck price scanning and the register contradicts the trust this surface must build.",
+      "kept": "One dominant global field the whole surface obeys, with the legend fixed and never moving.",
+      "hero": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-gravity-rain-garden-hero.webp"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "What every Rishikesh operator ships, executed at the craft level of the best of them.",
+    "palette": ["#0F1C2E", "#FF7A00", "#FFFFFF", "#F1F5F9"],
+    "materials": ["full-bleed drone video", "dark scrim", "glassy rounded cards"],
+    "viewport": "Whitewater hero video under a dark gradient, white bold headline, orange rounded CTA, three glass cards with rating chips, trust badges, testimonial carousel, sticky WhatsApp bubble.",
+    "risk": "Indistinguishable from DroneCraft and every competitor by design — which is also exactly what the client pointed at."
+  },
+  "steer": true
+}
