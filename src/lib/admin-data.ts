@@ -7,6 +7,7 @@ import {
   auditLog,
   closures,
   enquiries,
+  galleryItems,
   hotelRooms,
   hotels,
   media,
@@ -51,6 +52,15 @@ export async function getHotelAdmin(id: number) {
 
 export async function listReviewsAdmin() {
   return getDb().select().from(reviews).orderBy(reviews.sortOrder);
+}
+
+/** Every gallery photo, published or not, newest-added first — the admin's own review of what's in it. */
+export async function listGalleryItemsAdmin() {
+  return getDb()
+    .select({ item: galleryItems, media })
+    .from(galleryItems)
+    .innerJoin(media, eq(galleryItems.mediaId, media.id))
+    .orderBy(galleryItems.sortOrder);
 }
 
 export async function getReviewAdmin(id: number) {
@@ -239,6 +249,7 @@ export async function listUnusedMedia() {
             .where(or(eq(siteSettings.heroMediaId, media.id), eq(siteSettings.logoMediaId, media.id))),
         ),
         notExists(db.select().from(mediaLinks).where(eq(mediaLinks.mediaId, media.id))),
+        notExists(db.select().from(galleryItems).where(eq(galleryItems.mediaId, media.id))),
       ),
     )
     .orderBy(desc(media.createdAt));

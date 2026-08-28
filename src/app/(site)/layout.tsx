@@ -106,6 +106,7 @@ async function SiteFooter() {
             {[
               ["Bungee jumping", "/bungee/bungee-jump-rishikesh"],
               ["Stays", "/hotels"],
+              ["Gallery", "/#gallery"],
               ["Design system", "/styleguide"],
             ].map(([label, href]) => (
               <li key={label}>

@@ -113,6 +113,14 @@ export type Review = {
   tripLabel: string | null;
 };
 
+export type GalleryItem = {
+  id: number;
+  /** Reuses the same three services as everywhere else on the site; `null` is a photo that isn't specific to one of them. */
+  category: ServiceKey | null;
+  caption: string | null;
+  media: MediaSource;
+};
+
 export type SiteSettings = {
   brandName: string;
   tagline: string;
@@ -629,6 +637,11 @@ export async function getHotelSeed(slug: string): Promise<Hotel | null> {
 
 export async function getReviewsSeed(): Promise<Review[]> {
   return REVIEWS;
+}
+
+/** No stand-in photos here — an empty gallery in seed mode is the honest state; there is no database to have uploaded any to. */
+export async function getGalleryItemsSeed(): Promise<GalleryItem[]> {
+  return [];
 }
 
 export async function getClosuresSeed(): Promise<Closure[]> {

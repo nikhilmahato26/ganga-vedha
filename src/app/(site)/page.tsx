@@ -18,10 +18,12 @@ import {
 } from "@/components/ui";
 import { AdventureCard, CardLink, HotelCard } from "@/components/site/product-card";
 import { EnquireButton } from "@/components/site/enquiry";
+import { GallerySection } from "@/components/site/gallery";
 import {
   getAdventures,
   getClosures,
   getContentBlock,
+  getGalleryItems,
   getHotels,
   getRaftingByDistance,
   getReviews,
@@ -67,15 +69,17 @@ const WHY_US_FALLBACK = {
 } as const;
 
 export default async function LandingPage() {
-  const [settings, rafting, bungeeList, hotels, reviews, closures, whyUsBlock] = await Promise.all([
-    getSiteSettings(),
-    getRaftingByDistance(),
-    getAdventures("bungee"),
-    getHotels(),
-    getReviews(),
-    getClosures(),
-    getContentBlock("why-choose-us"),
-  ]);
+  const [settings, rafting, bungeeList, hotels, reviews, closures, whyUsBlock, galleryItems] =
+    await Promise.all([
+      getSiteSettings(),
+      getRaftingByDistance(),
+      getAdventures("bungee"),
+      getHotels(),
+      getReviews(),
+      getClosures(),
+      getContentBlock("why-choose-us"),
+      getGalleryItems(),
+    ]);
   const whyUs = whyUsBlock ?? WHY_US_FALLBACK;
 
   const bungee = bungeeList[0];
@@ -431,6 +435,9 @@ export default async function LandingPage() {
           })}
         </div>
       </section>
+
+      {/* ── Gallery ───────────────────────────────────────────────────────── */}
+      <GallerySection items={galleryItems} />
 
       {/* ── Reviews ───────────────────────────────────────────────────────── */}
       <section className="container-page pt-24">

@@ -6,6 +6,7 @@ import {
   adventures as adventuresTable,
   closures as closuresTable,
   contentBlocks as contentBlocksTable,
+  galleryItems as galleryItemsTable,
   hotels as hotelsTable,
   media as mediaTable,
   mediaLinks as mediaLinksTable,
@@ -19,6 +20,7 @@ import type { MediaSource } from "@/components/ui/media";
 export type {
   Adventure,
   Closure,
+  GalleryItem,
   Grade,
   Hotel,
   HotelRoom,
@@ -29,6 +31,7 @@ export type {
 import type {
   Adventure,
   Closure,
+  GalleryItem,
   Hotel,
   Review,
   SiteSettings,
@@ -58,6 +61,7 @@ const TAGS = {
   reviews: "reviews",
   closures: "closures",
   content: "content-blocks",
+  gallery: "gallery",
 } as const;
 
 export type WhyUsItem = { icon: string; title: string; body: string };
@@ -201,6 +205,21 @@ function mapReview(row: typeof reviewsTable.$inferSelect): Review {
     rating: row.rating,
     body: row.body,
     tripLabel: row.tripLabel,
+  };
+}
+
+function mapGalleryItem(
+  row: typeof galleryItemsTable.$inferSelect,
+  mediaRow: typeof mediaTable.$inferSelect,
+): GalleryItem {
+  return {
+    id: row.id,
+    category: row.category,
+    caption: row.caption,
+    // Never null in practice — the FK is NOT NULL and the join is inner —
+    // but `toMediaSource` still takes `| undefined` from its other callers,
+    // so this satisfies that signature without a second, looser type here.
+    media: toMediaSource(mediaRow) as MediaSource,
   };
 }
 
@@ -368,6 +387,24 @@ export async function getReviews(): Promise<Review[]> {
     },
     ["reviews"],
     { tags: [TAGS.reviews], revalidate: 300 },
+  )();
+}
+
+/** All published gallery photos, newest-curated-first order. Filter by category client-side — the whole set is small enough to ship in one request and switch instantly. */
+export async function getGalleryItems(): Promise<GalleryItem[]> {
+  if (!hasDatabase()) return seed.getGalleryItemsSeed();
+  return cache(
+    async () => {
+      const rows = await getDb()
+        .select({ item: galleryItemsTable, media: mediaTable })
+        .from(galleryItemsTable)
+        .innerJoin(mediaTable, eq(galleryItemsTable.mediaId, mediaTable.id))
+        .where(eq(galleryItemsTable.isPublished, true))
+        .orderBy(galleryItemsTable.sortOrder);
+      return rows.map((r) => mapGalleryItem(r.item, r.media));
+    },
+    ["gallery"],
+    { tags: [TAGS.gallery], revalidate: 300 },
   )();
 }
 

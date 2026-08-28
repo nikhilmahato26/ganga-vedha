@@ -114,6 +114,29 @@ export const mediaLinks = pgTable(
   ],
 );
 
+/**
+ * The homepage gallery — photos curated on their own, not borrowed from a
+ * specific hotel or rafting stretch's cover image. `category` reuses
+ * `service_key` so it lines up with the same three services everywhere else
+ * on the site; null is a photo that doesn't belong to just one of them
+ * (the camp at sunset, the team, the put-in view) and still shows under "All".
+ */
+export const galleryItems = pgTable(
+  "gallery_items",
+  {
+    id: serial("id").primaryKey(),
+    mediaId: integer("media_id")
+      .notNull()
+      .references(() => media.id, { onDelete: "cascade" }),
+    category: serviceKey("category"),
+    caption: varchar("caption", { length: 200 }),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    isPublished: boolean("is_published").default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("gallery_items_sort_idx").on(t.sortOrder)],
+);
+
 /* =============================================================================
    Site-wide content
    ========================================================================== */
@@ -528,6 +551,7 @@ export const hotelRoomsRelations = relations(hotelRooms, ({ one }) => ({
    ========================================================================== */
 
 export type Media = typeof media.$inferSelect;
+export type GalleryItem = typeof galleryItems.$inferSelect;
 export type Adventure = typeof adventures.$inferSelect;
 export type Hotel = typeof hotels.$inferSelect;
 export type HotelRoom = typeof hotelRooms.$inferSelect;

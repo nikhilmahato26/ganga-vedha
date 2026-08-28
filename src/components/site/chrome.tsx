@@ -182,6 +182,7 @@ export function SiteHeader({
           {[
             ["Bungee", "/bungee/bungee-jump-rishikesh"],
             ["Stays", "/hotels"],
+            ["Gallery", "/#gallery"],
             ["Contact", "#contact"],
           ].map(([label, href]) => (
             <Link
@@ -263,6 +264,7 @@ export function SiteHeader({
                 {[
                   ["Bungee jumping", "/bungee/bungee-jump-rishikesh"],
                   ["Stays", "/hotels"],
+                  ["Gallery", "/#gallery"],
                   ["Contact", "#contact"],
                 ].map(([label, href]) => (
                   <Link
