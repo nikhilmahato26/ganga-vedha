@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ChevronDown,
   CloudRain,
@@ -15,24 +17,62 @@ import {
 import { AvailabilityPill, Button, LinkButton } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { formatKm, whatsappHref } from "@/lib/format";
-import { closureDismissKey } from "@/lib/closure";
 import type { Closure } from "@/lib/content";
 
 export type NavStretch = { slug: string; name: string; distanceKm: number | null };
 
+/** The fuller phrasing for the strap, which has room for it. */
+const SERVICE_CLOSED_LABEL: Record<string, string> = {
+  rafting: "Rafting paused — high water",
+  bungee: "Bungee closed",
+  hotel: "Hotel bookings closed",
+};
+
+/** The short name for the compact nav pill. */
+const SERVICE_SHORT_NAME: Record<string, string> = {
+  rafting: "Rafting",
+  bungee: "Bungee",
+  hotel: "Hotels",
+};
+
+/**
+ * Cycles through a list, one at a time, every `intervalMs` — for a status
+ * strap that has more than one closed service to mention and only room for
+ * one. A list of 0 or 1 never starts the timer, so nothing above ever
+ * flickers when only one thing (or nothing) is closed.
+ */
+function useRotatingIndex(length: number, intervalMs = 3000): number {
+  const [index, setIndex] = React.useState(0);
+  React.useEffect(() => {
+    if (length <= 1) return;
+    const id = setInterval(() => setIndex((i) => (i + 1) % length), intervalMs);
+    return () => clearInterval(id);
+  }, [length, intervalMs]);
+  return length > 0 ? index % length : 0;
+}
+
 /**
  * The river-status strap. Pinned above the header and never scrolled away,
- * because availability is the first fact this site owes anyone.
+ * because availability is the first fact this site owes anyone. Rotates
+ * through every closed service — not just rafting — a few seconds at a time
+ * when more than one is closed at once.
  */
 export function StatusStrap({
-  open,
-  label,
+  closedServices,
+  openLabel,
   gauge,
 }: {
-  open: boolean;
-  label: string;
+  /** Service keys currently closed, e.g. `["rafting", "bungee"]` — empty when everything is open. */
+  closedServices: string[];
+  openLabel: string;
   gauge: string;
 }) {
+  const index = useRotatingIndex(closedServices.length);
+  const open = closedServices.length === 0;
+  const label = open
+    ? openLabel
+    : (SERVICE_CLOSED_LABEL[closedServices[index]] ?? `${closedServices[index]} closed`);
+
   return (
     <div className={cn("w-full text-white", open ? "bg-jade-900" : "bg-granite-900")}>
       <div className="container-page flex min-h-9 flex-wrap items-center justify-center gap-x-3 gap-y-1 py-1.5 text-center text-caption sm:justify-between sm:text-left">
@@ -58,17 +98,19 @@ export function SiteHeader({
   brandName,
   stretches,
   whatsappNumber,
-  raftingOpen,
+  closedServices,
 }: {
   brandName: string;
   stretches: NavStretch[];
   whatsappNumber: string;
-  raftingOpen: boolean;
+  /** Service keys currently closed, e.g. `["rafting", "bungee"]` — empty when everything is open. */
+  closedServices: string[];
 }) {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [raftOpen, setRaftOpen] = React.useState(false);
   const raftRef = React.useRef<HTMLDivElement>(null);
   const wa = whatsappHref(whatsappNumber, "Hi Ganga Vedha — I'd like to book a trip.");
+  const closedIndex = useRotatingIndex(closedServices.length);
 
   React.useEffect(() => {
     function onDown(e: PointerEvent) {
@@ -153,8 +195,12 @@ export function SiteHeader({
         </nav>
 
         <div className="flex items-center gap-2">
-          {!raftingOpen && (
-            <AvailabilityPill open={false} label="Rafting closed" className="hidden sm:inline-flex" />
+          {closedServices.length > 0 && (
+            <AvailabilityPill
+              open={false}
+              label={`${SERVICE_SHORT_NAME[closedServices[closedIndex]] ?? closedServices[closedIndex]} closed`}
+              className="hidden sm:inline-flex"
+            />
           )}
           {wa && (
             <LinkButton
@@ -276,14 +322,17 @@ export function ClosureNoticeVisual({
   onDismiss,
 }: ClosureVisualProps) {
   const Icon = CLOSURE_ICON[icon];
-  return (
+  const node = (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="closure-title"
-      className="fixed inset-0 z-(--z-toast) grid place-items-center overflow-y-auto bg-jade-950/96 px-5 py-12 backdrop-blur-sm"
+      // Same scrim convention as the admin `<Modal>` — a dimmed, blurred backdrop
+      // the page stays visible through, not a near-opaque field that reads as a
+      // separate screen. The card below is the modal; this is only the backdrop.
+      className="fixed inset-0 z-(--z-toast) grid place-items-center overflow-y-auto bg-granite-950/55 px-5 py-12 backdrop-blur-[3px]"
     >
-      <div className="mx-auto max-w-lg text-center text-white">
+      <div className="mx-auto w-full max-w-lg rounded-lg bg-jade-950 p-10 text-center text-white shadow-xl">
         <span className="mx-auto grid size-20 place-items-center rounded-full border-2 border-white/25">
           <Icon className="size-9" aria-hidden />
         </span>
@@ -309,53 +358,25 @@ export function ClosureNoticeVisual({
       </div>
     </div>
   );
+
+  // `fixed` positions relative to the viewport only when every ancestor is
+  // free of a transform/filter/perspective — a hovered `Card interactive`
+  // (its `hover:-translate-y-0.5`) creates exactly that, which trapped this
+  // inside the card instead of covering the screen. A portal to `document.body`
+  // sidesteps the whole class of ancestor-styling bug rather than chasing it
+  // through every possible card, and is why this is client-only (`ClosureLink`
+  // and `ClosureTrigger` only ever mount it after a click, well past hydration,
+  // so `document` is always there).
+  return createPortal(node, document.body);
 }
 
-/**
- * The full-screen closure notice. Dismissal is keyed to the closure's id AND
- * version, so editing the message brings it back for people who dismissed the
- * old one — and it is stored per session, not forever.
- */
-const dismissListeners = new Set<() => void>();
-function subscribeDismiss(cb: () => void) {
-  dismissListeners.add(cb);
-  return () => dismissListeners.delete(cb);
-}
-
-export function ClosureNotice({ closure }: { closure: Closure | null }) {
-  const key = closure ? closureDismissKey(closure) : null;
-
-  /* sessionStorage is an external store, so it is read through the primitive
-     built for one. An effect + setState here would render the notice, then
-     immediately hide it, which is a visible flash on every page view. */
-  const dismissed = React.useSyncExternalStore(
-    subscribeDismiss,
-    () => {
-      if (!key) return true;
-      try {
-        return sessionStorage.getItem(key) !== null;
-      } catch {
-        return false; // private mode: show it, and it reappears next visit
-      }
-    },
-    () => true, // server render: never emit the notice into static HTML
-  );
-
-  const dismiss = React.useCallback(() => {
-    if (!key) return;
-    try {
-      sessionStorage.setItem(key, "1");
-    } catch {
-      /* ignore */
-    }
-    dismissListeners.forEach((cb) => cb());
-  }, [key]);
-
-  const show = Boolean(closure) && !dismissed;
-
+/** Escape-to-close and background-scroll-lock, shared by every closure trigger below. */
+function useModalChrome(open: boolean, close: () => void) {
   React.useEffect(() => {
-    if (!show) return;
-    function onKey(e: KeyboardEvent) { if (e.key === "Escape") dismiss(); }
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") close();
+    }
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -363,19 +384,93 @@ export function ClosureNotice({ closure }: { closure: Closure | null }) {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
-  }, [show, dismiss]);
+  }, [open, close]);
+}
 
-  if (!closure || !show) return null;
+/**
+ * Sits where a "Book now" button would be, for a listing that can't take one
+ * right now. Nothing shows on its own when the page loads — the modal only
+ * appears if a visitor actually presses this, i.e. tries to book. Plain local
+ * state, not a remembered dismissal: each press is a fresh attempt, not a
+ * one-time notice there's ever a reason to suppress on a later visit.
+ */
+export function ClosureTrigger({
+  closure,
+  children = "Bookings closed — tap to see why",
+  className = "w-full rounded-md bg-granite-100 p-4 text-center text-small font-semibold text-ink-muted transition-colors hover:bg-granite-200",
+}: {
+  closure: Closure;
+  /** The clickable content — the default is the booking-panel label, but this
+   * wraps just as well around a photo so the same "why" is reachable from
+   * there too. */
+  children?: React.ReactNode;
+  className?: string;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const close = React.useCallback(() => setOpen(false), []);
+  useModalChrome(open, close);
 
   return (
-    <ClosureNoticeVisual
-      icon={closure.icon}
-      title={closure.title}
-      body={closure.body}
-      footnote={closure.footnote}
-      ctaLabel={closure.ctaLabel}
-      onDismiss={dismiss}
-    />
+    <>
+      <button type="button" onClick={() => setOpen(true)} className={className}>
+        {children}
+      </button>
+      {open && (
+        <ClosureNoticeVisual
+          icon={closure.icon}
+          title={closure.title}
+          body={closure.body}
+          footnote={closure.footnote}
+          ctaLabel={closure.ctaLabel}
+          onDismiss={close}
+        />
+      )}
+    </>
+  );
+}
+
+/**
+ * Wraps a link to a closed listing's own page — its photo, its name, its
+ * "Details" CTA. Pressing it shows the closure card instead of navigating
+ * straight there; "Got it" is what actually takes the visitor to the page,
+ * every single time, never suppressed after a first look. An open listing
+ * never renders this at all — its links stay plain `<Link>`s.
+ */
+export function ClosureLink({
+  closure,
+  href,
+  children,
+  className,
+}: {
+  closure: Closure;
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const router = useRouter();
+  const [open, setOpen] = React.useState(false);
+  const proceed = React.useCallback(() => {
+    setOpen(false);
+    router.push(href);
+  }, [router, href]);
+  useModalChrome(open, proceed);
+
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} className={className}>
+        {children}
+      </button>
+      {open && (
+        <ClosureNoticeVisual
+          icon={closure.icon}
+          title={closure.title}
+          body={closure.body}
+          footnote={closure.footnote}
+          ctaLabel={closure.ctaLabel}
+          onDismiss={proceed}
+        />
+      )}
+    </>
   );
 }
 

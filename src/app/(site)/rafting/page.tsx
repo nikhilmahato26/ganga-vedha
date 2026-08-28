@@ -13,7 +13,7 @@ import {
 } from "@/components/ui";
 import { AdventureCard } from "@/components/site/product-card";
 import { getClosures, getRaftingByDistance, getSiteSettings } from "@/lib/content";
-import { isBookable, resolveClosure } from "@/lib/closure";
+import { resolveClosure } from "@/lib/closure";
 import { formatDuration, formatINR, formatKm } from "@/lib/format";
 
 // 60s: matches the adventures cache window in @/lib/content.
@@ -51,7 +51,6 @@ export default async function RaftingIndex() {
           {closure.footnote ? ` ${closure.footnote}.` : ""}
         </Alert>
       )}
-
       <div className="mt-12">
         <TableScroller label="Every rafting stretch compared">
           <Table>
@@ -92,7 +91,7 @@ export default async function RaftingIndex() {
           <AdventureCard
             key={a.id}
             adventure={a}
-            open={isBookable(closures, {
+            closure={resolveClosure(closures, {
               service: "rafting",
               entityType: "adventure",
               entityId: a.id,

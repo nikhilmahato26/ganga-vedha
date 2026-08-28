@@ -12,7 +12,34 @@ import {
 } from "@/components/ui";
 import { formatDurationShort, formatINR, formatKm } from "@/lib/format";
 import { EnquireButton, type EnquiryProduct } from "./enquiry";
-import type { Adventure, Hotel } from "@/lib/content";
+import { ClosureLink } from "./chrome";
+import type { Adventure, Closure, Hotel } from "@/lib/content";
+
+/** Plain navigation when open; shows the closure card first, every time, when not. */
+export function CardLink({
+  closure,
+  href,
+  className,
+  children,
+}: {
+  closure: Closure | null;
+  href: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  if (closure) {
+    return (
+      <ClosureLink closure={closure} href={href} className={className}>
+        {children}
+      </ClosureLink>
+    );
+  }
+  return (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  );
+}
 
 function PriceBlock({
   price,
@@ -42,15 +69,17 @@ function PriceBlock({
 
 export function AdventureCard({
   adventure,
-  open,
+  closure,
   whatsappNumber,
   priority = false,
 }: {
   adventure: Adventure;
-  open: boolean;
+  /** `null` when bookable; the active closure — service, entity, or global — otherwise. */
+  closure: Closure | null;
   whatsappNumber: string;
   priority?: boolean;
 }) {
+  const open = closure === null;
   const href = `/${adventure.kind}/${adventure.slug}`;
   const product: EnquiryProduct = {
     kind: adventure.kind,
@@ -62,7 +91,7 @@ export function AdventureCard({
 
   return (
     <Card interactive className="flex flex-col">
-      <Link href={href} className="no-underline">
+      <CardLink closure={closure} href={href} className="block no-underline">
         <MediaFrame
           media={adventure.coverMedia ?? null}
           ratio="card"
@@ -95,15 +124,15 @@ export function AdventureCard({
             )}
           </div>
         </MediaFrame>
-      </Link>
+      </CardLink>
 
       <CardBody className="flex flex-1 flex-col gap-4">
         <div className="flex-1">
           <div className="flex items-start justify-between gap-2">
             <h3 className="min-w-0 flex-1 text-title text-ink">
-              <Link href={href} className="text-ink no-underline hover:underline">
+              <CardLink closure={closure} href={href} className="text-ink no-underline hover:underline">
                 {adventure.name}
-              </Link>
+              </CardLink>
             </h3>
             <div className="flex shrink-0 items-center gap-2">
               {adventure.badge && (
@@ -111,12 +140,13 @@ export function AdventureCard({
                   {adventure.badge}
                 </Chip>
               )}
-              <Link
+              <CardLink
+                closure={closure}
                 href={href}
                 className="mt-1 whitespace-nowrap text-caption font-semibold text-link no-underline hover:underline"
               >
                 Details
-              </Link>
+              </CardLink>
             </div>
           </div>
           <p className="mt-1.5 text-small text-ink-muted">{adventure.summary}</p>
@@ -159,12 +189,13 @@ export function AdventureCard({
           {open ? (
             <EnquireButton product={product} whatsappNumber={whatsappNumber} source="card" />
           ) : (
-            <Link
+            <CardLink
+              closure={closure}
               href={href}
               className="inline-flex h-11 items-center gap-2 rounded-md border border-granite-300 px-5 text-small font-semibold text-ink-muted no-underline"
             >
               Details <ArrowRight className="size-4" aria-hidden />
-            </Link>
+            </CardLink>
           )}
         </div>
       </CardBody>
@@ -174,13 +205,15 @@ export function AdventureCard({
 
 export function HotelCard({
   hotel,
-  open,
+  closure,
   whatsappNumber,
 }: {
   hotel: Hotel;
-  open: boolean;
+  /** `null` when bookable; the active closure — service, entity, or global — otherwise. */
+  closure: Closure | null;
   whatsappNumber: string;
 }) {
+  const open = closure === null;
   const href = `/hotels/${hotel.slug}`;
   const product: EnquiryProduct = {
     kind: "hotel",
@@ -192,7 +225,7 @@ export function HotelCard({
 
   return (
     <Card interactive className="flex flex-col">
-      <Link href={href} className="no-underline">
+      <CardLink closure={closure} href={href} className="block no-underline">
         <MediaFrame
           media={hotel.coverMedia ?? null}
           ratio="card"
@@ -228,22 +261,23 @@ export function HotelCard({
             )}
           </div>
         </MediaFrame>
-      </Link>
+      </CardLink>
 
       <CardBody className="flex flex-1 flex-col gap-4">
         <div className="flex-1">
           <div className="flex items-start justify-between gap-2">
             <h3 className="text-title text-ink">
-              <Link href={href} className="text-ink no-underline hover:underline">
+              <CardLink closure={closure} href={href} className="text-ink no-underline hover:underline">
                 {hotel.name}
-              </Link>
+              </CardLink>
             </h3>
-            <Link
+            <CardLink
+              closure={closure}
               href={href}
               className="mt-1 shrink-0 whitespace-nowrap text-caption font-semibold text-link no-underline hover:underline"
             >
               Details
-            </Link>
+            </CardLink>
           </div>
           <p className="mt-1.5 text-small text-ink-muted">{hotel.tagline}</p>
           <ul className="mt-3 flex flex-wrap gap-1.5">
@@ -273,12 +307,13 @@ export function HotelCard({
               Check dates <ArrowRight className="size-4" aria-hidden />
             </EnquireButton>
           ) : (
-            <Link
+            <CardLink
+              closure={closure}
               href={href}
               className="inline-flex h-11 items-center gap-2 rounded-md border border-granite-300 px-5 text-small font-semibold text-ink-muted no-underline"
             >
               Details <ArrowRight className="size-4" aria-hidden />
-            </Link>
+            </CardLink>
           )}
         </div>
       </CardBody>

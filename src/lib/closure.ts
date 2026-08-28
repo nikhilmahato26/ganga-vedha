@@ -44,8 +44,3 @@ export function resolveClosure(
 export function isBookable(closures: Closure[], target: ClosureTarget): boolean {
   return resolveClosure(closures, target) === null;
 }
-
-/** Stable key for dismissal, so editing the copy brings the notice back. */
-export function closureDismissKey(closure: Closure): string {
-  return `gv-closure:${closure.id}:${closure.version}`;
-}

@@ -8,7 +8,6 @@
 export const revalidate = 30;
 
 import {
-  ClosureNotice,
   SeedBanner,
   SiteHeader,
   StatusStrap,
@@ -25,16 +24,29 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   ]);
 
   const raftingClosure = resolveClosure(closures, { service: "rafting" });
-  const globalClosure = resolveClosure(closures, { service: "hotel" });
-  // Show the interstitial for the broadest active closure, once per session.
-  const notice = globalClosure?.scope === "global" ? globalClosure : raftingClosure;
+  // No full-screen takeover on page load, anywhere, for any scope — a
+  // closure (rafting, bungee, one hotel, or the whole site) only shows its
+  // modal when a visitor actually presses the "book" spot for that specific
+  // listing (`ClosureTrigger`, on each detail page). A true site-wide closure
+  // still reaches every listing that way, since `resolveClosure` falls back
+  // to it when nothing more specific is set — nothing sitewide needed here.
+
+  // The strap and the nav pill both need every closed service, not just
+  // rafting — they rotate through whichever of these is non-empty.
+  const closedServices = (
+    [
+      raftingClosure && "rafting",
+      resolveClosure(closures, { service: "bungee" }) && "bungee",
+      resolveClosure(closures, { service: "hotel" }) && "hotel",
+    ] as const
+  ).filter((s): s is "rafting" | "bungee" | "hotel" => Boolean(s));
 
   return (
     <div className="flex min-h-dvh flex-col">
       {isSeedContent() && <SeedBanner />}
       <StatusStrap
-        open={!raftingClosure}
-        label={raftingClosure ? "Rafting paused — high water" : settings.riverStatusLabel}
+        closedServices={closedServices}
+        openLabel={settings.riverStatusLabel}
         gauge={settings.gaugeLocation}
       />
       <SiteHeader
@@ -45,12 +57,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           distanceKm: s.distanceKm,
         }))}
         whatsappNumber={settings.whatsappNumber}
-        raftingOpen={!raftingClosure}
+        closedServices={closedServices}
       />
       <main className="flex-1">{children}</main>
       <SiteFooter />
       <WhatsappFab number={settings.whatsappNumber} />
-      <ClosureNotice closure={notice} />
     </div>
   );
 }

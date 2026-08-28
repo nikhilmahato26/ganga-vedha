@@ -21,6 +21,7 @@ import {
 import {
   Accordion,
   Alert,
+  AvailabilityPill,
   Breadcrumb,
   Card,
   CardBody,
@@ -33,7 +34,7 @@ import {
 } from "@/components/ui";
 import { EnquireButton } from "@/components/site/enquiry";
 import { BookingPanel, SpecGrid } from "@/components/site/detail";
-import { ClosureNotice } from "@/components/site/chrome";
+import { ClosureTrigger } from "@/components/site/chrome";
 import { getClosures, getHotel, getHotels, getSiteSettings } from "@/lib/content";
 import { isBookable, resolveClosure } from "@/lib/closure";
 import { formatINR } from "@/lib/format";
@@ -141,36 +142,55 @@ export default async function HotelDetail({
       </div>
 
       {/* Gallery: one lead frame plus a strip, the shape a real photo set fills. */}
-      <div className="container-page grid gap-3 pt-6 lg:grid-cols-[2fr_1fr]">
-        <MediaFrame
-          media={hotel.gallery?.[0] ?? hotel.coverMedia ?? null}
-          ratio="wide"
-          standInSeed={hotel.slug}
-          priority
-          className="rounded-xl"
-          emptyLabel={`${hotel.name} — photograph pending`}
-        >
-          <div className="absolute inset-x-0 top-0 flex flex-wrap gap-2 p-4">
-            <Chip tone="onMedia" icon={<MapPin />}>{hotel.locality}</Chip>
-            {hotel.starRating && (
-              <Chip tone="onMedia">{"★".repeat(hotel.starRating)}</Chip>
-            )}
-          </div>
-        </MediaFrame>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
-          {(["a", "b"] as const).map((k, i) => (
+      {(() => {
+        const gallery = (
+          <div className="container-page grid gap-3 pt-6 lg:grid-cols-[2fr_1fr]">
             <MediaFrame
-              key={k}
-              media={hotel.gallery?.[i + 1] ?? null}
+              media={hotel.gallery?.[0] ?? hotel.coverMedia ?? null}
               ratio="wide"
-              standInSeed={`${hotel.slug}-${k}`}
-              className="rounded-lg"
-              scrim={false}
-              emptyLabel="Photograph pending"
-            />
-          ))}
-        </div>
-      </div>
+              standInSeed={hotel.slug}
+              priority
+              className="rounded-xl"
+              emptyLabel={`${hotel.name} — photograph pending`}
+            >
+              <div className="absolute inset-x-0 top-0 flex flex-wrap gap-2 p-4">
+                <Chip tone="onMedia" icon={<MapPin />}>{hotel.locality}</Chip>
+                {hotel.starRating && (
+                  <Chip tone="onMedia">{"★".repeat(hotel.starRating)}</Chip>
+                )}
+              </div>
+              {!open && (
+                <>
+                  <div className="absolute inset-0 bg-granite-950/55" aria-hidden />
+                  <div className="absolute inset-0 grid place-items-center px-4">
+                    <AvailabilityPill open={false} label="Tap to see why" onMedia />
+                  </div>
+                </>
+              )}
+            </MediaFrame>
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+              {(["a", "b"] as const).map((k, i) => (
+                <MediaFrame
+                  key={k}
+                  media={hotel.gallery?.[i + 1] ?? null}
+                  ratio="wide"
+                  standInSeed={`${hotel.slug}-${k}`}
+                  className="rounded-lg"
+                  scrim={false}
+                  emptyLabel="Photograph pending"
+                />
+              ))}
+            </div>
+          </div>
+        );
+        return !open && closure ? (
+          <ClosureTrigger closure={closure} className="block w-full text-left">
+            {gallery}
+          </ClosureTrigger>
+        ) : (
+          gallery
+        );
+      })()}
 
       <div className="container-page grid gap-12 pt-10 lg:grid-cols-[1fr_22rem]">
         <div className="min-w-0">
@@ -195,14 +215,6 @@ export default async function HotelDetail({
               {closure.body}
             </Alert>
           )}
-          {/* Rafting and global closures already get the full-screen takeover from
-              the site layout, on every page — it would double up here. Hotel
-              closures have no such sitewide check (a hotel closure has no reason
-              to interrupt someone browsing rafting), so this page shows its own. */}
-          {(closure?.scope === "entity" || closure?.scope === "service") && (
-            <ClosureNotice closure={closure} />
-          )}
-
           <SpecGrid
             className="mt-8"
             items={[
@@ -384,9 +396,9 @@ export default async function HotelDetail({
                   Check dates
                 </EnquireButton>
               ) : (
-                <div className="rounded-md bg-granite-100 p-4 text-center text-small text-ink-muted">
-                  This property is not taking bookings right now.
-                </div>
+                closure && (
+                  <ClosureTrigger closure={closure}>Not taking bookings — tap to see why</ClosureTrigger>
+                )
               )}
             </div>
             <p className="mt-3 text-center text-caption text-ink-faint">

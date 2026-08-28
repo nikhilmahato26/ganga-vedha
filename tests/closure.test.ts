@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { resolveClosure, isBookable, closureDismissKey } from "../src/lib/closure.ts";
+import { resolveClosure, isBookable } from "../src/lib/closure.ts";
 import type { Closure } from "../src/lib/content.ts";
 
 const base = {
@@ -66,10 +66,4 @@ test("an entity closure does not leak to its siblings", () => {
 test("inactive closures are ignored", () => {
   assert.equal(isBookable([{ ...raftingClosed, isActive: false }], { service: "rafting" }), true);
   assert.equal(resolveClosure([], { service: "rafting" }), null);
-});
-
-test("editing the message brings a dismissed notice back", () => {
-  const v1 = closureDismissKey(raftingClosed);
-  const v2 = closureDismissKey({ ...raftingClosed, version: 2 });
-  assert.notEqual(v1, v2);
 });

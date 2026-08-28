@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Breadcrumb, EmptyState, SectionHeading } from "@/components/ui";
+import { Alert, Breadcrumb, EmptyState, SectionHeading } from "@/components/ui";
 import { BedDouble } from "lucide-react";
 import { HotelCard } from "@/components/site/product-card";
 import { getClosures, getHotels, getSiteSettings } from "@/lib/content";
-import { isBookable } from "@/lib/closure";
+import { resolveClosure } from "@/lib/closure";
 
 // 60s: matches the hotels cache window in @/lib/content.
 export const revalidate = 60;
@@ -21,6 +21,7 @@ export default async function HotelsIndex() {
     getSiteSettings(),
     getClosures(),
   ]);
+  const closure = resolveClosure(closures, { service: "hotel" });
 
   return (
     <div className="container-page pt-6 pb-8">
@@ -33,6 +34,12 @@ export default async function HotelsIndex() {
         />
       </div>
 
+      {closure && (
+        <Alert tone="closed" title={closure.title} className="mt-8">
+          {closure.body}
+          {closure.footnote ? ` ${closure.footnote}.` : ""}
+        </Alert>
+      )}
       {hotels.length === 0 ? (
         <EmptyState
           className="mt-12"
@@ -46,7 +53,7 @@ export default async function HotelsIndex() {
             <HotelCard
               key={h.id}
               hotel={h}
-              open={isBookable(closures, {
+              closure={resolveClosure(closures, {
                 service: "hotel",
                 entityType: "hotel",
                 entityId: h.id,

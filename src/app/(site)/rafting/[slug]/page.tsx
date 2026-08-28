@@ -4,6 +4,7 @@ import { Clock, MapPin, Route, Users, Waves } from "lucide-react";
 import {
   Accordion,
   Alert,
+  AvailabilityPill,
   Breadcrumb,
   Chip,
   GradeChip,
@@ -15,7 +16,7 @@ import {
 import { EnquireButton } from "@/components/site/enquiry";
 import { BookingPanel, IncludedList, SpecGrid } from "@/components/site/detail";
 import { AdventureCard } from "@/components/site/product-card";
-import { ClosureNotice } from "@/components/site/chrome";
+import { ClosureTrigger } from "@/components/site/chrome";
 import {
   getAdventure,
   getAdventures,
@@ -118,22 +119,41 @@ export default async function RaftingDetail({
       </div>
 
       <div className="container-page pt-6">
-        <MediaFrame
-          media={adventure.coverMedia ?? null}
-          ratio="wide"
-          standInSeed={adventure.slug}
-          priority
-          className="rounded-xl"
-          emptyLabel={`${adventure.name} — photograph pending`}
-        >
-          <div className="absolute inset-x-0 top-0 flex flex-wrap items-start gap-2 p-4">
-            {adventure.grade && <GradeChip grade={adventure.grade} onMedia />}
-            <Chip tone="onMedia" icon={<Route />}>{formatKm(adventure.distanceKm)}</Chip>
-            <Chip tone="onMedia" icon={<Clock />}>
-              {formatDuration(adventure.durationMinutes)}
-            </Chip>
-          </div>
-        </MediaFrame>
+        {(() => {
+          const hero = (
+            <MediaFrame
+              media={adventure.coverMedia ?? null}
+              ratio="wide"
+              standInSeed={adventure.slug}
+              priority
+              className="rounded-xl"
+              emptyLabel={`${adventure.name} — photograph pending`}
+            >
+              <div className="absolute inset-x-0 top-0 flex flex-wrap items-start gap-2 p-4">
+                {adventure.grade && <GradeChip grade={adventure.grade} onMedia />}
+                <Chip tone="onMedia" icon={<Route />}>{formatKm(adventure.distanceKm)}</Chip>
+                <Chip tone="onMedia" icon={<Clock />}>
+                  {formatDuration(adventure.durationMinutes)}
+                </Chip>
+              </div>
+              {!open && (
+                <>
+                  <div className="absolute inset-0 bg-granite-950/55" aria-hidden />
+                  <div className="absolute inset-0 grid place-items-center px-4">
+                    <AvailabilityPill open={false} label="Tap to see why" onMedia />
+                  </div>
+                </>
+              )}
+            </MediaFrame>
+          );
+          return !open && closure ? (
+            <ClosureTrigger closure={closure} className="block w-full rounded-xl text-left">
+              {hero}
+            </ClosureTrigger>
+          ) : (
+            hero
+          );
+        })()}
       </div>
 
       <div className="container-page grid gap-12 pt-10 lg:grid-cols-[1fr_22rem]">
@@ -157,8 +177,6 @@ export default async function RaftingDetail({
               {closure.footnote ? ` ${closure.footnote}.` : ""}
             </Alert>
           )}
-          {closure?.scope === "entity" && <ClosureNotice closure={closure} />}
-
           <SpecGrid
             className="mt-8"
             items={[
@@ -271,9 +289,9 @@ export default async function RaftingDetail({
                   whatsappNumber={settings.whatsappNumber}
                 />
               ) : (
-                <div className="rounded-md bg-granite-100 p-4 text-center text-small text-ink-muted">
-                  Bookings are closed for this stretch right now.
-                </div>
+                closure && (
+                  <ClosureTrigger closure={closure}>Bookings closed — tap to see why</ClosureTrigger>
+                )
               )}
             </div>
             <p className="mt-3 text-center text-caption text-ink-faint">
@@ -291,7 +309,7 @@ export default async function RaftingDetail({
               <AdventureCard
                 key={a.id}
                 adventure={a}
-                open={isBookable(closures, {
+                closure={resolveClosure(closures, {
                   service: "rafting",
                   entityType: "adventure",
                   entityId: a.id,

@@ -16,7 +16,7 @@ import {
   Th,
   Tr,
 } from "@/components/ui";
-import { AdventureCard, HotelCard } from "@/components/site/product-card";
+import { AdventureCard, CardLink, HotelCard } from "@/components/site/product-card";
 import { EnquireButton } from "@/components/site/enquiry";
 import {
   getAdventures,
@@ -167,6 +167,7 @@ export default async function LandingPage() {
               href: "/hotels",
               cta: "Browse stays",
               open: hotelsOpen,
+              closure: resolveClosure(closures, { service: "hotel" }),
               from: hotels.length ? Math.min(...hotels.map((h) => h.pricePerNightInr)) : null,
               unit: "per night",
               count: `${hotels.length} properties`,
@@ -181,6 +182,7 @@ export default async function LandingPage() {
               href: "/rafting",
               cta: "Choose a stretch",
               open: raftingOpen,
+              closure: resolveClosure(closures, { service: "rafting" }),
               from: cheapest,
               unit: "per person",
               count: `${rafting.length} stretches · 12–32 km`,
@@ -195,6 +197,7 @@ export default async function LandingPage() {
               href: bungee ? `/bungee/${bungee.slug}` : "/",
               cta: "See the jump",
               open: bungeeOpen,
+              closure: resolveClosure(closures, { service: "bungee" }),
               from: bungee?.priceInr ?? null,
               unit: "per person",
               count: "83 m · 3 sec free fall",
@@ -202,7 +205,7 @@ export default async function LandingPage() {
             },
           ].map((s) => (
             <Card key={s.key} elevation="flat" interactive className="flex flex-col">
-              <Link href={s.href} className="no-underline">
+              <CardLink closure={s.closure} href={s.href} className="block no-underline">
                 <MediaFrame
                   media={s.media}
                   ratio="wide"
@@ -216,7 +219,7 @@ export default async function LandingPage() {
                     {!s.open && <Chip tone="closed" size="sm">Closed</Chip>}
                   </div>
                 </MediaFrame>
-              </Link>
+              </CardLink>
               <div className="flex flex-1 flex-col p-6">
                 <h3 className="text-title text-ink">{s.title}</h3>
                 <p className="mt-2 flex-1 text-small text-ink-muted">{s.blurb}</p>
@@ -228,12 +231,13 @@ export default async function LandingPage() {
                       <p className="text-caption text-ink-faint">from · {s.unit}</p>
                     </div>
                   )}
-                  <Link
+                  <CardLink
+                    closure={s.closure}
                     href={s.href}
                     className="inline-flex h-11 items-center gap-2 rounded-md px-4 text-small font-semibold text-link no-underline hover:bg-ember-50"
                   >
                     {s.cta} <ArrowRight className="size-4" aria-hidden />
-                  </Link>
+                  </CardLink>
                 </div>
               </div>
             </Card>
@@ -269,7 +273,7 @@ export default async function LandingPage() {
             <AdventureCard
               key={a.id}
               adventure={a}
-              open={isBookable(closures, {
+              closure={resolveClosure(closures, {
                 service: "rafting",
                 entityType: "adventure",
                 entityId: a.id,
@@ -396,7 +400,7 @@ export default async function LandingPage() {
             <HotelCard
               key={h.id}
               hotel={h}
-              open={isBookable(closures, {
+              closure={resolveClosure(closures, {
                 service: "hotel",
                 entityType: "hotel",
                 entityId: h.id,
