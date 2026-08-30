@@ -13,15 +13,12 @@ import {
   StatusStrap,
   WhatsappFab,
 } from "@/components/site/chrome";
+import { WelcomeModal } from "@/components/site/welcome-modal";
 import { getClosures, getRaftingByDistance, getSiteSettings, isSeedContent } from "@/lib/content";
 import { resolveClosure } from "@/lib/closure";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [settings, stretches, closures] = await Promise.all([
-    getSiteSettings(),
-    getRaftingByDistance(),
-    getClosures(),
-  ]);
+  const [settings, closures] = await Promise.all([getSiteSettings(), getClosures()]);
 
   const raftingClosure = resolveClosure(closures, { service: "rafting" });
   // No full-screen takeover on page load, anywhere, for any scope — a
@@ -51,17 +48,13 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       />
       <SiteHeader
         brandName={settings.brandName}
-        stretches={stretches.map((s) => ({
-          slug: s.slug,
-          name: s.name,
-          distanceKm: s.distanceKm,
-        }))}
         whatsappNumber={settings.whatsappNumber}
         closedServices={closedServices}
       />
       <main className="flex-1">{children}</main>
       <SiteFooter />
       <WhatsappFab number={settings.whatsappNumber} />
+      <WelcomeModal />
     </div>
   );
 }
