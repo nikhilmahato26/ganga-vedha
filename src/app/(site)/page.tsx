@@ -147,7 +147,7 @@ export default async function LandingPage() {
 
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <LinkButton href="#adventures" size="lg">
-                See all {rafting.length} stretches
+                See all rafting stretches
                 <ArrowRight className="size-4" aria-hidden />
               </LinkButton>
               <LinkButton href="/hotels" size="lg" variant="outline" className="border-white/30 bg-white/10 text-white hover:border-white/50 hover:bg-white/20">
@@ -158,7 +158,7 @@ export default async function LandingPage() {
             <dl className="mt-12 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
               {[
                 ["From", formatINR(cheapest), "per person"],
-                ["Stretches", String(rafting.length), "12 km to 32 km"],
+                ["Rafting", String(rafting.length), "options · 7–26 km"],
                 ["Bungee", `${bungee?.heightM ?? "—"} m`, "free fall"],
                 ["Season", "Sep–Jun", "water permitting"],
               ].map(([label, value, note]) => (
@@ -210,7 +210,7 @@ export default async function LandingPage() {
               closure: resolveClosure(closures, { service: "rafting" }),
               from: cheapest,
               unit: "per person",
-              count: `${rafting.length} stretches · 12–32 km`,
+              count: `${rafting.length} options · Rishikesh & Manali`,
               media: rafting[0]?.coverMedia ?? null,
             },
             {

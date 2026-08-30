@@ -20,9 +20,9 @@ import { formatDuration, formatINR, formatKm } from "@/lib/format";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "River rafting in Rishikesh, by the kilometre",
+  title: "River rafting in Rishikesh & Manali, by the kilometre",
   description:
-    "Five rafting stretches on the Ganga from 12 km to 32 km. Distance, grade, duration, age limit and price on every one.",
+    "Rafting on the Ganga at Rishikesh — 12, 16 and 26 km stretches, with or without drone video — and the Beas at Manali. Distance, grade, duration, age limit and price on every one.",
   alternates: { canonical: "/rafting" },
 };
 
