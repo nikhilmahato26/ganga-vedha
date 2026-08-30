@@ -242,14 +242,23 @@ export async function getEnquiryStats() {
     .from(enquiries)
     .groupBy(enquiries.status);
 
-  const topStretch = await db
+  // Enquiries per product kind — rafting / bungee / hotel / package / rental /
+  // activity / general — so the dashboard shows where demand actually is.
+  const kindRows = await db
+    .select({ kind: enquiries.productKind, count: sql<number>`count(*)` })
+    .from(enquiries)
+    .groupBy(enquiries.productKind);
+
+  // The single most-enquired product, across every kind (not just rafting).
+  const topProduct = await db
     .select({
       name: enquiries.productNameSnapshot,
+      kind: enquiries.productKind,
       count: sql<number>`count(*)`,
     })
     .from(enquiries)
-    .where(eq(enquiries.productKind, "rafting"))
-    .groupBy(enquiries.productNameSnapshot)
+    .where(sql`${enquiries.productKind} <> 'general'`)
+    .groupBy(enquiries.productNameSnapshot, enquiries.productKind)
     .orderBy(sql`count(*) desc`)
     .limit(1);
 
@@ -261,7 +270,15 @@ export async function getEnquiryStats() {
       EnquiryStatus,
       number
     >,
-    topStretch: topStretch[0]?.name ?? null,
+    byKind: Object.fromEntries(kindRows.map((r) => [r.kind, Number(r.count)])) as Record<
+      string,
+      number
+    >,
+    topProduct: topProduct[0]
+      ? { name: topProduct[0].name, kind: topProduct[0].kind as string }
+      : null,
+    /** @deprecated kept for backwards-compat — use `topProduct`. */
+    topStretch: topProduct[0]?.kind === "rafting" ? topProduct[0].name : null,
   };
 }
 
