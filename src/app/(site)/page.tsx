@@ -17,15 +17,20 @@ import {
   Tr,
 } from "@/components/ui";
 import { AdventureCard, CardLink, HotelCard } from "@/components/site/product-card";
+import { DestinationCard, PackageCard, RentalCard } from "@/components/site/catalog-cards";
 import { EnquireButton } from "@/components/site/enquiry";
 import { GallerySection } from "@/components/site/gallery";
 import {
+  getActivities,
   getAdventures,
   getClosures,
   getContentBlock,
+  getDestinations,
   getGalleryItems,
   getHotels,
+  getPackages,
   getRaftingByDistance,
+  getRentals,
   getReviews,
   getSiteSettings,
 } from "@/lib/content";
@@ -69,17 +74,33 @@ const WHY_US_FALLBACK = {
 } as const;
 
 export default async function LandingPage() {
-  const [settings, rafting, bungeeList, hotels, reviews, closures, whyUsBlock, galleryItems] =
-    await Promise.all([
-      getSiteSettings(),
-      getRaftingByDistance(),
-      getAdventures("bungee"),
-      getHotels(),
-      getReviews(),
-      getClosures(),
-      getContentBlock("why-choose-us"),
-      getGalleryItems(),
-    ]);
+  const [
+    settings,
+    rafting,
+    bungeeList,
+    hotels,
+    reviews,
+    closures,
+    whyUsBlock,
+    galleryItems,
+    activities,
+    packages,
+    destinations,
+    rentals,
+  ] = await Promise.all([
+    getSiteSettings(),
+    getRaftingByDistance(),
+    getAdventures("bungee"),
+    getHotels(),
+    getReviews(),
+    getClosures(),
+    getContentBlock("why-choose-us"),
+    getGalleryItems(),
+    getActivities(),
+    getPackages(),
+    getDestinations(),
+    getRentals(),
+  ]);
   const whyUs = whyUsBlock ?? WHY_US_FALLBACK;
 
   const bungee = bungeeList[0];
@@ -387,6 +408,57 @@ export default async function LandingPage() {
         </section>
       )}
 
+      {/* ── Other adventures ──────────────────────────────────────────────── */}
+      {activities.length > 0 && (
+        <section className="container-page pt-24">
+          <SectionHeading
+            as="h2"
+            title="Paragliding, zip line and more"
+            description="Not everything here happens on the water. A tandem flight and a valley zip line, both a short drive from town."
+            action={
+              <LinkButton href="/adventures" variant="outline">
+                All adventures
+              </LinkButton>
+            }
+          />
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {activities.map((a) => (
+              <AdventureCard
+                key={a.id}
+                adventure={a}
+                closure={resolveClosure(closures, {
+                  service: "activity",
+                  entityType: "adventure",
+                  entityId: a.id,
+                })}
+                whatsappNumber={settings.whatsappNumber}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Holiday packages ──────────────────────────────────────────────── */}
+      {packages.length > 0 && (
+        <section className="container-page pt-24">
+          <SectionHeading
+            as="h2"
+            title="Holiday packages"
+            description="Fixed itineraries for the trips people ask us to plan most — the Char Dham and Do Dham yatras, a week of yoga, and the Uttarakhand and Himachal loops."
+            action={
+              <LinkButton href="/packages" variant="outline">
+                All packages
+              </LinkButton>
+            }
+          />
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {packages.slice(0, 3).map((p) => (
+              <PackageCard key={p.id} pkg={p} whatsappNumber={settings.whatsappNumber} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ── Stays ─────────────────────────────────────────────────────────── */}
       <section className="container-page pt-24">
         <SectionHeading
@@ -415,6 +487,48 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ── Destinations ──────────────────────────────────────────────────── */}
+      {destinations.length > 0 && (
+        <section className="container-page pt-24">
+          <SectionHeading
+            as="h2"
+            title="Where we take people"
+            description="Rishikesh is home base, but we plan trips across Uttarakhand and Himachal — each with a short guide and where to stay."
+            action={
+              <LinkButton href="/stays" variant="outline">
+                All destinations
+              </LinkButton>
+            }
+          />
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {destinations.slice(0, 8).map((d) => (
+              <DestinationCard key={d.id} destination={d} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Rentals ───────────────────────────────────────────────────────── */}
+      {rentals.length > 0 && (
+        <section className="container-page pt-24">
+          <SectionHeading
+            as="h2"
+            title="Getting around"
+            description="A car with a driver, priced per route, or a bike by the day from our Tapovan office."
+            action={
+              <LinkButton href="/rentals" variant="outline">
+                Car &amp; bike rental
+              </LinkButton>
+            }
+          />
+          <div className="mt-10 grid gap-6 sm:grid-cols-2">
+            {rentals.map((r) => (
+              <RentalCard key={r.id} rental={r} whatsappNumber={settings.whatsappNumber} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ── Why us ────────────────────────────────────────────────────────── */}
       <section className="container-page pt-24">
         <SectionHeading as="h2" title={whyUs.title} description={whyUs.subtitle ?? undefined} />
@@ -438,6 +552,13 @@ export default async function LandingPage() {
 
       {/* ── Gallery ───────────────────────────────────────────────────────── */}
       <GallerySection items={galleryItems} />
+      {galleryItems.length > 0 && (
+        <div className="container-page mt-8 text-center">
+          <LinkButton href="/gallery" variant="outline">
+            See the full gallery
+          </LinkButton>
+        </div>
+      )}
 
       {/* ── Reviews ───────────────────────────────────────────────────────── */}
       <section className="container-page pt-24">
