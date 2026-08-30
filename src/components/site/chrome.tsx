@@ -180,15 +180,18 @@ export function SiteHeader({
             )}
           </div>
           {[
-            ["Bungee", "/bungee/bungee-jump-rishikesh"],
-            ["Stays", "/hotels"],
-            ["Gallery", "/#gallery"],
-            ["Contact", "#contact"],
+            ["Adventures", "/adventures"],
+            ["Packages", "/packages"],
+            ["Stays", "/stays"],
+            ["Rentals", "/rentals"],
+            ["Gallery", "/gallery"],
+            ["About", "/about"],
+            ["Contact", "/contact"],
           ].map(([label, href]) => (
             <Link
               key={label}
               href={href}
-              className="inline-flex h-11 items-center rounded-md px-3.5 text-small font-semibold text-ink-muted no-underline transition-colors hover:bg-granite-100 hover:text-ink"
+              className="inline-flex h-11 items-center rounded-md px-2.5 text-small font-semibold text-ink-muted no-underline transition-colors hover:bg-granite-100 hover:text-ink"
             >
               {label}
             </Link>
@@ -262,10 +265,14 @@ export function SiteHeader({
               ))}
               <div className="mt-4 border-t border-hairline pt-4">
                 {[
+                  ["Adventures", "/adventures"],
                   ["Bungee jumping", "/bungee/bungee-jump-rishikesh"],
-                  ["Stays", "/hotels"],
-                  ["Gallery", "/#gallery"],
-                  ["Contact", "#contact"],
+                  ["Packages", "/packages"],
+                  ["Stays & destinations", "/stays"],
+                  ["Car & bike rental", "/rentals"],
+                  ["Gallery", "/gallery"],
+                  ["About us", "/about"],
+                  ["Contact", "/contact"],
                 ].map(([label, href]) => (
                   <Link
                     key={label}

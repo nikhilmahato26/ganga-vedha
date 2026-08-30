@@ -101,13 +101,17 @@ async function SiteFooter() {
         </nav>
 
         <nav aria-label="More">
-          <p className="text-label uppercase text-jade-300">More</p>
+          <p className="text-label uppercase text-jade-300">Explore</p>
           <ul className="mt-4 space-y-2.5">
             {[
+              ["Adventures", "/adventures"],
               ["Bungee jumping", "/bungee/bungee-jump-rishikesh"],
-              ["Stays", "/hotels"],
-              ["Gallery", "/#gallery"],
-              ["Design system", "/styleguide"],
+              ["Holiday packages", "/packages"],
+              ["Stays & destinations", "/stays"],
+              ["Car & bike rental", "/rentals"],
+              ["Gallery", "/gallery"],
+              ["About us", "/about"],
+              ["Contact", "/contact"],
             ].map(([label, href]) => (
               <li key={label}>
                 <a

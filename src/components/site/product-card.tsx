@@ -80,7 +80,10 @@ export function AdventureCard({
   priority?: boolean;
 }) {
   const open = closure === null;
-  const href = `/${adventure.kind}/${adventure.slug}`;
+  const href =
+    adventure.kind === "rafting" || adventure.kind === "bungee"
+      ? `/${adventure.kind}/${adventure.slug}`
+      : `/adventures/${adventure.slug}`;
   const product: EnquiryProduct = {
     kind: adventure.kind,
     slug: adventure.slug,
@@ -160,11 +163,17 @@ export function AdventureCard({
                   value: formatKm(adventure.distanceKm),
                   icon: <Route />,
                 }
-              : {
-                  label: "Height",
-                  value: `${adventure.heightM} m`,
-                  icon: <Mountain />,
-                },
+              : adventure.kind === "bungee" || adventure.heightM
+                ? {
+                    label: "Height",
+                    value: `${adventure.heightM} m`,
+                    icon: <Mountain />,
+                  }
+                : {
+                    label: "Where",
+                    value: adventure.putInPoint ?? "Rishikesh",
+                    icon: <Route />,
+                  },
             {
               // Short form here: "2 hr 30 min" wraps inside a stat cell and
               // knocks the whole row out of alignment across a card grid.
