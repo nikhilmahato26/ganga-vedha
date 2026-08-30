@@ -131,28 +131,29 @@ export function AdventureCard({
 
       <CardBody className="flex flex-1 flex-col gap-4">
         <div className="flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="min-w-0 flex-1 text-title text-ink">
-              <CardLink closure={closure} href={href} className="text-ink no-underline hover:underline">
-                {adventure.name}
-              </CardLink>
-            </h3>
-            <div className="flex shrink-0 items-center gap-2">
-              {adventure.badge && (
-                <Chip tone="ember" size="sm" className="mt-0.5">
-                  {adventure.badge}
-                </Chip>
-              )}
-              <CardLink
-                closure={closure}
-                href={href}
-                className="mt-1 whitespace-nowrap text-caption font-semibold text-link no-underline hover:underline"
-              >
-                Details
-              </CardLink>
-            </div>
+          {/* Title on its own line — some names ("… · Drone Craft") are long
+              enough that sharing the row with the badge squeezed them to one
+              word per line. */}
+          <h3 className="text-title text-ink">
+            <CardLink closure={closure} href={href} className="text-ink no-underline hover:underline">
+              {adventure.name}
+            </CardLink>
+          </h3>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            {adventure.badge && (
+              <Chip tone="ember" size="sm">
+                {adventure.badge}
+              </Chip>
+            )}
+            <CardLink
+              closure={closure}
+              href={href}
+              className="whitespace-nowrap text-caption font-semibold text-link no-underline hover:underline"
+            >
+              Details
+            </CardLink>
           </div>
-          <p className="mt-1.5 text-small text-ink-muted">{adventure.summary}</p>
+          <p className="mt-2 text-small text-ink-muted">{adventure.summary}</p>
         </div>
 
         <StatRow
