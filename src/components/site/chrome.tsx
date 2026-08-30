@@ -16,10 +16,14 @@ import {
 } from "lucide-react";
 import { AvailabilityPill, Button, LinkButton } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { formatKm, whatsappHref } from "@/lib/format";
+import { whatsappHref } from "@/lib/format";
 import type { Closure } from "@/lib/content";
 
-export type NavStretch = { slug: string; name: string; distanceKm: number | null };
+/** The two rafting categories the workbook splits Rishikesh into. */
+const RAFTING_LINKS: [string, string][] = [
+  ["Dronecraft rafting", "/rafting?type=dronecraft"],
+  ["River rafting", "/rafting?type=river"],
+];
 
 /** The fuller phrasing for the strap, which has room for it. */
 const SERVICE_CLOSED_LABEL: Record<string, string> = {
@@ -96,12 +100,10 @@ export function StatusStrap({
 
 export function SiteHeader({
   brandName,
-  stretches,
   whatsappNumber,
   closedServices,
 }: {
   brandName: string;
-  stretches: NavStretch[];
   whatsappNumber: string;
   /** Service keys currently closed, e.g. `["rafting", "bungee"]` — empty when everything is open. */
   closedServices: string[];
@@ -154,19 +156,15 @@ export function SiteHeader({
               />
             </button>
             {raftOpen && (
-              <div className="absolute left-0 top-full mt-1 w-72 overflow-hidden rounded-lg bg-canvas p-1.5 shadow-lg">
-                {/* Sold by the kilometre — the axis, not a buried dropdown. */}
-                {stretches.map((s) => (
+              <div className="absolute left-0 top-full mt-1 w-60 overflow-hidden rounded-lg bg-canvas p-1.5 shadow-lg">
+                {RAFTING_LINKS.map(([label, href]) => (
                   <Link
-                    key={s.slug}
-                    href={`/rafting/${s.slug}`}
+                    key={label}
+                    href={href}
                     onClick={() => setRaftOpen(false)}
-                    className="flex items-center justify-between gap-3 rounded-sm px-3 py-2.5 no-underline transition-colors hover:bg-granite-100"
+                    className="block rounded-sm px-3 py-2.5 text-small font-semibold text-ink no-underline transition-colors hover:bg-granite-100"
                   >
-                    <span className="text-small font-semibold text-ink">{s.name}</span>
-                    <span className="tabular text-caption text-ink-faint">
-                      {formatKm(s.distanceKm)}
-                    </span>
+                    {label}
                   </Link>
                 ))}
                 <Link
@@ -249,20 +247,24 @@ export function SiteHeader({
               </button>
             </div>
             <nav className="flex-1 overflow-y-auto p-4" aria-label="Mobile">
-              <p className="px-2 pb-2 text-label uppercase text-ink-faint">Rafting by distance</p>
-              {stretches.map((s) => (
+              <p className="px-2 pb-2 text-label uppercase text-ink-faint">Rafting</p>
+              {RAFTING_LINKS.map(([label, href]) => (
                 <Link
-                  key={s.slug}
-                  href={`/rafting/${s.slug}`}
+                  key={label}
+                  href={href}
                   onClick={() => setMenuOpen(false)}
-                  className="flex min-h-12 items-center justify-between gap-3 rounded-md px-2 no-underline"
+                  className="flex min-h-12 items-center rounded-md px-2 text-small font-semibold text-ink no-underline"
                 >
-                  <span className="text-small font-semibold text-ink">{s.name}</span>
-                  <span className="tabular text-caption text-ink-faint">
-                    {formatKm(s.distanceKm)}
-                  </span>
+                  {label}
                 </Link>
               ))}
+              <Link
+                href="/rafting"
+                onClick={() => setMenuOpen(false)}
+                className="flex min-h-12 items-center rounded-md px-2 text-small font-semibold text-link no-underline"
+              >
+                Compare all stretches
+              </Link>
               <div className="mt-4 border-t border-hairline pt-4">
                 {[
                   ["Adventures", "/adventures"],

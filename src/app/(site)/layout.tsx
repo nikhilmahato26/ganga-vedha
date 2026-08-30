@@ -17,11 +17,7 @@ import { getClosures, getRaftingByDistance, getSiteSettings, isSeedContent } fro
 import { resolveClosure } from "@/lib/closure";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [settings, stretches, closures] = await Promise.all([
-    getSiteSettings(),
-    getRaftingByDistance(),
-    getClosures(),
-  ]);
+  const [settings, closures] = await Promise.all([getSiteSettings(), getClosures()]);
 
   const raftingClosure = resolveClosure(closures, { service: "rafting" });
   // No full-screen takeover on page load, anywhere, for any scope — a
@@ -51,11 +47,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       />
       <SiteHeader
         brandName={settings.brandName}
-        stretches={stretches.map((s) => ({
-          slug: s.slug,
-          name: s.name,
-          distanceKm: s.distanceKm,
-        }))}
         whatsappNumber={settings.whatsappNumber}
         closedServices={closedServices}
       />

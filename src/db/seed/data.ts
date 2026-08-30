@@ -43,7 +43,7 @@ export const SETTINGS: SettingsInsert = {
   socials: {},
   heroHeading: "Every rapid has a number.\nSo does every limit.",
   heroSubheading:
-    "Three stretches of the Ganga at Rishikesh — 12, 16 and 26 km — plus the Beas at Manali. Distance, grade, price and age limit on every card, before you book, not after.",
+    "Three stretches of the Ganga at Rishikesh — 12, 16 and 26 km. Distance, grade, price and age limit on every card, before you book, not after.",
   announcement: null,
   announcementActive: false,
   riverStatusLabel: "Running today",
@@ -108,25 +108,6 @@ const bungeeFaqs = (minW: number, maxW: number) => [
   {
     q: "Do I get a refund if I back out on the platform?",
     a: "You can take as long as you need on the edge. If you walk back down, most operators refund part of the fee — the exact policy is the operator's, and we confirm it when you book.",
-  },
-];
-
-const manaliFaqs = (minAge: number) => [
-  {
-    q: "Which river is this?",
-    a: "The Beas, in the Kullu valley below Manali — a different river from the Ganga at Rishikesh, with its own season and rapids.",
-  },
-  {
-    q: "What is the minimum age?",
-    a: `${minAge} years for this stretch. The 5–7 km run around Dobhi and Babeli is the gentler of the two.`,
-  },
-  {
-    q: "When does Manali rafting run?",
-    a: "Roughly March to June, and again after the monsoon eases. High snowmelt or heavy rain closes it — we confirm your date before taking payment.",
-  },
-  {
-    q: "Can I keep my phone with me?",
-    a: "No. Phones, wallets and keys go into a dry bag with the crew. Ask about the drone or GoPro add-on if you want footage.",
   },
 ];
 
@@ -349,71 +330,6 @@ export const ADVENTURES: AdventureInsert[] = [
     maxWeightKg: 110,
     rapids: RAPIDS.marine,
     sortOrder: 6,
-    isPublished: true,
-  },
-  /* ── Manali · the Beas ────────────────────────────────────────────────── */
-  {
-    kind: "rafting",
-    slug: "7-km-rafting-manali-dobhi-babeli",
-    name: "7 km around Dobhi & Babeli",
-    distanceKm: "7.0",
-    heightM: null,
-    putInPoint: "Dobhi / Babeli",
-    grade: "moderate",
-    durationMinutes: 90,
-    priceInr: 800,
-    compareAtPriceInr: null,
-    rating: null,
-    reviewCount: null,
-    badge: null,
-    bestFor: "Best Manali intro",
-    summary:
-      "A short, punchy 5–7 km run on the Beas around Dobhi and Babeli — the standard first raft in the Kullu valley.",
-    description:
-      "The everyday Manali stretch: cold, fast snow-melt water on the Beas with a run of grade II–III rapids and mountain views on both banks. Done inside about ninety minutes including the drive and briefing. A good first raft for a group with mixed nerves.",
-    inclusions: COMMON_INCLUSIONS,
-    exclusions: COMMON_EXCLUSIONS,
-    whatToBring: WHAT_TO_BRING,
-    faqs: manaliFaqs(12),
-    meetingPoint:
-      "Pick-up from Manali (Mall Road or Old Manali). Drive to the Dobhi or Babeli put-in on the Beas; report 30 minutes before your slot.",
-    minAge: 12,
-    minWeightKg: 35,
-    maxWeightKg: 110,
-    rapids: [],
-    sortOrder: 7,
-    isPublished: true,
-  },
-  {
-    kind: "rafting",
-    slug: "14-km-rafting-manali-pirdi-bajaura",
-    name: "14 km Pirdi to Bajaura",
-    distanceKm: "14.0",
-    heightM: null,
-    putInPoint: "Pirdi",
-    grade: "challenging",
-    durationMinutes: 150,
-    priceInr: 1500,
-    compareAtPriceInr: null,
-    rating: null,
-    reviewCount: null,
-    badge: "Longest on the Beas",
-    bestFor: "Best on the Beas",
-    summary:
-      "The full commercial Beas run — 14 km from Pirdi down to Bajaura, the longest stretch out of Manali.",
-    description:
-      "Pirdi to Bajaura is the long day on the Beas: continuous grade III water with only short breaks, high volume from the snowmelt, and no easy exit once you start. Some rafting experience helps, and we cap this run when the river is high.",
-    inclusions: COMMON_INCLUSIONS,
-    exclusions: COMMON_EXCLUSIONS,
-    whatToBring: WHAT_TO_BRING,
-    faqs: manaliFaqs(16),
-    meetingPoint:
-      "Pick-up from Manali. Drive south to the Pirdi put-in; report 45 minutes before your slot.",
-    minAge: 16,
-    minWeightKg: 45,
-    maxWeightKg: 110,
-    rapids: [],
-    sortOrder: 8,
     isPublished: true,
   },
   /* ── Bungee jumping · operators from the workbook ─────────────────────── */
@@ -1071,9 +987,9 @@ export const DESTINATIONS: DestinationInsert[] = [
     region: "Himachal Pradesh",
     tagline: "Rafting, snow and the road to the passes",
     intro:
-      "The head of the Kullu valley on the Beas river — rafting on the Dobhi–Babeli and Pirdi–Bajaura stretches, day trips to Solang and Atal Tunnel, and the base for Rohtang and Spiti in season.",
+      "The head of the Kullu valley on the Beas river — day trips to Solang and the Atal Tunnel, the Old Manali cafés, and the base for Rohtang and Spiti in season.",
     highlights: [
-      "Beas rafting: 5–7 km around Dobhi/Babeli or 14 km Pirdi to Bajaura",
+      "Solang Valley — ropeway, and zip line and paragliding in season",
       "Solang Valley, Atal Tunnel and Sissu day trips",
       "Old Manali cafés and the Hadimba temple in deodar forest",
     ],
@@ -1342,7 +1258,7 @@ export const PACKAGES: PackageInsert[] = [
     summary:
       "The classic Himachal pairing — two nights in Shimla, two in Manali — with a private car, hotels and the Kufri and Solang day trips.",
     description:
-      "Arrive Shimla, take the Ridge and a Kufri excursion, then drive the Beas valley to Manali for Solang, the Atal Tunnel and Old Manali. A rafting session on the Beas can be added in Manali on request.",
+      "Arrive Shimla, take the Ridge and a Kufri excursion, then drive the Beas valley to Manali for Solang, the Atal Tunnel and Old Manali.",
     itinerary: [
       { title: "Day 1", detail: "Arrive Shimla (from Chandigarh/Kalka), evening on the Ridge and Mall Road. Overnight Shimla." },
       { title: "Day 2", detail: "Kufri excursion and Jakhoo temple. Overnight Shimla." },
@@ -1372,8 +1288,8 @@ export const PACKAGES: PackageInsert[] = [
     ],
     faqs: [
       {
-        q: "Can we add Beas rafting in Manali?",
-        a: "Yes — a 5–7 km or 14 km stretch can be added on Day 4 for an extra charge. Tell us when you enquire.",
+        q: "Can we go up to Rohtang Pass?",
+        a: "Rohtang needs a separate permit and is weather-dependent. If it is closed we run the Atal Tunnel and Sissu instead, which is included.",
       },
     ],
     sortOrder: 5,
