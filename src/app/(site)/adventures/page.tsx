@@ -44,7 +44,6 @@ export default async function AdventuresIndex() {
     getClosures(),
   ]);
 
-  const bungee = bungeeList[0];
   const cheapest = Math.min(
     ...[...rafting, ...bungeeList, ...activities].map((a) => a.priceInr),
   );
@@ -52,19 +51,19 @@ export default async function AdventuresIndex() {
   const pillars = [
     {
       kind: "rafting" as const,
-      count: `${rafting.length} stretches · 12–32 km`,
+      count: `${rafting.length} options · Rishikesh & Manali`,
       from: rafting.length ? Math.min(...rafting.map((r) => r.priceInr)) : null,
       href: "/rafting",
       blurb:
-        "Grade II to IV on the Ganga, sold and compared by distance. Longer runs mean bigger water, not just more river.",
+        "The Ganga at Rishikesh and the Beas at Manali, sold and compared by distance. Longer runs mean bigger water, not just more river.",
     },
     {
       kind: "bungee" as const,
-      count: bungee ? `${bungee.heightM} m · 3 sec free fall` : "83 m platform",
-      from: bungee?.priceInr ?? null,
-      href: bungee ? `/bungee/${bungee.slug}` : "/adventures",
+      count: bungeeList.length ? `${bungeeList.length} operators` : "Fixed platforms",
+      from: bungeeList.length ? Math.min(...bungeeList.map((b) => b.priceInr)) : null,
+      href: "#dry-land",
       blurb:
-        "Off a fixed cantilever platform above the Hyul valley, run by trained jump masters against a written checklist.",
+        "Several fixed-platform bungee operators around Rishikesh and Jim Corbett, each run by trained jump masters against a written checklist.",
     },
     ...activities.map((a) => ({
       kind: a.kind as "paragliding" | "zipline",
@@ -164,11 +163,11 @@ export default async function AdventuresIndex() {
       </section>
 
       {/* Everything else */}
-      {(bungee || activities.length > 0) && (
-        <section className="mt-20">
+      {(bungeeList.length > 0 || activities.length > 0) && (
+        <section id="dry-land" className="mt-20 scroll-mt-24">
           <SectionHeading as="h2" title="Bungee, paragliding & zip line" />
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[...(bungee ? [bungee] : []), ...activities].map((a) => (
+            {[...bungeeList, ...activities].map((a) => (
               <AdventureCard
                 key={a.id}
                 adventure={a}

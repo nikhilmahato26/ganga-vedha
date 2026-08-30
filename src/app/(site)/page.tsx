@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, BedDouble, Mountain, ShieldCheck, Waves } from "lucide-react";
+import { ArrowRight, BedDouble, Mountain, Waves } from "lucide-react";
 import {
   Alert,
   Card,
-  CardBody,
   Chip,
   GradeChip,
   LinkButton,
@@ -18,7 +17,6 @@ import {
 } from "@/components/ui";
 import { AdventureCard, CardLink, HotelCard } from "@/components/site/product-card";
 import { DestinationCard, PackageCard, RentalCard } from "@/components/site/catalog-cards";
-import { EnquireButton } from "@/components/site/enquiry";
 import { GallerySection } from "@/components/site/gallery";
 import {
   getActivities,
@@ -216,17 +214,19 @@ export default async function LandingPage() {
             {
               key: "bungee" as const,
               icon: Mountain,
-              title: "Bungee jumping",
+              title: "Bungee & activities",
               blurb:
-                "83 metres off a cantilever platform over the Hyul valley, run against a written safety checklist.",
-              href: bungee ? `/bungee/${bungee.slug}` : "/",
-              cta: "See the jump",
+                "Bungee jumps from several operators, tandem paragliding and a valley zip line — each run against a written safety checklist.",
+              href: "/adventures",
+              cta: "See adventures",
               open: bungeeOpen,
               closure: resolveClosure(closures, { service: "bungee" }),
-              from: bungee?.priceInr ?? null,
+              from: bungeeList.length
+                ? Math.min(...[...bungeeList, ...activities].map((a) => a.priceInr))
+                : null,
               unit: "per person",
-              count: "83 m · 3 sec free fall",
-              media: bungee?.coverMedia ?? null,
+              count: `${bungeeList.length} bungee operators · paragliding · zip line`,
+              media: bungeeList[0]?.coverMedia ?? null,
             },
           ].map((s) => (
             <Card key={s.key} elevation="flat" interactive className="flex flex-col">
@@ -346,75 +346,13 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Bungee ────────────────────────────────────────────────────────── */}
-      {bungee && (
-        <section className="container-page pt-24">
-          <Card className="grid overflow-hidden lg:grid-cols-2">
-            <MediaFrame
-              media={bungee.coverMedia ?? null}
-              ratio="wide"
-              standInSeed={bungee.slug}
-              className="lg:h-full lg:aspect-auto"
-              emptyLabel="Bungee platform photograph pending"
-            >
-              <div className="absolute inset-x-0 top-0 p-4">
-                <Chip tone="onMedia" size="sm">
-                  {bungee.heightM} m platform
-                </Chip>
-              </div>
-            </MediaFrame>
-            <CardBody className="flex flex-col justify-center gap-5 p-8 lg:p-12">
-              <h2 className="text-display-md text-ink">{bungee.name}</h2>
-              <p className="measure text-ink-muted">{bungee.summary}</p>
-              <ul className="grid gap-2 text-small text-ink-muted sm:grid-cols-2">
-                {[
-                  `Weight ${bungee.minWeightKg}–${bungee.maxWeightKg} kg`,
-                  `Minimum age ${bungee.minAge}`,
-                  `About ${formatDuration(bungee.durationMinutes)} on site`,
-                  "Medical screening at the platform",
-                ].map((t) => (
-                  <li key={t} className="flex items-start gap-2">
-                    <ShieldCheck className="mt-0.5 size-4 shrink-0 text-jade-600" aria-hidden />
-                    {t}
-                  </li>
-                ))}
-              </ul>
-              <div className="flex flex-wrap items-end justify-between gap-4 border-t border-hairline pt-5">
-                <div>
-                  <p className="tabular text-display-md leading-none text-ink">
-                    {formatINR(bungee.priceInr)}
-                  </p>
-                  <p className="mt-1.5 text-caption text-ink-faint">per person</p>
-                </div>
-                {bungeeOpen ? (
-                  <EnquireButton
-                    size="lg"
-                    source="detail"
-                    whatsappNumber={settings.whatsappNumber}
-                    product={{
-                      kind: "bungee",
-                      slug: bungee.slug,
-                      name: bungee.name,
-                      priceInr: bungee.priceInr,
-                      priceUnit: "per person",
-                    }}
-                  />
-                ) : (
-                  <Chip tone="closed">Bookings closed</Chip>
-                )}
-              </div>
-            </CardBody>
-          </Card>
-        </section>
-      )}
-
-      {/* ── Other adventures ──────────────────────────────────────────────── */}
-      {activities.length > 0 && (
+      {/* ── Bungee, paragliding & zip line ────────────────────────────────── */}
+      {(bungeeList.length > 0 || activities.length > 0) && (
         <section className="container-page pt-24">
           <SectionHeading
             as="h2"
-            title="Paragliding, zip line and more"
-            description="Not everything here happens on the water. A tandem flight and a valley zip line, both a short drive from town."
+            title="Bungee, paragliding & zip line"
+            description="The dry-land adventures — several bungee operators, tandem paragliding and a valley zip line. Height, grade and age limit on every card."
             action={
               <LinkButton href="/adventures" variant="outline">
                 All adventures
@@ -422,12 +360,12 @@ export default async function LandingPage() {
             }
           />
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {activities.map((a) => (
+            {[...bungeeList, ...activities].map((a) => (
               <AdventureCard
                 key={a.id}
                 adventure={a}
                 closure={resolveClosure(closures, {
-                  service: "activity",
+                  service: a.kind === "bungee" ? "bungee" : "activity",
                   entityType: "adventure",
                   entityId: a.id,
                 })}

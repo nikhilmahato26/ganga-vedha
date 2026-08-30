@@ -266,7 +266,6 @@ export function SiteHeader({
               <div className="mt-4 border-t border-hairline pt-4">
                 {[
                   ["Adventures", "/adventures"],
-                  ["Bungee jumping", "/bungee/bungee-jump-rishikesh"],
                   ["Packages", "/packages"],
                   ["Stays & destinations", "/stays"],
                   ["Car & bike rental", "/rentals"],

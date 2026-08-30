@@ -77,7 +77,7 @@ export default async function BungeeDetail({
   const related = all.filter((a) => a.id !== adventure.id).slice(0, 3);
 
   const product = {
-    kind: "rafting" as const,
+    kind: "bungee" as const,
     slug: adventure.slug,
     name: adventure.name,
     priceInr: adventure.priceInr,
@@ -111,7 +111,7 @@ export default async function BungeeDetail({
         <Breadcrumb
           items={[
             { label: "Home", href: "/" },
-            { label: "Bungee", href: "/bungee/bungee-jump-rishikesh" },
+            { label: "Adventures", href: "/adventures" },
             { label: adventure.name },
           ]}
         />

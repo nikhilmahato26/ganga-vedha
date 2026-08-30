@@ -105,7 +105,6 @@ async function SiteFooter() {
           <ul className="mt-4 space-y-2.5">
             {[
               ["Adventures", "/adventures"],
-              ["Bungee jumping", "/bungee/bungee-jump-rishikesh"],
               ["Holiday packages", "/packages"],
               ["Stays & destinations", "/stays"],
               ["Car & bike rental", "/rentals"],
