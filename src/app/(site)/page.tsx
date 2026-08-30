@@ -1,22 +1,15 @@
-import Link from "next/link";
 import { ArrowRight, BedDouble, Mountain, Waves } from "lucide-react";
 import {
-  Alert,
   Card,
   Chip,
-  GradeChip,
   LinkButton,
   MediaFrame,
   Rating,
   SectionHeading,
-  Table,
-  TableScroller,
-  Td,
-  Th,
-  Tr,
 } from "@/components/ui";
 import { AdventureCard, CardLink, HotelCard } from "@/components/site/product-card";
 import { DestinationCard, PackageCard, RentalCard } from "@/components/site/catalog-cards";
+import { RaftingSection } from "@/components/site/rafting-section";
 import { GallerySection } from "@/components/site/gallery";
 import {
   getActivities,
@@ -34,7 +27,7 @@ import {
 } from "@/lib/content";
 import { WHY_US_ICONS, isWhyUsIconKey } from "@/lib/why-us-icons";
 import { isBookable, resolveClosure } from "@/lib/closure";
-import { formatDuration, formatINR, formatKm } from "@/lib/format";
+import { formatINR } from "@/lib/format";
 
 // 30s: the shortest read on this page is closures, the monsoon switch.
 export const revalidate = 30;
@@ -105,7 +98,6 @@ export default async function LandingPage() {
   const raftingOpen = isBookable(closures, { service: "rafting" });
   const bungeeOpen = isBookable(closures, { service: "bungee" });
   const hotelsOpen = isBookable(closures, { service: "hotel" });
-  const raftingClosure = resolveClosure(closures, { service: "rafting" });
 
   const headline = settings.heroHeading.split("\n");
   const cheapest = Math.min(...rafting.map((r) => r.priceInr));
@@ -271,80 +263,11 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Rafting, by the kilometre ─────────────────────────────────────── */}
-      <section id="rafting" className="container-page scroll-mt-28 pt-24">
-        <SectionHeading
-          as="h2"
-          title="Rafting, by the kilometre"
-          description="The distance is the decision. Longer runs mean bigger water, more rapids and a longer day — not simply more of the same river."
-          action={
-            <LinkButton href="/rafting" variant="outline">
-              Compare all stretches
-            </LinkButton>
-          }
-        />
-
-        {raftingClosure && (
-          <Alert
-            tone="closed"
-            title={raftingClosure.title}
-            className="mt-8"
-          >
-            {raftingClosure.body}
-          </Alert>
-        )}
-
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {rafting.map((a, i) => (
-            <AdventureCard
-              key={a.id}
-              adventure={a}
-              closure={resolveClosure(closures, {
-                service: "rafting",
-                entityType: "adventure",
-                entityId: a.id,
-              })}
-              whatsappNumber={settings.whatsappNumber}
-              priority={i === 0}
-            />
-          ))}
-        </div>
-
-        {/* The comparison the cards cannot make: all stretches on one axis. */}
-        <div className="mt-10">
-          <TableScroller label="Every rafting stretch compared">
-            <Table>
-              <thead>
-                <tr>
-                  <Th>Stretch</Th>
-                  <Th>Put-in</Th>
-                  <Th>Grade</Th>
-                  <Th className="text-right">Distance</Th>
-                  <Th className="text-right">Duration</Th>
-                  <Th className="text-right">Min age</Th>
-                  <Th className="text-right">Price</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {rafting.map((a) => (
-                  <Tr key={a.id}>
-                    <Td className="font-semibold whitespace-nowrap">
-                      <Link href={`/rafting/${a.slug}`} className="text-ink no-underline hover:underline">
-                        {a.name}
-                      </Link>
-                    </Td>
-                    <Td className="text-ink-muted">{a.putInPoint}</Td>
-                    <Td>{a.grade && <GradeChip grade={a.grade} size="sm" />}</Td>
-                    <Td className="text-right tabular">{formatKm(a.distanceKm)}</Td>
-                    <Td className="text-right tabular">{formatDuration(a.durationMinutes)}</Td>
-                    <Td className="text-right tabular">{a.minAge}</Td>
-                    <Td className="text-right tabular font-semibold">{formatINR(a.priceInr)}</Td>
-                  </Tr>
-                ))}
-              </tbody>
-            </Table>
-          </TableScroller>
-        </div>
-      </section>
+      <RaftingSection
+        stretches={rafting}
+        closures={closures}
+        whatsappNumber={settings.whatsappNumber}
+      />
 
       {/* ── Bungee, paragliding & zip line ────────────────────────────────── */}
       {(bungeeList.length > 0 || activities.length > 0) && (
