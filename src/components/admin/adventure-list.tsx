@@ -27,7 +27,7 @@ export function AdventureList({
   kind,
   items,
 }: {
-  kind: "rafting" | "bungee";
+  kind: "rafting" | "bungee" | "activities";
   items: Adventure[];
 }) {
   const [rows, setRows] = React.useState(items);
@@ -35,9 +35,14 @@ export function AdventureList({
   const [query, setQuery] = React.useState("");
 
   const filtered = rows.filter((r) => r.name.toLowerCase().includes(query.toLowerCase()));
-  const label = kind === "rafting" ? "stretch" : "package";
-  const labelPlural = kind === "rafting" ? "stretches" : "packages";
-  const newHref = `/admin/${kind}/new`;
+  const isActivities = kind === "activities";
+  const label = kind === "rafting" ? "stretch" : kind === "bungee" ? "package" : "activity";
+  const labelPlural =
+    kind === "rafting" ? "stretches" : kind === "bungee" ? "packages" : "activities";
+  const adminBase = isActivities ? "/admin/adventures" : `/admin/${kind}`;
+  const newHref = `${adminBase}/new`;
+  /** rafting → /rafting, bungee → /bungee, activities → /adventures */
+  const viewBase = isActivities ? "/adventures" : `/${kind}`;
 
   async function handleMove(id: number, direction: "up" | "down") {
     setPending(id);
@@ -108,7 +113,9 @@ export function AdventureList({
               <tr>
                 <Th>Name</Th>
                 {kind === "rafting" && <Th>Grade</Th>}
-                <Th className="text-right">{kind === "rafting" ? "Distance" : "Height"}</Th>
+                {!isActivities && (
+                  <Th className="text-right">{kind === "rafting" ? "Distance" : "Height"}</Th>
+                )}
                 <Th className="text-right">Duration</Th>
                 <Th className="text-right">Price</Th>
                 <Th>Published</Th>
@@ -123,9 +130,11 @@ export function AdventureList({
                   {kind === "rafting" && (
                     <Td>{r.grade && <GradeChip grade={r.grade} size="sm" />}</Td>
                   )}
-                  <Td className="text-right tabular">
-                    {kind === "rafting" ? formatKm(r.distanceKm) : `${r.heightM ?? "—"} m`}
-                  </Td>
+                  {!isActivities && (
+                    <Td className="text-right tabular">
+                      {kind === "rafting" ? formatKm(r.distanceKm) : `${r.heightM ?? "—"} m`}
+                    </Td>
+                  )}
                   <Td className="text-right tabular">{formatDurationShort(r.durationMinutes)}</Td>
                   <Td className="text-right tabular font-semibold">{formatINR(r.priceInr)}</Td>
                   <Td>
@@ -161,7 +170,7 @@ export function AdventureList({
                   <Td>
                     <div className="flex items-center justify-end gap-3">
                       <a
-                        href={`/${kind}/${r.slug}`}
+                        href={`${viewBase}/${r.slug}`}
                         target="_blank"
                         rel="noopener"
                         className="text-ink-faint transition-colors hover:text-ink"
@@ -170,7 +179,7 @@ export function AdventureList({
                         <ExternalLink className="size-4" aria-hidden />
                       </a>
                       <Link
-                        href={`/admin/${kind}/${r.id}/edit`}
+                        href={`${adminBase}/${r.id}/edit`}
                         className="text-small font-semibold text-link no-underline"
                       >
                         Edit

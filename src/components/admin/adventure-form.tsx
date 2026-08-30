@@ -27,12 +27,14 @@ function joinLines(list: string[]): string {
   return list.join("\n");
 }
 
+export type AdventureAdminKind = "rafting" | "bungee" | "paragliding" | "zipline";
+
 export function AdventureForm({
   kind,
   adventure,
   coverMedia,
 }: {
-  kind: "rafting" | "bungee";
+  kind: AdventureAdminKind;
   /** Present when editing; absent when creating. */
   adventure?: Adventure;
   coverMedia: MediaItem | null;
@@ -43,6 +45,10 @@ export function AdventureForm({
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [slugTouched, setSlugTouched] = React.useState(Boolean(adventure));
 
+  const isActivityRoute = kind === "paragliding" || kind === "zipline";
+  const [kindValue, setKindValue] = React.useState<AdventureAdminKind>(
+    (adventure?.kind as AdventureAdminKind) ?? kind,
+  );
   const [name, setName] = React.useState(adventure?.name ?? "");
   const [slug, setSlug] = React.useState(adventure?.slug ?? "");
   const [distanceKm, setDistanceKm] = React.useState(
@@ -86,6 +92,13 @@ export function AdventureForm({
   const [isPublished, setIsPublished] = React.useState(adventure?.isPublished ?? false);
   const [cover, setCover] = React.useState<MediaItem[]>(coverMedia ? [coverMedia] : []);
 
+  const basePath =
+    kind === "rafting" || kind === "bungee" ? `/admin/${kind}` : "/admin/adventures";
+  const label =
+    kind === "rafting" ? "stretch" : kind === "bungee" ? "package" : "activity";
+  const backLabel =
+    kind === "rafting" ? "rafting" : kind === "bungee" ? "bungee" : "adventures";
+
   function onNameChange(v: string) {
     setName(v);
     if (!slugTouched) setSlug(slugify(v));
@@ -97,7 +110,7 @@ export function AdventureForm({
     setErrors({});
 
     const payload = {
-      kind,
+      kind: isActivityRoute ? kindValue : kind,
       name,
       slug,
       distanceKm: kind === "rafting" ? (distanceKm ? Number(distanceKm) : null) : null,
@@ -138,19 +151,17 @@ export function AdventureForm({
     }
 
     toast({ tone: "success", title: adventure ? "Saved" : "Created" });
-    router.push(`/admin/${kind}`);
+    router.push(basePath);
     router.refresh();
   }
-
-  const label = kind === "rafting" ? "stretch" : "package";
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl pb-24" noValidate>
       <Link
-        href={`/admin/${kind}`}
+        href={basePath}
         className="inline-flex items-center gap-1.5 text-small font-semibold text-ink-muted no-underline hover:text-ink"
       >
-        <ArrowLeft className="size-4" aria-hidden /> Back to {kind}
+        <ArrowLeft className="size-4" aria-hidden /> Back to {backLabel}
       </Link>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
@@ -176,6 +187,17 @@ export function AdventureForm({
         <CardBody className="space-y-5 p-6">
           <h2 className="text-subtitle text-ink">Basics</h2>
           <div className="grid gap-5 sm:grid-cols-2">
+            {isActivityRoute && (
+              <Field label="Activity type">
+                <Select
+                  value={kindValue}
+                  onChange={(e) => setKindValue(e.target.value as AdventureAdminKind)}
+                >
+                  <option value="paragliding">Paragliding</option>
+                  <option value="zipline">Zip lining</option>
+                </Select>
+              </Field>
+            )}
             <Field label="Name" required error={errors.name}>
               <Input value={name} onChange={(e) => onNameChange(e.target.value)} required />
             </Field>
@@ -195,7 +217,7 @@ export function AdventureForm({
               />
             </Field>
 
-            {kind === "rafting" ? (
+            {kind === "rafting" && (
               <Field label="Distance (km)" required error={errors.distanceKm}>
                 <Input
                   type="number"
@@ -206,7 +228,8 @@ export function AdventureForm({
                   required
                 />
               </Field>
-            ) : (
+            )}
+            {kind === "bungee" && (
               <Field label="Height (m)" required error={errors.heightM}>
                 <Input
                   type="number"
@@ -381,7 +404,7 @@ export function AdventureForm({
       </Card>
 
       <div className="sticky bottom-0 mt-8 flex justify-end gap-3 border-t border-hairline bg-canvas py-4">
-        <Link href={`/admin/${kind}`} className="no-underline">
+        <Link href={basePath} className="no-underline">
           <Button type="button" variant="ghost">
             Cancel
           </Button>

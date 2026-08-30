@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, BedDouble, Mountain, ShieldCheck, Waves } from "lucide-react";
+import { ArrowRight, BedDouble, Mountain, Waves } from "lucide-react";
 import {
   Alert,
   Card,
-  CardBody,
   Chip,
   GradeChip,
   LinkButton,
@@ -17,15 +16,19 @@ import {
   Tr,
 } from "@/components/ui";
 import { AdventureCard, CardLink, HotelCard } from "@/components/site/product-card";
-import { EnquireButton } from "@/components/site/enquiry";
+import { DestinationCard, PackageCard, RentalCard } from "@/components/site/catalog-cards";
 import { GallerySection } from "@/components/site/gallery";
 import {
+  getActivities,
   getAdventures,
   getClosures,
   getContentBlock,
+  getDestinations,
   getGalleryItems,
   getHotels,
+  getPackages,
   getRaftingByDistance,
+  getRentals,
   getReviews,
   getSiteSettings,
 } from "@/lib/content";
@@ -69,17 +72,33 @@ const WHY_US_FALLBACK = {
 } as const;
 
 export default async function LandingPage() {
-  const [settings, rafting, bungeeList, hotels, reviews, closures, whyUsBlock, galleryItems] =
-    await Promise.all([
-      getSiteSettings(),
-      getRaftingByDistance(),
-      getAdventures("bungee"),
-      getHotels(),
-      getReviews(),
-      getClosures(),
-      getContentBlock("why-choose-us"),
-      getGalleryItems(),
-    ]);
+  const [
+    settings,
+    rafting,
+    bungeeList,
+    hotels,
+    reviews,
+    closures,
+    whyUsBlock,
+    galleryItems,
+    activities,
+    packages,
+    destinations,
+    rentals,
+  ] = await Promise.all([
+    getSiteSettings(),
+    getRaftingByDistance(),
+    getAdventures("bungee"),
+    getHotels(),
+    getReviews(),
+    getClosures(),
+    getContentBlock("why-choose-us"),
+    getGalleryItems(),
+    getActivities(),
+    getPackages(),
+    getDestinations(),
+    getRentals(),
+  ]);
   const whyUs = whyUsBlock ?? WHY_US_FALLBACK;
 
   const bungee = bungeeList[0];
@@ -126,7 +145,7 @@ export default async function LandingPage() {
 
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <LinkButton href="#adventures" size="lg">
-                See all {rafting.length} stretches
+                See all rafting stretches
                 <ArrowRight className="size-4" aria-hidden />
               </LinkButton>
               <LinkButton href="/hotels" size="lg" variant="outline" className="border-white/30 bg-white/10 text-white hover:border-white/50 hover:bg-white/20">
@@ -137,7 +156,7 @@ export default async function LandingPage() {
             <dl className="mt-12 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
               {[
                 ["From", formatINR(cheapest), "per person"],
-                ["Stretches", String(rafting.length), "12 km to 32 km"],
+                ["Rafting", String(rafting.length), "options · 7–26 km"],
                 ["Bungee", `${bungee?.heightM ?? "—"} m`, "free fall"],
                 ["Season", "Sep–Jun", "water permitting"],
               ].map(([label, value, note]) => (
@@ -189,23 +208,25 @@ export default async function LandingPage() {
               closure: resolveClosure(closures, { service: "rafting" }),
               from: cheapest,
               unit: "per person",
-              count: `${rafting.length} stretches · 12–32 km`,
+              count: `${rafting.length} options · Rishikesh & Manali`,
               media: rafting[0]?.coverMedia ?? null,
             },
             {
               key: "bungee" as const,
               icon: Mountain,
-              title: "Bungee jumping",
+              title: "Bungee & activities",
               blurb:
-                "83 metres off a cantilever platform over the Hyul valley, run against a written safety checklist.",
-              href: bungee ? `/bungee/${bungee.slug}` : "/",
-              cta: "See the jump",
+                "Bungee jumps from several operators, tandem paragliding and a valley zip line — each run against a written safety checklist.",
+              href: "/adventures",
+              cta: "See adventures",
               open: bungeeOpen,
               closure: resolveClosure(closures, { service: "bungee" }),
-              from: bungee?.priceInr ?? null,
+              from: bungeeList.length
+                ? Math.min(...[...bungeeList, ...activities].map((a) => a.priceInr))
+                : null,
               unit: "per person",
-              count: "83 m · 3 sec free fall",
-              media: bungee?.coverMedia ?? null,
+              count: `${bungeeList.length} bungee operators · paragliding · zip line`,
+              media: bungeeList[0]?.coverMedia ?? null,
             },
           ].map((s) => (
             <Card key={s.key} elevation="flat" interactive className="flex flex-col">
@@ -325,65 +346,54 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Bungee ────────────────────────────────────────────────────────── */}
-      {bungee && (
+      {/* ── Bungee, paragliding & zip line ────────────────────────────────── */}
+      {(bungeeList.length > 0 || activities.length > 0) && (
         <section className="container-page pt-24">
-          <Card className="grid overflow-hidden lg:grid-cols-2">
-            <MediaFrame
-              media={bungee.coverMedia ?? null}
-              ratio="wide"
-              standInSeed={bungee.slug}
-              className="lg:h-full lg:aspect-auto"
-              emptyLabel="Bungee platform photograph pending"
-            >
-              <div className="absolute inset-x-0 top-0 p-4">
-                <Chip tone="onMedia" size="sm">
-                  {bungee.heightM} m platform
-                </Chip>
-              </div>
-            </MediaFrame>
-            <CardBody className="flex flex-col justify-center gap-5 p-8 lg:p-12">
-              <h2 className="text-display-md text-ink">{bungee.name}</h2>
-              <p className="measure text-ink-muted">{bungee.summary}</p>
-              <ul className="grid gap-2 text-small text-ink-muted sm:grid-cols-2">
-                {[
-                  `Weight ${bungee.minWeightKg}–${bungee.maxWeightKg} kg`,
-                  `Minimum age ${bungee.minAge}`,
-                  `About ${formatDuration(bungee.durationMinutes)} on site`,
-                  "Medical screening at the platform",
-                ].map((t) => (
-                  <li key={t} className="flex items-start gap-2">
-                    <ShieldCheck className="mt-0.5 size-4 shrink-0 text-jade-600" aria-hidden />
-                    {t}
-                  </li>
-                ))}
-              </ul>
-              <div className="flex flex-wrap items-end justify-between gap-4 border-t border-hairline pt-5">
-                <div>
-                  <p className="tabular text-display-md leading-none text-ink">
-                    {formatINR(bungee.priceInr)}
-                  </p>
-                  <p className="mt-1.5 text-caption text-ink-faint">per person</p>
-                </div>
-                {bungeeOpen ? (
-                  <EnquireButton
-                    size="lg"
-                    source="detail"
-                    whatsappNumber={settings.whatsappNumber}
-                    product={{
-                      kind: "bungee",
-                      slug: bungee.slug,
-                      name: bungee.name,
-                      priceInr: bungee.priceInr,
-                      priceUnit: "per person",
-                    }}
-                  />
-                ) : (
-                  <Chip tone="closed">Bookings closed</Chip>
-                )}
-              </div>
-            </CardBody>
-          </Card>
+          <SectionHeading
+            as="h2"
+            title="Bungee, paragliding & zip line"
+            description="The dry-land adventures — several bungee operators, tandem paragliding and a valley zip line. Height, grade and age limit on every card."
+            action={
+              <LinkButton href="/adventures" variant="outline">
+                All adventures
+              </LinkButton>
+            }
+          />
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[...bungeeList, ...activities].map((a) => (
+              <AdventureCard
+                key={a.id}
+                adventure={a}
+                closure={resolveClosure(closures, {
+                  service: a.kind === "bungee" ? "bungee" : "activity",
+                  entityType: "adventure",
+                  entityId: a.id,
+                })}
+                whatsappNumber={settings.whatsappNumber}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Holiday packages ──────────────────────────────────────────────── */}
+      {packages.length > 0 && (
+        <section className="container-page pt-24">
+          <SectionHeading
+            as="h2"
+            title="Holiday packages"
+            description="Fixed itineraries for the trips people ask us to plan most — the Char Dham and Do Dham yatras, a week of yoga, and the Uttarakhand and Himachal loops."
+            action={
+              <LinkButton href="/packages" variant="outline">
+                All packages
+              </LinkButton>
+            }
+          />
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {packages.slice(0, 3).map((p) => (
+              <PackageCard key={p.id} pkg={p} whatsappNumber={settings.whatsappNumber} />
+            ))}
+          </div>
         </section>
       )}
 
@@ -415,6 +425,48 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ── Destinations ──────────────────────────────────────────────────── */}
+      {destinations.length > 0 && (
+        <section className="container-page pt-24">
+          <SectionHeading
+            as="h2"
+            title="Where we take people"
+            description="Rishikesh is home base, but we plan trips across Uttarakhand and Himachal — each with a short guide and where to stay."
+            action={
+              <LinkButton href="/stays" variant="outline">
+                All destinations
+              </LinkButton>
+            }
+          />
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {destinations.slice(0, 8).map((d) => (
+              <DestinationCard key={d.id} destination={d} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Rentals ───────────────────────────────────────────────────────── */}
+      {rentals.length > 0 && (
+        <section className="container-page pt-24">
+          <SectionHeading
+            as="h2"
+            title="Getting around"
+            description="A car with a driver, priced per route, or a bike by the day from our Tapovan office."
+            action={
+              <LinkButton href="/rentals" variant="outline">
+                Car &amp; bike rental
+              </LinkButton>
+            }
+          />
+          <div className="mt-10 grid gap-6 sm:grid-cols-2">
+            {rentals.map((r) => (
+              <RentalCard key={r.id} rental={r} whatsappNumber={settings.whatsappNumber} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ── Why us ────────────────────────────────────────────────────────── */}
       <section className="container-page pt-24">
         <SectionHeading as="h2" title={whyUs.title} description={whyUs.subtitle ?? undefined} />
@@ -438,6 +490,13 @@ export default async function LandingPage() {
 
       {/* ── Gallery ───────────────────────────────────────────────────────── */}
       <GallerySection items={galleryItems} />
+      {galleryItems.length > 0 && (
+        <div className="container-page mt-8 text-center">
+          <LinkButton href="/gallery" variant="outline">
+            See the full gallery
+          </LinkButton>
+        </div>
+      )}
 
       {/* ── Reviews ───────────────────────────────────────────────────────── */}
       <section className="container-page pt-24">

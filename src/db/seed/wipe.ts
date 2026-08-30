@@ -34,7 +34,8 @@ async function main() {
   await sql`
     truncate table
       admin_users, adventures, audit_log, closures, content_blocks,
-      enquiries, hotel_rooms, hotels, media, media_links,
+      destinations, enquiries, gallery_items, hotel_rooms, hotels,
+      media, media_links, packages, rentals,
       reviews, service_lines, site_settings
     restart identity cascade
   `;

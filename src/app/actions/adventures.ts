@@ -9,11 +9,20 @@ import { getVerifiedSession } from "@/lib/auth";
 import { contentTags } from "@/lib/content";
 import { logAudit } from "@/lib/audit";
 import { adventureSchema, type AdventureFormValues } from "@/lib/schemas/adventure";
+import type { AdventureKind } from "@/lib/content";
 
 async function requireAdmin() {
   const session = await getVerifiedSession();
   if (!session) redirect("/admin/login");
   return session;
+}
+
+/**
+ * The public URL prefix for an adventure kind. Rafting and bungee keep their
+ * own top-level sections; paragliding and zip-lining live under /adventures.
+ */
+function adventurePathPrefix(kind: AdventureKind): string {
+  return kind === "rafting" || kind === "bungee" ? `/${kind}` : "/adventures";
 }
 
 /**
@@ -24,15 +33,16 @@ async function requireAdmin() {
  * verify time-based ISR behaved as documented in this environment, so a
  * write path relies on neither alone.
  */
-function revalidateAdventurePaths(kind: "rafting" | "bungee", slug: string, prevSlug?: string) {
+function revalidateAdventurePaths(kind: AdventureKind, slug: string, prevSlug?: string) {
   revalidateTag(contentTags.adventures);
   revalidateTag(`adventure:${slug}`);
   if (prevSlug && prevSlug !== slug) revalidateTag(`adventure:${prevSlug}`);
 
+  const prefix = adventurePathPrefix(kind);
   revalidatePath("/");
-  revalidatePath(kind === "rafting" ? "/rafting" : "/bungee");
-  revalidatePath(`/${kind}/${slug}`);
-  if (prevSlug && prevSlug !== slug) revalidatePath(`/${kind}/${prevSlug}`);
+  revalidatePath(prefix);
+  revalidatePath(`${prefix}/${slug}`);
+  if (prevSlug && prevSlug !== slug) revalidatePath(`${prefix}/${prevSlug}`);
 }
 
 export type AdventureActionState =
@@ -191,7 +201,7 @@ export async function moveAdventure(id: number, direction: "up" | "down") {
 
   revalidateTag(contentTags.adventures);
   revalidatePath("/");
-  revalidatePath(current.kind === "rafting" ? "/rafting" : "/bungee");
+  revalidatePath(adventurePathPrefix(current.kind));
 }
 
 function toInsertShape(data: AdventureFormValues) {

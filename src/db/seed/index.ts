@@ -10,13 +10,24 @@ import {
   adventures,
   closures,
   contentBlocks,
+  destinations,
   hotelRooms,
   hotels,
+  packages,
+  rentals,
   reviews,
   serviceLines,
   siteSettings,
 } from "@/db/schema";
-import { ADVENTURES, HOTELS, REVIEWS, SETTINGS } from "./data";
+import {
+  ADVENTURES,
+  DESTINATIONS,
+  HOTELS,
+  PACKAGES,
+  RENTALS,
+  REVIEWS,
+  SETTINGS,
+} from "./data";
 
 const CONTENT_BLOCKS = [
   {
@@ -120,12 +131,51 @@ async function main() {
       .onConflictDoUpdate({ target: adventures.slug, set: a });
   }
 
+  console.log(`→ destinations (${DESTINATIONS.length})`);
+  for (const d of DESTINATIONS) {
+    await db
+      .insert(destinations)
+      .values(d)
+      .onConflictDoUpdate({ target: destinations.slug, set: d });
+  }
+
+  // slug → id, so hotels and packages can carry a readable destinationSlug in
+  // the seed file and still land a real FK.
+  const destRows = await db
+    .select({ id: destinations.id, slug: destinations.slug })
+    .from(destinations);
+  const destIdBySlug = new Map(destRows.map((r) => [r.slug, r.id]));
+
+  console.log(`→ packages (${PACKAGES.length})`);
+  for (const { destinationSlug, ...p } of PACKAGES) {
+    const values = {
+      ...p,
+      destinationId: destinationSlug ? (destIdBySlug.get(destinationSlug) ?? null) : null,
+    };
+    await db
+      .insert(packages)
+      .values(values)
+      .onConflictDoUpdate({ target: packages.slug, set: values });
+  }
+
+  console.log(`→ rentals (${RENTALS.length})`);
+  for (const r of RENTALS) {
+    await db
+      .insert(rentals)
+      .values(r)
+      .onConflictDoUpdate({ target: rentals.slug, set: r });
+  }
+
   console.log(`→ hotels + rooms (${HOTELS.length})`);
-  for (const { rooms, ...h } of HOTELS) {
+  for (const { rooms, destinationSlug, ...h } of HOTELS) {
+    const values = {
+      ...h,
+      destinationId: destinationSlug ? (destIdBySlug.get(destinationSlug) ?? null) : null,
+    };
     const [row] = await db
       .insert(hotels)
-      .values(h)
-      .onConflictDoUpdate({ target: hotels.slug, set: h })
+      .values(values)
+      .onConflictDoUpdate({ target: hotels.slug, set: values })
       .returning({ id: hotels.id });
 
     // Rooms have no natural key of their own — replace the set for this

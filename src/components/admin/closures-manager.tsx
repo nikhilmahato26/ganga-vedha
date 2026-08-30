@@ -41,7 +41,11 @@ export type CustomClosureRow = {
 };
 
 export type ClosureTargets = {
-  adventures: { id: number; name: string; kind: "rafting" | "bungee" }[];
+  adventures: {
+    id: number;
+    name: string;
+    kind: "rafting" | "bungee" | "paragliding" | "zipline";
+  }[];
   hotels: { id: number; name: string }[];
 };
 

@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getEntityGallery, getHotelAdmin, getMediaById } from "@/lib/admin-data";
+import {
+  getEntityGallery,
+  getHotelAdmin,
+  getMediaById,
+  listDestinationOptions,
+} from "@/lib/admin-data";
 import { HotelForm } from "@/components/admin/hotel-form";
 
 export const metadata: Metadata = { title: "Edit hotel", robots: { index: false, follow: false } };
@@ -14,10 +19,11 @@ export default async function EditHotelPage({
   const hotel = await getHotelAdmin(Number(id));
   if (!hotel) notFound();
 
-  const [coverRow, galleryRows, roomMediaRows] = await Promise.all([
+  const [coverRow, galleryRows, roomMediaRows, destinationOptions] = await Promise.all([
     getMediaById(hotel.coverMediaId),
     getEntityGallery("hotel", hotel.id),
     Promise.all(hotel.rooms.map((r) => getMediaById(r.mediaId))),
+    listDestinationOptions(),
   ]);
 
   return (
@@ -31,6 +37,7 @@ export default async function EditHotelPage({
         coverRow ? { id: coverRow.id, secureUrl: coverRow.secureUrl, altText: coverRow.altText ?? "" } : null
       }
       gallery={galleryRows.map((g) => ({ id: g.id, secureUrl: g.secureUrl, altText: g.altText ?? "" }))}
+      destinationOptions={destinationOptions}
     />
   );
 }
