@@ -6,12 +6,15 @@ import {
   adventures,
   auditLog,
   closures,
+  destinations,
   enquiries,
   galleryItems,
   hotelRooms,
   hotels,
   media,
   mediaLinks,
+  packages,
+  rentals,
   reviews,
   siteSettings,
 } from "@/db/schema";
@@ -59,6 +62,41 @@ export async function getHotelAdmin(id: number) {
     where: eq(hotels.id, id),
     with: { rooms: { orderBy: hotelRooms.sortOrder } },
   });
+}
+
+export async function listPackagesAdmin() {
+  return getDb().select().from(packages).orderBy(packages.sortOrder);
+}
+
+export async function getPackageAdmin(id: number) {
+  const [row] = await getDb().select().from(packages).where(eq(packages.id, id)).limit(1);
+  return row ?? null;
+}
+
+export async function listRentalsAdmin() {
+  return getDb().select().from(rentals).orderBy(rentals.sortOrder);
+}
+
+export async function getRentalAdmin(id: number) {
+  const [row] = await getDb().select().from(rentals).where(eq(rentals.id, id)).limit(1);
+  return row ?? null;
+}
+
+export async function listDestinationsAdmin() {
+  return getDb().select().from(destinations).orderBy(destinations.sortOrder);
+}
+
+export async function getDestinationAdmin(id: number) {
+  const [row] = await getDb().select().from(destinations).where(eq(destinations.id, id)).limit(1);
+  return row ?? null;
+}
+
+/** id + name pairs for the "primary destination" picker on the package form. */
+export async function listDestinationOptions() {
+  return getDb()
+    .select({ id: destinations.id, name: destinations.name })
+    .from(destinations)
+    .orderBy(destinations.sortOrder);
 }
 
 export async function listReviewsAdmin() {
@@ -252,6 +290,9 @@ export async function listUnusedMedia() {
         notExists(db.select().from(adventures).where(eq(adventures.coverMediaId, media.id))),
         notExists(db.select().from(hotels).where(eq(hotels.coverMediaId, media.id))),
         notExists(db.select().from(hotelRooms).where(eq(hotelRooms.mediaId, media.id))),
+        notExists(db.select().from(packages).where(eq(packages.coverMediaId, media.id))),
+        notExists(db.select().from(rentals).where(eq(rentals.coverMediaId, media.id))),
+        notExists(db.select().from(destinations).where(eq(destinations.coverMediaId, media.id))),
         notExists(db.select().from(reviews).where(eq(reviews.avatarMediaId, media.id))),
         notExists(
           db

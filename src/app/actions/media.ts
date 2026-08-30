@@ -17,7 +17,15 @@ async function requireAdmin() {
 
 const signInput = z.object({
   /** Scopes the Cloudinary folder — never trusted as a path, only slugified. */
-  folder: z.enum(["adventures", "hotels", "reviews", "site"]),
+  folder: z.enum([
+    "adventures",
+    "hotels",
+    "reviews",
+    "site",
+    "packages",
+    "rentals",
+    "destinations",
+  ]),
 });
 
 /**

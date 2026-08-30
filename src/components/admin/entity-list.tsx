@@ -6,7 +6,6 @@ import { ArrowDown, ArrowUp, ExternalLink, Plus, Trash2 } from "lucide-react";
 import {
   Button,
   EmptyState,
-  GradeChip,
   Switch,
   Table,
   TableScroller,
@@ -14,35 +13,60 @@ import {
   Th,
   Tr,
 } from "@/components/ui";
-import { formatDurationShort, formatINR, formatKm } from "@/lib/format";
-import {
-  deleteAdventure,
-  moveAdventure,
-  setAdventurePublished,
-} from "@/app/actions/adventures";
-import type { Adventure } from "@/db/schema";
-import { Waves } from "lucide-react";
 
-export function AdventureList({
-  kind,
+export type EntityRow = {
+  id: number;
+  name: string;
+  slug: string;
+  isPublished: boolean;
+};
+
+export type EntityColumn<T extends EntityRow> = {
+  header: string;
+  align?: "left" | "right";
+  cell: (row: T) => React.ReactNode;
+};
+
+/**
+ * The shared admin list — search, a publish toggle, move up/down, view-on-site,
+ * edit and delete. Packages, rentals and destinations all use this; the only
+ * per-entity part is `columns` and the copy.
+ */
+export function EntityList<T extends EntityRow>({
   items,
+  columns,
+  noun,
+  nounPlural,
+  basePath,
+  viewPrefix,
+  icon,
+  actions,
 }: {
-  kind: "rafting" | "bungee" | "activities";
-  items: Adventure[];
+  items: T[];
+  columns: EntityColumn<T>[];
+  /** e.g. "package" */
+  noun: string;
+  /** e.g. "packages" */
+  nounPlural: string;
+  /** e.g. "/admin/packages" */
+  basePath: string;
+  /** e.g. "/packages" — the public URL prefix for "view on site" */
+  viewPrefix: string;
+  icon: React.ReactNode;
+  actions: {
+    remove: (id: number) => Promise<unknown>;
+    setPublished: (id: number, isPublished: boolean) => Promise<unknown>;
+    move: (id: number, direction: "up" | "down") => Promise<unknown>;
+  };
 }) {
   const [rows, setRows] = React.useState(items);
   const [pending, setPending] = React.useState<number | null>(null);
   const [query, setQuery] = React.useState("");
 
-  const filtered = rows.filter((r) => r.name.toLowerCase().includes(query.toLowerCase()));
-  const isActivities = kind === "activities";
-  const label = kind === "rafting" ? "stretch" : kind === "bungee" ? "package" : "activity";
-  const labelPlural =
-    kind === "rafting" ? "stretches" : kind === "bungee" ? "packages" : "activities";
-  const adminBase = isActivities ? "/admin/adventures" : `/admin/${kind}`;
-  const newHref = `${adminBase}/new`;
-  /** rafting → /rafting, bungee → /bungee, activities → /adventures */
-  const viewBase = isActivities ? "/adventures" : `/${kind}`;
+  const filtered = rows.filter((r) =>
+    r.name.toLowerCase().includes(query.toLowerCase()),
+  );
+  const newHref = `${basePath}/new`;
 
   async function handleMove(id: number, direction: "up" | "down") {
     setPending(id);
@@ -55,20 +79,20 @@ export function AdventureList({
     const next = [...rows];
     [next[i], next[j]] = [next[j], next[i]];
     setRows(next);
-    await moveAdventure(id, direction);
+    await actions.move(id, direction);
     setPending(null);
   }
 
   async function handleTogglePublished(id: number, isPublished: boolean) {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, isPublished } : r)));
-    await setAdventurePublished(id, isPublished);
+    await actions.setPublished(id, isPublished);
   }
 
   async function handleDelete(id: number, name: string) {
     if (!confirm(`Delete "${name}" permanently? Past enquiries for it are kept.`)) return;
     setPending(id);
     setRows((prev) => prev.filter((r) => r.id !== id));
-    await deleteAdventure(id);
+    await actions.remove(id);
     setPending(null);
   }
 
@@ -78,12 +102,12 @@ export function AdventureList({
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={`Search ${labelPlural}…`}
+          placeholder={`Search ${nounPlural}…`}
           className="h-10 w-full max-w-xs rounded-md border border-granite-300 bg-canvas px-3 text-small text-ink placeholder:text-ink-faint focus:border-jade-600 focus:outline-none focus:ring-2 focus:ring-jade-600/25"
         />
         <Link href={newHref} className="no-underline">
           <Button size="sm">
-            <Plus className="size-4" aria-hidden /> Add {label}
+            <Plus className="size-4" aria-hidden /> Add {noun}
           </Button>
         </Link>
       </div>
@@ -91,33 +115,32 @@ export function AdventureList({
       {filtered.length === 0 ? (
         <EmptyState
           className="mt-6"
-          icon={<Waves />}
-          title={rows.length === 0 ? `No ${labelPlural} yet` : "No matches"}
+          icon={icon}
+          title={rows.length === 0 ? `No ${nounPlural} yet` : "No matches"}
           description={
             rows.length === 0
-              ? `Add your first ${label} and it appears on the site once published.`
+              ? `Add your first ${noun} and it appears on the site once published.`
               : "Try a different search."
           }
           action={
             rows.length === 0 ? (
               <Link href={newHref} className="no-underline">
-                <Button size="sm">Add {label}</Button>
+                <Button size="sm">Add {noun}</Button>
               </Link>
             ) : undefined
           }
         />
       ) : (
-        <TableScroller label={labelPlural} className="mt-6">
+        <TableScroller label={nounPlural} className="mt-6">
           <Table>
             <thead>
               <tr>
                 <Th>Name</Th>
-                {kind === "rafting" && <Th>Grade</Th>}
-                {!isActivities && (
-                  <Th className="text-right">{kind === "rafting" ? "Distance" : "Height"}</Th>
-                )}
-                <Th className="text-right">Duration</Th>
-                <Th className="text-right">Price</Th>
+                {columns.map((c) => (
+                  <Th key={c.header} className={c.align === "right" ? "text-right" : undefined}>
+                    {c.header}
+                  </Th>
+                ))}
                 <Th>Published</Th>
                 <Th>Order</Th>
                 <Th className="text-right">Actions</Th>
@@ -127,16 +150,14 @@ export function AdventureList({
               {filtered.map((r, i) => (
                 <Tr key={r.id}>
                   <Td className="font-semibold whitespace-nowrap text-ink">{r.name}</Td>
-                  {kind === "rafting" && (
-                    <Td>{r.grade && <GradeChip grade={r.grade} size="sm" />}</Td>
-                  )}
-                  {!isActivities && (
-                    <Td className="text-right tabular">
-                      {kind === "rafting" ? formatKm(r.distanceKm) : `${r.heightM ?? "—"} m`}
+                  {columns.map((c) => (
+                    <Td
+                      key={c.header}
+                      className={c.align === "right" ? "text-right tabular" : "text-ink-muted"}
+                    >
+                      {c.cell(r)}
                     </Td>
-                  )}
-                  <Td className="text-right tabular">{formatDurationShort(r.durationMinutes)}</Td>
-                  <Td className="text-right tabular font-semibold">{formatINR(r.priceInr)}</Td>
+                  ))}
                   <Td>
                     <Switch
                       label=""
@@ -170,7 +191,7 @@ export function AdventureList({
                   <Td>
                     <div className="flex items-center justify-end gap-3">
                       <a
-                        href={`${viewBase}/${r.slug}`}
+                        href={`${viewPrefix}/${r.slug}`}
                         target="_blank"
                         rel="noopener"
                         className="text-ink-faint transition-colors hover:text-ink"
@@ -179,7 +200,7 @@ export function AdventureList({
                         <ExternalLink className="size-4" aria-hidden />
                       </a>
                       <Link
-                        href={`${adminBase}/${r.id}/edit`}
+                        href={`${basePath}/${r.id}/edit`}
                         className="text-small font-semibold text-link no-underline"
                       >
                         Edit

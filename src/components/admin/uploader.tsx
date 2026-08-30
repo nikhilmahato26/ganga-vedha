@@ -67,7 +67,14 @@ export function ImageUploader({
   onChange,
   max = 12,
 }: {
-  folder: "adventures" | "hotels" | "reviews" | "site";
+  folder:
+    | "adventures"
+    | "hotels"
+    | "reviews"
+    | "site"
+    | "packages"
+    | "rentals"
+    | "destinations";
   items: MediaItem[];
   onChange: (items: MediaItem[]) => void;
   /** 1 for a single cover image; higher for a gallery. */
