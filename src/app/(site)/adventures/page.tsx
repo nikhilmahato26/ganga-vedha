@@ -51,11 +51,11 @@ export default async function AdventuresIndex() {
   const pillars = [
     {
       kind: "rafting" as const,
-      count: `${rafting.length} options · Rishikesh & Manali`,
+      count: `${rafting.length} options · 12–26 km`,
       from: rafting.length ? Math.min(...rafting.map((r) => r.priceInr)) : null,
       href: "/rafting",
       blurb:
-        "The Ganga at Rishikesh and the Beas at Manali, sold and compared by distance. Longer runs mean bigger water, not just more river.",
+        "Three stretches of the Ganga at Rishikesh, sold and compared by distance — with or without a drone crew filming the run. Longer runs mean bigger water, not just more river.",
     },
     {
       kind: "bungee" as const,

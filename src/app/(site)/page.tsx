@@ -94,7 +94,6 @@ export default async function LandingPage() {
   ]);
   const whyUs = whyUsBlock ?? WHY_US_FALLBACK;
 
-  const bungee = bungeeList[0];
   const raftingOpen = isBookable(closures, { service: "rafting" });
   const bungeeOpen = isBookable(closures, { service: "bungee" });
   const hotelsOpen = isBookable(closures, { service: "hotel" });
@@ -120,9 +119,12 @@ export default async function LandingPage() {
           className="absolute inset-0 bg-[linear-gradient(to_top,rgb(5_41_38/0.92)_0%,rgb(5_41_38/0.66)_45%,rgb(5_41_38/0.42)_100%)]"
           aria-hidden
         />
-        <div className="container-page relative flex min-h-[clamp(28rem,68vh,40rem)] flex-col justify-end py-14 lg:py-20">
+        <div className="container-page relative flex min-h-[clamp(30rem,72vh,44rem)] flex-col justify-end py-14 lg:py-20">
           <div className="max-w-3xl">
-            <h1 className="text-display-xl text-white">
+            <p className="text-caption font-semibold uppercase tracking-wide text-jade-300">
+              Where the Ganga meets adventure
+            </p>
+            <h1 className="mt-3 text-display-xl text-white">
               {headline[0]}
               {headline[1] && (
                 <>
@@ -131,34 +133,51 @@ export default async function LandingPage() {
                 </>
               )}
             </h1>
-            <p className="mt-6 max-w-xl text-subtitle font-normal text-white/85">
-              {settings.heroSubheading}
+
+            <p className="mt-6 max-w-xl text-subtitle font-normal text-white">
+              Welcome to your complete Rishikesh experience.
+            </p>
+            <p className="mt-3 max-w-xl text-small text-white/85">
+              River rafting and bungee jumping, the right hotel or resort, and the
+              Himalayan city on a car, bike or scooty rental — with travel services to
+              tie it together.
+            </p>
+            <p className="mt-2 max-w-xl text-small text-white/85">
+              Adventure, family holidays, spiritual journeys, business travel or a
+              weekend getaway — Ganga Vedha helps you{" "}
+              <strong className="font-semibold text-white">
+                plan it, book it, experience it.
+              </strong>
             </p>
 
-            <div className="mt-9 flex flex-wrap items-center gap-3">
-              <LinkButton href="#adventures" size="lg">
-                See all rafting stretches
+            <p className="mt-6 text-title text-white">
+              Your Rishikesh adventure starts here.
+            </p>
+
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <LinkButton href="/adventures" size="lg">
+                Explore Rishikesh
                 <ArrowRight className="size-4" aria-hidden />
               </LinkButton>
-              <LinkButton href="/hotels" size="lg" variant="outline" className="border-white/30 bg-white/10 text-white hover:border-white/50 hover:bg-white/20">
+              <LinkButton
+                href="/hotels"
+                size="lg"
+                variant="outline"
+                className="border-white/30 bg-white/10 text-white hover:border-white/50 hover:bg-white/20"
+              >
                 Where to stay
               </LinkButton>
             </div>
 
-            <dl className="mt-12 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
-              {[
-                ["From", formatINR(cheapest), "per person"],
-                ["Rafting", String(rafting.length), "options · 7–26 km"],
-                ["Bungee", `${bungee?.heightM ?? "—"} m`, "free fall"],
-                ["Season", "Sep–Jun", "water permitting"],
-              ].map(([label, value, note]) => (
-                <div key={label}>
-                  <dt className="text-caption text-white/60">{label}</dt>
-                  <dd className="mt-1 tabular text-title text-white">{value}</dd>
-                  <dd className="text-caption text-white/60">{note}</dd>
-                </div>
-              ))}
-            </dl>
+            <div className="mt-11 border-t border-white/15 pt-6">
+              <p className="text-caption font-semibold uppercase tracking-wide text-jade-300">
+                One destination. Endless experiences.
+              </p>
+              <p className="mt-2 text-caption font-semibold tracking-wide text-white/70">
+                Rafting &nbsp;•&nbsp; Bungee &nbsp;•&nbsp; Stay &nbsp;•&nbsp; Rentals
+                &nbsp;•&nbsp; Transport &nbsp;•&nbsp; Tours
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -200,7 +219,7 @@ export default async function LandingPage() {
               closure: resolveClosure(closures, { service: "rafting" }),
               from: cheapest,
               unit: "per person",
-              count: `${rafting.length} options · Rishikesh & Manali`,
+              count: `${rafting.length} options · 12–26 km`,
               media: rafting[0]?.coverMedia ?? null,
             },
             {
