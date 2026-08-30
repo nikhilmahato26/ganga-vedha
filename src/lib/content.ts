@@ -6,10 +6,13 @@ import {
   adventures as adventuresTable,
   closures as closuresTable,
   contentBlocks as contentBlocksTable,
+  destinations as destinationsTable,
   galleryItems as galleryItemsTable,
   hotels as hotelsTable,
   media as mediaTable,
   mediaLinks as mediaLinksTable,
+  packages as packagesTable,
+  rentals as rentalsTable,
   reviews as reviewsTable,
   siteSettings as siteSettingsTable,
 } from "@/db/schema";
@@ -19,20 +22,30 @@ import type { MediaSource } from "@/components/ui/media";
 
 export type {
   Adventure,
+  AdventureKind,
   Closure,
+  Destination,
+  EnquiryKind,
   GalleryItem,
   Grade,
   Hotel,
   HotelRoom,
+  Package,
+  PackageItinerary,
+  Rental,
   Review,
   ServiceKey,
   SiteSettings,
 } from "./content.seed";
 import type {
   Adventure,
+  AdventureKind,
   Closure,
+  Destination,
   GalleryItem,
   Hotel,
+  Package,
+  Rental,
   Review,
   SiteSettings,
 } from "./content.seed";
@@ -62,6 +75,9 @@ const TAGS = {
   closures: "closures",
   content: "content-blocks",
   gallery: "gallery",
+  destinations: "destinations",
+  packages: "packages",
+  rentals: "rentals",
 } as const;
 
 export type WhyUsItem = { icon: string; title: string; body: string };
@@ -159,6 +175,7 @@ function mapHotel(
   coverMediaRow?: typeof mediaTable.$inferSelect,
   gallery: MediaSource[] = [],
   roomMediaMap: Map<number, typeof mediaTable.$inferSelect> = new Map(),
+  destinationSlug: string | null = null,
 ): Hotel {
   return {
     id: row.id,
@@ -168,6 +185,7 @@ function mapHotel(
     description: row.description ?? "",
     address: row.address ?? "",
     locality: row.locality ?? "",
+    destinationSlug,
     mapUrl: row.mapUrl,
     starRating: row.starRating,
     pricePerNightInr: row.pricePerNightInr,
@@ -214,7 +232,10 @@ function mapGalleryItem(
 ): GalleryItem {
   return {
     id: row.id,
-    category: row.category,
+    // The column is the wide service_key enum; a gallery category is only ever
+    // one of the three core services in the app.
+    category: row.category as GalleryItem["category"],
+    album: row.album,
     caption: row.caption,
     // Never null in practice — the FK is NOT NULL and the join is inner —
     // but `toMediaSource` still takes `| undefined` from its other callers,
@@ -227,7 +248,8 @@ function mapClosure(row: typeof closuresTable.$inferSelect): Closure {
   return {
     id: row.id,
     scope: row.scope,
-    serviceKey: row.serviceKey,
+    // Closures are only ever scoped to one of the three core services.
+    serviceKey: row.serviceKey as Closure["serviceKey"],
     entityType: row.entityType as Closure["entityType"],
     entityId: row.entityId,
     isActive: row.isActive,
@@ -279,7 +301,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   )();
 }
 
-export async function getAdventures(kind?: "rafting" | "bungee"): Promise<Adventure[]> {
+export async function getAdventures(kind?: AdventureKind): Promise<Adventure[]> {
   if (!hasDatabase()) return seed.getAdventuresSeed(kind);
   return cache(
     async () => {
@@ -298,6 +320,16 @@ export async function getAdventures(kind?: "rafting" | "bungee"): Promise<Advent
     ["adventures", kind ?? "all"],
     { tags: [TAGS.adventures], revalidate: 60 },
   )();
+}
+
+/**
+ * The "Other adventures" from the blueprint — paragliding, zip-lining and
+ * anything else that is neither a rafting stretch nor the bungee jump. Same
+ * table, filtered by kind.
+ */
+export async function getActivities(): Promise<Adventure[]> {
+  const all = await getAdventures();
+  return all.filter((a) => a.kind !== "rafting" && a.kind !== "bungee");
 }
 
 /** Rafting stretches ordered by the axis the whole product is sold on. */
@@ -335,12 +367,19 @@ export async function getHotels(): Promise<Hotel[]> {
         orderBy: hotelsTable.sortOrder,
         with: { rooms: true },
       });
-      const [mediaMap, roomMediaMap] = await Promise.all([
+      const [mediaMap, roomMediaMap, destSlugs] = await Promise.all([
         getMediaByIds(rows.map((r) => r.coverMediaId)),
         getMediaByIds(rows.flatMap((r) => r.rooms.map((room) => room.mediaId))),
+        getDestinationSlugsByIds(rows.map((r) => r.destinationId)),
       ]);
       return rows.map((r) =>
-        mapHotel(r, r.coverMediaId ? mediaMap.get(r.coverMediaId) : undefined, [], roomMediaMap),
+        mapHotel(
+          r,
+          r.coverMediaId ? mediaMap.get(r.coverMediaId) : undefined,
+          [],
+          roomMediaMap,
+          r.destinationId ? (destSlugs.get(r.destinationId) ?? null) : null,
+        ),
       );
     },
     ["hotels"],
@@ -357,16 +396,18 @@ export async function getHotel(slug: string): Promise<Hotel | null> {
         with: { rooms: true },
       });
       if (!row) return null;
-      const [mediaMap, gallery, roomMediaMap] = await Promise.all([
+      const [mediaMap, gallery, roomMediaMap, destSlugs] = await Promise.all([
         getMediaByIds([row.coverMediaId]),
         getGallery("hotel", row.id),
         getMediaByIds(row.rooms.map((room) => room.mediaId)),
+        getDestinationSlugsByIds([row.destinationId]),
       ]);
       return mapHotel(
         row,
         row.coverMediaId ? mediaMap.get(row.coverMediaId) : undefined,
         gallery,
         roomMediaMap,
+        row.destinationId ? (destSlugs.get(row.destinationId) ?? null) : null,
       );
     },
     ["hotel", slug],
@@ -452,6 +493,242 @@ export async function getContentBlock(key: string): Promise<ContentBlock | null>
     },
     ["content-block", key],
     { tags: [TAGS.content, `content-block:${key}`], revalidate: 300 },
+  )();
+}
+
+/* =============================================================================
+   Destinations, packages, rentals — the blueprint's added product lines.
+   ========================================================================== */
+
+function mapDestination(
+  row: typeof destinationsTable.$inferSelect,
+  coverMediaRow?: typeof mediaTable.$inferSelect,
+): Destination {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    region: row.region,
+    tagline: row.tagline ?? "",
+    intro: row.intro ?? "",
+    highlights: row.highlights,
+    bestTime: row.bestTime,
+    howToReach: row.howToReach,
+    faqs: row.faqs,
+    coverMedia: toMediaSource(coverMediaRow),
+    sortOrder: row.sortOrder,
+    isPublished: row.isPublished,
+  };
+}
+
+function mapPackage(
+  row: typeof packagesTable.$inferSelect,
+  destinationSlug: string | null,
+  coverMediaRow?: typeof mediaTable.$inferSelect,
+): Package {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    category: row.category,
+    destinationSlug,
+    durationLabel: row.durationLabel,
+    nights: row.nights,
+    routeLabel: row.routeLabel,
+    priceInr: row.priceInr,
+    compareAtPriceInr: row.compareAtPriceInr,
+    priceNote: row.priceNote,
+    rating: num(row.rating),
+    reviewCount: row.reviewCount,
+    badge: row.badge,
+    summary: row.summary ?? "",
+    description: row.description ?? "",
+    itinerary: row.itinerary,
+    inclusions: row.inclusions,
+    exclusions: row.exclusions,
+    accommodationNote: row.accommodationNote,
+    transportNote: row.transportNote,
+    mealsNote: row.mealsNote,
+    terms: row.terms,
+    faqs: row.faqs,
+    coverMedia: toMediaSource(coverMediaRow),
+    sortOrder: row.sortOrder,
+    isPublished: row.isPublished,
+  };
+}
+
+function mapRental(
+  row: typeof rentalsTable.$inferSelect,
+  coverMediaRow?: typeof mediaTable.$inferSelect,
+): Rental {
+  return {
+    id: row.id,
+    kind: row.kind,
+    slug: row.slug,
+    name: row.name,
+    perDayInr: row.perDayInr,
+    quoteOnly: row.quoteOnly,
+    depositInr: row.depositInr,
+    seats: row.seats,
+    transmission: row.transmission,
+    fuelNote: row.fuelNote,
+    summary: row.summary ?? "",
+    description: row.description ?? "",
+    includes: row.includes,
+    documentsRequired: row.documentsRequired,
+    terms: row.terms,
+    pickupNote: row.pickupNote,
+    faqs: row.faqs,
+    coverMedia: toMediaSource(coverMediaRow),
+    sortOrder: row.sortOrder,
+    isPublished: row.isPublished,
+  };
+}
+
+/** slug lookup for a set of destination ids — batched like the media map. */
+async function getDestinationSlugsByIds(ids: (number | null)[]): Promise<Map<number, string>> {
+  const uniqueIds = [...new Set(ids.filter((id): id is number => id !== null))];
+  if (uniqueIds.length === 0) return new Map();
+  const rows = await getDb()
+    .select({ id: destinationsTable.id, slug: destinationsTable.slug })
+    .from(destinationsTable)
+    .where(inArray(destinationsTable.id, uniqueIds));
+  return new Map(rows.map((r) => [r.id, r.slug]));
+}
+
+export async function getDestinations(): Promise<Destination[]> {
+  if (!hasDatabase()) return seed.getDestinationsSeed();
+  return cache(
+    async () => {
+      const rows = await getDb()
+        .select()
+        .from(destinationsTable)
+        .where(eq(destinationsTable.isPublished, true))
+        .orderBy(destinationsTable.sortOrder);
+      const mediaMap = await getMediaByIds(rows.map((r) => r.coverMediaId));
+      return rows.map((r) =>
+        mapDestination(r, r.coverMediaId ? mediaMap.get(r.coverMediaId) : undefined),
+      );
+    },
+    ["destinations"],
+    { tags: [TAGS.destinations], revalidate: 300 },
+  )();
+}
+
+export async function getDestination(slug: string): Promise<Destination | null> {
+  if (!hasDatabase()) return seed.getDestinationSeed(slug);
+  return cache(
+    async () => {
+      const [row] = await getDb()
+        .select()
+        .from(destinationsTable)
+        .where(and(eq(destinationsTable.slug, slug), eq(destinationsTable.isPublished, true)))
+        .limit(1);
+      if (!row) return null;
+      const mediaMap = await getMediaByIds([row.coverMediaId]);
+      return mapDestination(row, row.coverMediaId ? mediaMap.get(row.coverMediaId) : undefined);
+    },
+    ["destination", slug],
+    { tags: [TAGS.destinations, `destination:${slug}`], revalidate: 300 },
+  )();
+}
+
+export async function getPackages(): Promise<Package[]> {
+  if (!hasDatabase()) return seed.getPackagesSeed();
+  return cache(
+    async () => {
+      const rows = await getDb()
+        .select()
+        .from(packagesTable)
+        .where(eq(packagesTable.isPublished, true))
+        .orderBy(packagesTable.sortOrder);
+      const [mediaMap, destSlugs] = await Promise.all([
+        getMediaByIds(rows.map((r) => r.coverMediaId)),
+        getDestinationSlugsByIds(rows.map((r) => r.destinationId)),
+      ]);
+      return rows.map((r) =>
+        mapPackage(
+          r,
+          r.destinationId ? (destSlugs.get(r.destinationId) ?? null) : null,
+          r.coverMediaId ? mediaMap.get(r.coverMediaId) : undefined,
+        ),
+      );
+    },
+    ["packages"],
+    { tags: [TAGS.packages], revalidate: 120 },
+  )();
+}
+
+export async function getPackage(slug: string): Promise<Package | null> {
+  if (!hasDatabase()) return seed.getPackageSeed(slug);
+  return cache(
+    async () => {
+      const [row] = await getDb()
+        .select()
+        .from(packagesTable)
+        .where(and(eq(packagesTable.slug, slug), eq(packagesTable.isPublished, true)))
+        .limit(1);
+      if (!row) return null;
+      const [mediaMap, destSlugs] = await Promise.all([
+        getMediaByIds([row.coverMediaId]),
+        getDestinationSlugsByIds([row.destinationId]),
+      ]);
+      return mapPackage(
+        row,
+        row.destinationId ? (destSlugs.get(row.destinationId) ?? null) : null,
+        row.coverMediaId ? mediaMap.get(row.coverMediaId) : undefined,
+      );
+    },
+    ["package", slug],
+    { tags: [TAGS.packages, `package:${slug}`], revalidate: 120 },
+  )();
+}
+
+/** Published packages whose primary destination is this one. */
+export async function getPackagesForDestination(destinationId: number): Promise<Package[]> {
+  const all = await getPackages();
+  const [dest] = hasDatabase()
+    ? await getDb()
+        .select({ slug: destinationsTable.slug })
+        .from(destinationsTable)
+        .where(eq(destinationsTable.id, destinationId))
+        .limit(1)
+    : [{ slug: (await seed.getDestinationsSeed()).find((d) => d.id === destinationId)?.slug }];
+  return all.filter((p) => p.destinationSlug && p.destinationSlug === dest?.slug);
+}
+
+export async function getRentals(): Promise<Rental[]> {
+  if (!hasDatabase()) return seed.getRentalsSeed();
+  return cache(
+    async () => {
+      const rows = await getDb()
+        .select()
+        .from(rentalsTable)
+        .where(eq(rentalsTable.isPublished, true))
+        .orderBy(rentalsTable.sortOrder);
+      const mediaMap = await getMediaByIds(rows.map((r) => r.coverMediaId));
+      return rows.map((r) => mapRental(r, r.coverMediaId ? mediaMap.get(r.coverMediaId) : undefined));
+    },
+    ["rentals"],
+    { tags: [TAGS.rentals], revalidate: 300 },
+  )();
+}
+
+export async function getRental(slug: string): Promise<Rental | null> {
+  if (!hasDatabase()) return seed.getRentalSeed(slug);
+  return cache(
+    async () => {
+      const [row] = await getDb()
+        .select()
+        .from(rentalsTable)
+        .where(and(eq(rentalsTable.slug, slug), eq(rentalsTable.isPublished, true)))
+        .limit(1);
+      if (!row) return null;
+      const mediaMap = await getMediaByIds([row.coverMediaId]);
+      return mapRental(row, row.coverMediaId ? mediaMap.get(row.coverMediaId) : undefined);
+    },
+    ["rental", slug],
+    { tags: [TAGS.rentals, `rental:${slug}`], revalidate: 300 },
   )();
 }
 

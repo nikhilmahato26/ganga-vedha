@@ -16,11 +16,29 @@ import type { MediaSource } from "@/components/ui/media";
  */
 
 export type Grade = "easy" | "moderate" | "challenging";
+/**
+ * The three homepage service lines. These are the only values a closure scope
+ * or a gallery category ever carries in the app, even though the underlying
+ * `service_key` Postgres enum also has the enquiry-only kinds below.
+ */
 export type ServiceKey = "hotel" | "rafting" | "bungee";
+/**
+ * Every value the `service_key` enum can hold — the three services plus the
+ * kinds that only appear as `enquiries.product_kind`.
+ */
+export type EnquiryKind =
+  | "hotel"
+  | "rafting"
+  | "bungee"
+  | "package"
+  | "rental"
+  | "activity"
+  | "general";
+export type AdventureKind = "rafting" | "bungee" | "paragliding" | "zipline";
 
 export type Adventure = {
   id: number;
-  kind: "rafting" | "bungee";
+  kind: AdventureKind;
   slug: string;
   name: string;
   distanceKm: number | null;
@@ -70,6 +88,8 @@ export type Hotel = {
   description: string;
   address: string;
   locality: string;
+  /** Slug of the destination this stay sits in, for the /stays/[destination] page. */
+  destinationSlug: string | null;
   mapUrl: string | null;
   starRating: number | null;
   pricePerNightInr: number;
@@ -117,8 +137,82 @@ export type GalleryItem = {
   id: number;
   /** Reuses the same three services as everywhere else on the site; `null` is a photo that isn't specific to one of them. */
   category: ServiceKey | null;
+  /** Free-text album — "Rafting", "Mountains", "Manali"… The gallery page groups by whatever values exist. */
+  album: string | null;
   caption: string | null;
   media: MediaSource;
+};
+
+export type Destination = {
+  id: number;
+  slug: string;
+  name: string;
+  region: string | null;
+  tagline: string;
+  intro: string;
+  highlights: string[];
+  bestTime: string | null;
+  howToReach: string | null;
+  faqs: { q: string; a: string }[];
+  coverMedia?: MediaSource | null;
+  sortOrder: number;
+  isPublished: boolean;
+};
+
+export type PackageItinerary = { title: string; detail: string };
+
+export type Package = {
+  id: number;
+  slug: string;
+  name: string;
+  category: string | null;
+  /** Slug of the primary destination, for cross-linking. */
+  destinationSlug: string | null;
+  durationLabel: string | null;
+  nights: number | null;
+  routeLabel: string | null;
+  priceInr: number;
+  compareAtPriceInr: number | null;
+  priceNote: string | null;
+  rating: number | null;
+  reviewCount: number | null;
+  badge: string | null;
+  summary: string;
+  description: string;
+  itinerary: PackageItinerary[];
+  inclusions: string[];
+  exclusions: string[];
+  accommodationNote: string | null;
+  transportNote: string | null;
+  mealsNote: string | null;
+  terms: string[];
+  faqs: { q: string; a: string }[];
+  coverMedia?: MediaSource | null;
+  sortOrder: number;
+  isPublished: boolean;
+};
+
+export type Rental = {
+  id: number;
+  kind: "car" | "bike";
+  slug: string;
+  name: string;
+  perDayInr: number | null;
+  quoteOnly: boolean;
+  depositInr: number | null;
+  seats: number | null;
+  transmission: string | null;
+  fuelNote: string | null;
+  summary: string;
+  description: string;
+  includes: string[];
+  documentsRequired: string[];
+  terms: string[];
+  pickupNote: string | null;
+  faqs: { q: string; a: string }[];
+  coverMedia?: MediaSource | null;
+  sortOrder: number;
+  isPublished: boolean;
 };
 
 export type SiteSettings = {
@@ -403,6 +497,110 @@ const ADVENTURES: Adventure[] = [
     sortOrder: 5,
     isPublished: true,
   },
+  {
+    id: 6,
+    kind: "paragliding",
+    slug: "tandem-paragliding",
+    name: "Tandem paragliding",
+    distanceKm: null,
+    heightM: null,
+    putInPoint: "Hill take-off site",
+    grade: "moderate",
+    durationMinutes: 45,
+    priceInr: 10000,
+    compareAtPriceInr: null,
+    rating: null,
+    reviewCount: null,
+    badge: null,
+    bestFor: "Best for the view",
+    summary:
+      "A tandem flight strapped to a certified pilot — a short uphill drive to the launch, then 15 to 30 minutes in the air depending on the wind, landing down in the valley.",
+    description:
+      "You fly with a licensed tandem pilot who handles the wing the whole way; your job is to run a few steps at take-off and enjoy the rest. Airtime depends entirely on the wind on the day — we quote a range, never a promise. Flights are weather-dependent and can be moved or refunded if the site is not flyable.",
+    inclusions: [
+      "Certified tandem pilot",
+      "Full harness, helmet and wing",
+      "Short safety briefing before take-off",
+      "Pick-up from the landing field back to the meeting point",
+    ],
+    exclusions: [
+      "In-flight video and photos (add-on)",
+      "Transport to the meeting point",
+      "Meals and refreshments",
+    ],
+    whatToBring: [
+      "Closed shoes you can run a few steps in",
+      "A light jacket — it is cooler at altitude",
+      "Sunglasses and a valid photo ID",
+    ],
+    faqs: [
+      {
+        q: "How long is the flight?",
+        a: "Between 15 and 30 minutes of airtime, decided by the wind on the day. We tell you the likely window at the meeting point, not before.",
+      },
+      {
+        q: "What is the weight limit?",
+        a: "Roughly 25 kg to 100 kg. Outside that range the wing and harness cannot be set up safely, and the pilot's decision at the site is final.",
+      },
+      {
+        q: "What if the weather is bad?",
+        a: "Paragliding only runs in a safe wind window. If the site is not flyable on your slot we move you to another time or refund the flight in full.",
+      },
+    ],
+    meetingPoint:
+      "Meeting point in Rishikesh; a shared vehicle takes you up to the take-off site. Report 45 minutes before your slot.",
+    minAge: 12,
+    minWeightKg: 25,
+    maxWeightKg: 100,
+    rapids: [],
+    sortOrder: 6,
+    isPublished: true,
+  },
+  {
+    id: 7,
+    kind: "zipline",
+    slug: "zip-line",
+    name: "Zip line",
+    distanceKm: null,
+    heightM: null,
+    putInPoint: "Valley crossing",
+    grade: "easy",
+    durationMinutes: 30,
+    priceInr: 2500,
+    compareAtPriceInr: null,
+    rating: null,
+    reviewCount: null,
+    badge: null,
+    bestFor: "Best quick thrill",
+    summary:
+      "A fixed steel line across the valley, ridden on a pulley harness with a mechanical brake and a trained operator at each end. On and done inside half an hour.",
+    description:
+      "The line, harness and braking system are checked before every session and the crew clip you in and send you off — there is nothing to operate yourself. It is the gentlest thing we run: no swimming, no free fall, and a minimum age of 10. A good first activity for a group with mixed nerves.",
+    inclusions: [
+      "Full-body harness, helmet and gloves",
+      "Trained operator at both ends",
+      "Equipment check before every session",
+    ],
+    exclusions: ["Photos and video (add-on)", "Transport to the site", "Meals and refreshments"],
+    whatToBring: ["Closed shoes", "Clothes you can move in", "A valid photo ID"],
+    faqs: [
+      {
+        q: "Is there an age limit?",
+        a: "10 years and up. Under 16s ride with a parent's consent and the operator's sign-off at the site.",
+      },
+      {
+        q: "Do I need any experience?",
+        a: "None. The crew clip you in, brief you in a minute, and control the ride from both ends.",
+      },
+    ],
+    meetingPoint: "Report at the zip-line site 20 minutes before your slot.",
+    minAge: 10,
+    minWeightKg: 30,
+    maxWeightKg: 120,
+    rapids: [],
+    sortOrder: 7,
+    isPublished: true,
+  },
 ];
 
 const HOTELS: Hotel[] = [
@@ -415,6 +613,7 @@ const HOTELS: Hotel[] = [
       "Twelve twin-share Swiss tents pitched on a private beach at Byasi, upstream of the crowds. Each tent has a proper bed, an attached washroom and a veranda facing the river. Evenings are a bonfire on the sand and dinner off a single menu; mornings are quiet enough to hear the rapids. It is a ten-minute drive from the Shivpuri put-in, so the 16 km run is an easy add-on.",
     address: "Byasi Beach, NH-34, Byasi, Rishikesh, Uttarakhand 249303",
     locality: "Byasi",
+    destinationSlug: "rishikesh",
     mapUrl: "https://maps.google.com/?q=Byasi+Rishikesh",
     starRating: 3,
     pricePerNightInr: 2200,
@@ -484,6 +683,7 @@ const HOTELS: Hotel[] = [
       "Eight rooms on three floors, five minutes' walk from Laxman Jhula and the Tapovan cafés. Not luxurious — clean, quiet, hot water that works, and a terrace where the whole building eats breakfast looking at the river. This is where we put people who want to be in town rather than on a beach.",
     address: "Badrinath Road, Tapovan, Rishikesh, Uttarakhand 249192",
     locality: "Tapovan",
+    destinationSlug: "rishikesh",
     mapUrl: "https://maps.google.com/?q=Tapovan+Rishikesh",
     starRating: 3,
     pricePerNightInr: 1800,
@@ -603,6 +803,587 @@ const REVIEWS: Review[] = [
   },
 ];
 
+/**
+ * The ten places in the blueprint. Region groups the index page. Prices and any
+ * figures live on the linked stays and packages, never here.
+ */
+const DESTINATIONS: Destination[] = [
+  {
+    id: 1,
+    slug: "haridwar",
+    name: "Haridwar",
+    region: "Uttarakhand",
+    tagline: "Where the Ganga leaves the mountains",
+    intro:
+      "The gateway town for the Char Dham and Do Dham yatras and the site of the evening Ganga Aarti at Har Ki Pauri. Most pilgrimage itineraries start and end here because it is the last town with a full railhead before the hills.",
+    highlights: [
+      "Ganga Aarti at Har Ki Pauri after sunset",
+      "Chandi Devi and Mansa Devi temples by ropeway",
+      "Starting point for Char Dham and Do Dham road trips",
+    ],
+    bestTime: "September to April; avoid the peak yatra rush of May–June if you can",
+    howToReach:
+      "Direct trains from Delhi (about 4–5 hours) and a road transfer from Dehradun's Jolly Grant airport (about 35 km).",
+    faqs: [
+      {
+        q: "Is Haridwar the same as Rishikesh?",
+        a: "No — they are about 20 km apart. Haridwar is the pilgrimage and railhead town; Rishikesh is the adventure and yoga town upstream.",
+      },
+    ],
+    sortOrder: 1,
+    isPublished: true,
+  },
+  {
+    id: 2,
+    slug: "rishikesh",
+    name: "Rishikesh",
+    region: "Uttarakhand",
+    tagline: "Rafting, yoga and the jhula bridges",
+    intro:
+      "Our home base. Rafting on the Ganga, bungee and zip-line sites in the side valleys, riverside cafés around Laxman Jhula and Tapovan, and the yoga schools that gave the town its second name.",
+    highlights: [
+      "Grade II–IV rafting from 12 km to 32 km stretches",
+      "Bungee, zip-line and paragliding within a short drive",
+      "Beatles Ashram, Triveni Ghat aarti and the Tapovan café strip",
+    ],
+    bestTime: "Mid-September to mid-June for rafting; the river closes through the monsoon",
+    howToReach:
+      "About 20 km from Haridwar, 45 minutes from Dehradun's Jolly Grant airport, and an overnight bus or train from Delhi.",
+    faqs: [
+      {
+        q: "When does rafting stop?",
+        a: "Through the monsoon, usually late June to mid-September, when the water is too high to run safely.",
+      },
+    ],
+    sortOrder: 2,
+    isPublished: true,
+  },
+  {
+    id: 3,
+    slug: "dehradun",
+    name: "Dehradun",
+    region: "Uttarakhand",
+    tagline: "The valley capital and the region's airport",
+    intro:
+      "The state capital and the arrival point for most trips into Uttarakhand — Jolly Grant airport is here. A relaxed valley city with Robber's Cave, the Forest Research Institute and a short climb up to Mussoorie.",
+    highlights: [
+      "Jolly Grant airport — the gateway to Rishikesh, Mussoorie and the hills",
+      "Robber's Cave (Guchhupani) and Sahastradhara springs",
+      "Forest Research Institute's colonial-era campus",
+    ],
+    bestTime: "All year; October to March is coolest",
+    howToReach: "Flights from Delhi, Mumbai and Bengaluru; the Shatabdi from Delhi takes about 6 hours.",
+    faqs: [],
+    sortOrder: 3,
+    isPublished: true,
+  },
+  {
+    id: 4,
+    slug: "mussoorie",
+    name: "Mussoorie",
+    region: "Uttarakhand",
+    tagline: "The Queen of the Hills, an hour above Dehradun",
+    intro:
+      "A classic colonial hill station on a ridge above the Doon valley — Mall Road, Gun Hill, Kempty Falls and long views to the snow line on a clear morning. Pairs naturally with Rishikesh on a short Uttarakhand loop.",
+    highlights: [
+      "Camel's Back Road walk and the Gun Hill ropeway",
+      "Kempty Falls and Landour's quiet upper bazaar",
+      "Sunset over the Doon valley from the Mall",
+    ],
+    bestTime: "March to June and September to November; December–January for snow",
+    howToReach: "About 35 km and 1.5 hours by road from Dehradun.",
+    faqs: [],
+    sortOrder: 4,
+    isPublished: true,
+  },
+  {
+    id: 5,
+    slug: "tehri-lake",
+    name: "Tehri Lake",
+    region: "Uttarakhand",
+    tagline: "A reservoir the size of a small sea",
+    intro:
+      "The lake behind the Tehri Dam, now a watersports centre — jet-skiing, boating and a growing cluster of floating huts. A calm-water contrast to the whitewater downstream at Rishikesh.",
+    highlights: [
+      "Jet-ski, banana-boat and kayaking on flat water",
+      "Floating huts and lakeside camps",
+      "The dam viewpoint and the old-Tehri story",
+    ],
+    bestTime: "March to June and September to November",
+    howToReach: "About 90 km from Rishikesh, 3 to 4 hours by road via Chamba.",
+    faqs: [],
+    sortOrder: 5,
+    isPublished: true,
+  },
+  {
+    id: 6,
+    slug: "nainital",
+    name: "Nainital",
+    region: "Uttarakhand",
+    tagline: "A lake town in the Kumaon hills",
+    intro:
+      "Built around Naini Lake, with boating from the Mallital and Tallital ends, a Mall Road along the water and the Snow View and Tiffin Top viewpoints above. The usual base for a Kumaon trip that also takes in Jim Corbett and Mukteshwar.",
+    highlights: [
+      "Rowing and pedal boats on Naini Lake",
+      "Snow View and Tiffin Top by ropeway or pony",
+      "Naina Devi temple on the north shore",
+    ],
+    bestTime: "March to June and September to November",
+    howToReach: "Nearest railhead is Kathgodam (about 35 km); road from Delhi is 300 km, 7 to 8 hours.",
+    faqs: [],
+    sortOrder: 6,
+    isPublished: true,
+  },
+  {
+    id: 7,
+    slug: "jim-corbett",
+    name: "Jim Corbett",
+    region: "Uttarakhand",
+    tagline: "India's oldest national park",
+    intro:
+      "Tiger country in the Kumaon foothills, run as a set of zones — Dhikala, Bijrani, Jhirna and others — each with its own permit and gate timings. Safaris are by registered jeep with a forest guide; bookings open a fixed number of days ahead.",
+    highlights: [
+      "Jeep safaris in the Bijrani and Jhirna zones",
+      "Dhikala's grassland and the Ramganga riverbed",
+      "Corbett Museum at Kaladhungi",
+    ],
+    bestTime: "November to June; core zones like Dhikala are closed in the monsoon",
+    howToReach: "Ramnagar is the gateway town and railhead; about 250 km and 6 hours from Delhi.",
+    faqs: [
+      {
+        q: "Do safaris need to be booked in advance?",
+        a: "Yes. Zone permits are limited and sell out, especially on weekends and holidays. Tell us your dates early and we'll arrange the permit and jeep.",
+      },
+    ],
+    sortOrder: 7,
+    isPublished: true,
+  },
+  {
+    id: 8,
+    slug: "mukteshwar",
+    name: "Mukteshwar",
+    region: "Uttarakhand",
+    tagline: "Orchards, pine and a straight look at the Himalaya",
+    intro:
+      "A quiet ridge village at 2,285 m, known for its 350-year-old Shiva temple, the cliff-edge 'Chauli Ki Jali' rocks and one of the cleanest Himalayan skylines in Kumaon. A slow-paced stop on a Nainital trip.",
+    highlights: [
+      "Panoramic Himalayan views on a clear morning",
+      "Chauli Ki Jali cliffs and short rappelling",
+      "Fruit orchards and pine-forest walks",
+    ],
+    bestTime: "March to June and September to November; clear skies after monsoon",
+    howToReach: "About 50 km from Nainital, 2 hours by road.",
+    faqs: [],
+    sortOrder: 8,
+    isPublished: true,
+  },
+  {
+    id: 9,
+    slug: "manali",
+    name: "Manali",
+    region: "Himachal Pradesh",
+    tagline: "Rafting, snow and the road to the passes",
+    intro:
+      "The head of the Kullu valley on the Beas river — rafting on the Dobhi–Babeli and Pirdi–Bajaura stretches, day trips to Solang and Atal Tunnel, and the base for Rohtang and Spiti in season.",
+    highlights: [
+      "Beas rafting: 5–7 km around Dobhi/Babeli or 14 km Pirdi to Bajaura",
+      "Solang Valley, Atal Tunnel and Sissu day trips",
+      "Old Manali cafés and the Hadimba temple in deodar forest",
+    ],
+    bestTime: "March to June for rafting and greenery; December to February for snow",
+    howToReach: "Overnight Volvo from Delhi (about 12–14 hours); nearest airport is Bhuntar, 50 km south.",
+    faqs: [],
+    sortOrder: 9,
+    isPublished: true,
+  },
+  {
+    id: 10,
+    slug: "shimla",
+    name: "Shimla",
+    region: "Himachal Pradesh",
+    tagline: "The old summer capital on a seven-hill ridge",
+    intro:
+      "Colonial-era Shimla — the Ridge, Mall Road, Christ Church and the toy train up from Kalka — usually paired with Manali on a Himachal loop. Kufri and Chail are short drives out.",
+    highlights: [
+      "The Ridge, Mall Road and Scandal Point",
+      "Kalka–Shimla toy train, a UNESCO line",
+      "Day trips to Kufri and Chail",
+    ],
+    bestTime: "March to June and September to November; December–January for snow",
+    howToReach: "About 350 km from Delhi; toy train from Kalka, or road via Chandigarh.",
+    faqs: [],
+    sortOrder: 10,
+    isPublished: true,
+  },
+];
+
+/**
+ * Holiday packages from the blueprint. Prices are the client's stated
+ * "starting from" figures — confirm current pricing before publishing.
+ */
+const PACKAGES: Package[] = [
+  {
+    id: 1,
+    slug: "yoga-classes-course",
+    name: "Yoga Classes Course",
+    category: "Yoga & wellness",
+    destinationSlug: "rishikesh",
+    durationLabel: "7 days",
+    nights: 6,
+    routeLabel: "Rishikesh",
+    priceInr: 10000,
+    compareAtPriceInr: null,
+    priceNote: "per person, course fee",
+    rating: null,
+    reviewCount: null,
+    badge: null,
+    summary:
+      "A week of guided yoga and pranayama in Rishikesh — two sessions a day with a resident teacher, plus philosophy and meditation. Suitable for beginners.",
+    description:
+      "A structured seven-day course at a Rishikesh yoga school: morning asana and pranayama, an afternoon session on alignment or meditation, and short talks on yoga philosophy. Small groups, mats provided, and a pace that assumes no prior experience. Accommodation and meals can be added — ask when you enquire.",
+    itinerary: [
+      { title: "Day 1", detail: "Arrival, orientation, gentle evening session and a walk to the Triveni Ghat aarti." },
+      { title: "Days 2–6", detail: "Morning asana and pranayama, afternoon alignment or meditation, evening philosophy talk." },
+      { title: "Day 7", detail: "Closing practice, feedback and course certificate. Late checkout on request." },
+    ],
+    inclusions: [
+      "Two guided sessions a day for six days",
+      "Meditation and philosophy sessions",
+      "Yoga mats and props",
+      "Course certificate",
+    ],
+    exclusions: ["Accommodation and meals (add-on)", "Travel to Rishikesh", "Personal expenses"],
+    accommodationNote: "Not included in the base fee — we can book an ashram room or a nearby guesthouse on request.",
+    transportNote: "Not included. We can arrange an airport or station pickup for an extra charge.",
+    mealsNote: "Not included in the base fee; sattvic meal plans available if you stay at the school.",
+    terms: [
+      "Full payment confirms the seat; the course runs on fixed start dates.",
+      "Rescheduling is free up to 14 days before the start date.",
+    ],
+    faqs: [
+      {
+        q: "Is this a teacher-training course?",
+        a: "No. This is a practice course for your own benefit, not a certified 200-hour TTC. Tell us if you want the TTC option and we'll quote separately.",
+      },
+    ],
+    sortOrder: 1,
+    isPublished: true,
+  },
+  {
+    id: 2,
+    slug: "char-dham-yatra",
+    name: "Char Dham Yatra",
+    category: "Pilgrimage",
+    destinationSlug: "haridwar",
+    durationLabel: "10 nights / 11 days",
+    nights: 10,
+    routeLabel: "Yamunotri · Gangotri · Kedarnath · Badrinath",
+    priceInr: 45000,
+    compareAtPriceInr: null,
+    priceNote: "per person, twin sharing",
+    rating: null,
+    reviewCount: null,
+    badge: "Fixed departures",
+    summary:
+      "The full four-shrine circuit from Haridwar — Yamunotri, Gangotri, Kedarnath and Badrinath — with hotels, transport, and the Kedarnath trek or pony arranged.",
+    description:
+      "An 11-day road pilgrimage covering all four dhams in the traditional order, starting and ending at Haridwar. The Kedarnath leg involves a 16 km trek from Gaurikund (pony, palki and helicopter options are extra). Itinerary and night halts shift with road and weather conditions in the high Himalaya.",
+    itinerary: [
+      { title: "Day 1", detail: "Arrive Haridwar. Ganga Aarti at Har Ki Pauri. Overnight Haridwar." },
+      { title: "Day 2", detail: "Drive to Barkot via Mussoorie. Overnight Barkot." },
+      { title: "Day 3", detail: "Yamunotri darshan (6 km trek each way from Janki Chatti). Overnight Barkot." },
+      { title: "Day 4", detail: "Drive to Uttarkashi. Overnight Uttarkashi." },
+      { title: "Day 5", detail: "Gangotri darshan, return to Uttarkashi. Overnight Uttarkashi." },
+      { title: "Day 6", detail: "Drive to Guptkashi/Sitapur. Overnight." },
+      { title: "Day 7", detail: "Drive to Sonprayag, trek/pony 16 km to Kedarnath. Overnight Kedarnath." },
+      { title: "Day 8", detail: "Kedarnath darshan, descend to Sonprayag, drive to Guptkashi. Overnight." },
+      { title: "Day 9", detail: "Drive to Badrinath via Joshimath. Evening aarti. Overnight Badrinath." },
+      { title: "Day 10", detail: "Badrinath darshan, Mana village, drive to Rudraprayag/Srinagar. Overnight." },
+      { title: "Day 11", detail: "Drive to Haridwar. Tour ends." },
+    ],
+    inclusions: [
+      "10 nights' hotel accommodation on twin sharing",
+      "All transfers by private vehicle from Haridwar",
+      "Daily breakfast and dinner",
+      "Driver allowance, tolls, parking and fuel",
+      "Assistance for darshan and permits where applicable",
+    ],
+    exclusions: [
+      "Kedarnath pony, palki or helicopter",
+      "Lunches and personal expenses",
+      "Any airfare or train fare to Haridwar",
+      "VIP darshan, pujas and donations",
+    ],
+    accommodationNote: "Standard hotels and guesthouses on the route; category rises the price. Kedarnath night is basic.",
+    transportNote: "Private vehicle sized to the group, from and back to Haridwar. Shared coach option is cheaper — ask.",
+    mealsNote: "Breakfast and dinner daily, vegetarian, at the hotels. Lunch is on your own on the road.",
+    terms: [
+      "Itinerary and night halts can change with weather, road blocks and shrine timings.",
+      "50% advance to confirm; balance before departure.",
+      "The high-altitude legs need basic fitness and a medical check for Kedarnath.",
+    ],
+    faqs: [
+      {
+        q: "Is the Kedarnath trek included?",
+        a: "The transport to Sonprayag is included. The 16 km trek itself is on foot; pony, palki and helicopter are all available at extra cost and we can pre-book them.",
+      },
+      {
+        q: "Can you do this by helicopter instead?",
+        a: "Yes — a separate Do Dham or Char Dham by helicopter package. Tell us and we'll quote it.",
+      },
+    ],
+    sortOrder: 2,
+    isPublished: true,
+  },
+  {
+    id: 3,
+    slug: "do-dham-yatra",
+    name: "Do Dham Yatra",
+    category: "Pilgrimage",
+    destinationSlug: "haridwar",
+    durationLabel: "5 nights / 6 days",
+    nights: 5,
+    routeLabel: "Kedarnath · Badrinath",
+    priceInr: 25000,
+    compareAtPriceInr: null,
+    priceNote: "per person, twin sharing",
+    rating: null,
+    reviewCount: null,
+    badge: null,
+    summary:
+      "The two most-visited shrines — Kedarnath and Badrinath — from Haridwar in six days, with hotels, private transport and darshan assistance.",
+    description:
+      "A shorter pilgrimage for travellers who cannot spare eleven days. Same standard of hotels and transport as the Char Dham package, covering the Kedarnath trek from Sonprayag and Badrinath by road via Joshimath.",
+    itinerary: [
+      { title: "Day 1", detail: "Arrive Haridwar, drive to Guptkashi. Overnight Guptkashi." },
+      { title: "Day 2", detail: "Sonprayag, trek/pony 16 km to Kedarnath. Overnight Kedarnath." },
+      { title: "Day 3", detail: "Kedarnath darshan, descend, drive towards Badrinath side. Overnight en route." },
+      { title: "Day 4", detail: "Drive to Badrinath via Joshimath. Evening aarti. Overnight Badrinath." },
+      { title: "Day 5", detail: "Badrinath darshan, Mana village, drive to Rudraprayag. Overnight." },
+      { title: "Day 6", detail: "Drive to Haridwar. Tour ends." },
+    ],
+    inclusions: [
+      "5 nights' hotel accommodation on twin sharing",
+      "All transfers by private vehicle from Haridwar",
+      "Daily breakfast and dinner",
+      "Driver allowance, tolls, parking and fuel",
+    ],
+    exclusions: [
+      "Kedarnath pony, palki or helicopter",
+      "Lunches and personal expenses",
+      "Travel to and from Haridwar",
+    ],
+    accommodationNote: "Standard hotels and guesthouses; Kedarnath night is basic.",
+    transportNote: "Private vehicle from and back to Haridwar, sized to the group.",
+    mealsNote: "Breakfast and dinner daily, vegetarian.",
+    terms: [
+      "Itinerary can change with weather and shrine timings.",
+      "50% advance to confirm; balance before departure.",
+    ],
+    faqs: [],
+    sortOrder: 3,
+    isPublished: true,
+  },
+  {
+    id: 4,
+    slug: "rishikesh-mussoorie-3n-4d",
+    name: "Rishikesh + Mussoorie",
+    category: "Multi-day tour",
+    destinationSlug: "rishikesh",
+    durationLabel: "3 nights / 4 days",
+    nights: 3,
+    routeLabel: "Rishikesh · Mussoorie",
+    priceInr: 35000,
+    compareAtPriceInr: null,
+    priceNote: "per person, twin sharing, group of 4",
+    rating: null,
+    reviewCount: null,
+    badge: "Popular short break",
+    summary:
+      "Two nights in Rishikesh with a rafting session, then a night in Mussoorie — hotels, private car and the main sights, in a long weekend.",
+    description:
+      "A compact Uttarakhand loop: arrive Rishikesh, raft the 16 km Shivpuri stretch, see the aarti and the jhula bridges, then drive up to Mussoorie for the Mall, Kempty Falls and the valley views before heading back to Dehradun.",
+    itinerary: [
+      { title: "Day 1", detail: "Arrive Rishikesh, check in, evening Ganga Aarti at Triveni Ghat. Overnight Rishikesh." },
+      { title: "Day 2", detail: "16 km rafting from Shivpuri, afternoon at Laxman Jhula and the Tapovan cafés. Overnight Rishikesh." },
+      { title: "Day 3", detail: "Drive to Mussoorie via Dehradun. Mall Road and Gun Hill in the evening. Overnight Mussoorie." },
+      { title: "Day 4", detail: "Kempty Falls and Camel's Back Road, then drop to Dehradun airport/station. Tour ends." },
+    ],
+    inclusions: [
+      "3 nights' hotel accommodation on twin sharing",
+      "Private car for the full itinerary (Dehradun–Rishikesh–Mussoorie–Dehradun)",
+      "Daily breakfast",
+      "One 16 km rafting session with safety gear and guide",
+      "All toll, parking and driver charges",
+    ],
+    exclusions: [
+      "Lunch and dinner",
+      "Airfare or train fare to Dehradun",
+      "Entry tickets and personal expenses",
+      "Anything not listed under inclusions",
+    ],
+    accommodationNote: "3-star hotels or riverside camps in Rishikesh and a Mall-Road-area hotel in Mussoorie. Upgrades on request.",
+    transportNote: "One private car (sedan for up to 3, SUV for 4–6) for the whole trip, with driver.",
+    mealsNote: "Breakfast daily at the hotels. Lunch and dinner are on your own.",
+    terms: [
+      "Price shown assumes a group of four sharing; solo and couple pricing differs.",
+      "Rafting moves to a shorter stretch or a refund if the river is closed on your date.",
+      "25% advance to confirm; balance on arrival.",
+    ],
+    faqs: [
+      {
+        q: "What if it rains and rafting is off?",
+        a: "We switch you to the 12 km stretch if it's runnable, or refund the rafting portion and add a half-day in Rishikesh.",
+      },
+    ],
+    sortOrder: 4,
+    isPublished: true,
+  },
+  {
+    id: 5,
+    slug: "shimla-manali-4n-5d",
+    name: "Shimla + Manali",
+    category: "Multi-day tour",
+    destinationSlug: "shimla",
+    durationLabel: "4 nights / 5 days",
+    nights: 4,
+    routeLabel: "Shimla · Manali",
+    priceInr: 40000,
+    compareAtPriceInr: null,
+    priceNote: "per person, twin sharing, group of 4",
+    rating: null,
+    reviewCount: null,
+    badge: null,
+    summary:
+      "The classic Himachal pairing — two nights in Shimla, two in Manali — with a private car, hotels and the Kufri and Solang day trips.",
+    description:
+      "Arrive Shimla, take the Ridge and a Kufri excursion, then drive the Beas valley to Manali for Solang, the Atal Tunnel and Old Manali. A rafting session on the Beas can be added in Manali on request.",
+    itinerary: [
+      { title: "Day 1", detail: "Arrive Shimla (from Chandigarh/Kalka), evening on the Ridge and Mall Road. Overnight Shimla." },
+      { title: "Day 2", detail: "Kufri excursion and Jakhoo temple. Overnight Shimla." },
+      { title: "Day 3", detail: "Drive to Manali via the Beas valley (about 8 hours). Overnight Manali." },
+      { title: "Day 4", detail: "Solang Valley and Atal Tunnel / Sissu, evening in Old Manali. Overnight Manali." },
+      { title: "Day 5", detail: "Hadimba temple and the Mall, then drop to Bhuntar airport or the Volvo stand. Tour ends." },
+    ],
+    inclusions: [
+      "4 nights' hotel accommodation on twin sharing",
+      "Private car for the full itinerary from Chandigarh/Kalka",
+      "Daily breakfast",
+      "All toll, parking and driver charges",
+    ],
+    exclusions: [
+      "Lunch and dinner",
+      "Travel to Chandigarh/Kalka and from Bhuntar",
+      "Solang activity tickets, ropeways and permits (Atal Tunnel/Rohtang)",
+      "Personal expenses",
+    ],
+    accommodationNote: "3-star hotels in Shimla (Mall area) and Manali. Upgrades and Old Manali stays on request.",
+    transportNote: "One private car (sedan for up to 3, SUV for 4–6) for the whole trip, with driver.",
+    mealsNote: "Breakfast daily. Lunch and dinner are on your own.",
+    terms: [
+      "Price shown assumes a group of four sharing.",
+      "Rohtang Pass needs a separate permit and is weather-dependent; Atal Tunnel/Sissu is the usual alternative.",
+      "25% advance to confirm; balance on arrival.",
+    ],
+    faqs: [
+      {
+        q: "Can we add Beas rafting in Manali?",
+        a: "Yes — a 5–7 km or 14 km stretch can be added on Day 4 for an extra charge. Tell us when you enquire.",
+      },
+    ],
+    sortOrder: 5,
+    isPublished: true,
+  },
+];
+
+/**
+ * Car and bike rental. Car is quote-only — the enquiry is a request for a
+ * custom quotation. Bike is a flat ₹600/day per the blueprint.
+ */
+const RENTALS: Rental[] = [
+  {
+    id: 1,
+    kind: "car",
+    slug: "car-rental",
+    name: "Car rental with driver",
+    perDayInr: null,
+    quoteOnly: true,
+    depositInr: null,
+    seats: 6,
+    transmission: "Sedan · SUV · Tempo Traveller",
+    fuelNote: "Fuel and driver allowance built into the quote",
+    summary:
+      "Sedans, SUVs and tempo travellers with a driver, for airport transfers, day trips and full multi-day itineraries. Priced per route — send your plan and dates and we'll quote.",
+    description:
+      "We don't run a fixed per-day car rate because the cost of a Rishikesh airport drop and a ten-day Char Dham circuit are nothing alike. Give us the pickup point, the rough itinerary and the group size and we'll come back with a fixed quote that includes fuel, tolls, parking and the driver's allowance. Self-drive cars are not offered.",
+    includes: [
+      "Driver, fuel, tolls, parking and state permits",
+      "Vehicle sized to your group",
+      "24×7 contact number for the trip",
+    ],
+    documentsRequired: ["A valid photo ID for the lead traveller"],
+    terms: [
+      "Quote is fixed for the itinerary agreed; detours are charged on actuals.",
+      "Hill driving hours are capped for safety — long legs are planned with a night halt.",
+      "25% advance confirms the vehicle for your dates.",
+    ],
+    pickupNote: "Pickup from Dehradun airport, Haridwar/Rishikesh railway stations, or your hotel.",
+    faqs: [
+      {
+        q: "Do you have self-drive cars?",
+        a: "No. All our cars come with a driver who knows the hill roads — it is safer and usually works out cheaper once fuel and permits are counted.",
+      },
+      {
+        q: "How fast do I get a quote?",
+        a: "Usually within a couple of hours on WhatsApp once we have your itinerary and dates.",
+      },
+    ],
+    sortOrder: 1,
+    isPublished: true,
+  },
+  {
+    id: 2,
+    kind: "bike",
+    slug: "bike-rental",
+    name: "Bike rental",
+    perDayInr: 600,
+    quoteOnly: false,
+    depositInr: 3000,
+    seats: null,
+    transmission: "Geared bikes and scooters",
+    fuelNote: "Fuel not included — return with the same level",
+    summary:
+      "Geared bikes and scooters for getting around Rishikesh and the nearby hills. ₹600 a day, one helmet included, refundable deposit.",
+    description:
+      "A small fleet of well-maintained bikes and scooters, hired by the day from our Tapovan office. Rate is ₹600 per 24 hours; a refundable security deposit and your original licence are held for the rental period. Fuel is on you. We give you a second helmet and a basic tool kit on request.",
+    includes: ["One helmet", "Basic tool kit on request", "24×7 roadside contact number"],
+    documentsRequired: [
+      "Original driving licence valid for two-wheelers",
+      "Aadhaar card or passport",
+      "Refundable security deposit (cash or UPI)",
+    ],
+    terms: [
+      "Rate is per 24 hours from pickup time; a grace of one hour, then a half-day charge.",
+      "Fuel is not included — return with the fuel level you took it at.",
+      "Traffic challans and any damage are billed to the renter from the deposit.",
+      "The bike stays within Uttarakhand unless agreed in writing.",
+    ],
+    pickupNote: "Pick up and drop at our Tapovan office, 9am to 7pm.",
+    faqs: [
+      {
+        q: "Can I take the bike to Rishikesh's rafting points and back?",
+        a: "Yes, day trips around Rishikesh, Shivpuri and Neelkanth are fine. For longer hill routes tell us first so we give you the right bike.",
+      },
+      {
+        q: "Is an international licence accepted?",
+        a: "An International Driving Permit alongside your home-country licence is accepted. A tourist visa copy is also needed.",
+      },
+    ],
+    sortOrder: 2,
+    isPublished: true,
+  },
+];
+
 /* ══════════════════════════════════════════════════════════════════════════
    Accessors — the only thing pages import
    ══════════════════════════════════════════════════════════════════════════ */
@@ -611,9 +1392,16 @@ export async function getSiteSettingsSeed(): Promise<SiteSettings> {
   return SETTINGS;
 }
 
-export async function getAdventuresSeed(kind?: "rafting" | "bungee"): Promise<Adventure[]> {
+export async function getAdventuresSeed(kind?: AdventureKind): Promise<Adventure[]> {
   return ADVENTURES.filter(
     (a) => a.isPublished && (kind ? a.kind === kind : true),
+  ).sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+/** The "Other adventures" — everything that isn't rafting or bungee. */
+export async function getActivitiesSeed(): Promise<Adventure[]> {
+  return ADVENTURES.filter(
+    (a) => a.isPublished && a.kind !== "rafting" && a.kind !== "bungee",
   ).sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
@@ -646,4 +1434,28 @@ export async function getGalleryItemsSeed(): Promise<GalleryItem[]> {
 
 export async function getClosuresSeed(): Promise<Closure[]> {
   return CLOSURES.filter((c) => c.isActive);
+}
+
+export async function getDestinationsSeed(): Promise<Destination[]> {
+  return DESTINATIONS.filter((d) => d.isPublished).sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+export async function getDestinationSeed(slug: string): Promise<Destination | null> {
+  return DESTINATIONS.find((d) => d.slug === slug && d.isPublished) ?? null;
+}
+
+export async function getPackagesSeed(): Promise<Package[]> {
+  return PACKAGES.filter((p) => p.isPublished).sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+export async function getPackageSeed(slug: string): Promise<Package | null> {
+  return PACKAGES.find((p) => p.slug === slug && p.isPublished) ?? null;
+}
+
+export async function getRentalsSeed(): Promise<Rental[]> {
+  return RENTALS.filter((r) => r.isPublished).sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+export async function getRentalSeed(slug: string): Promise<Rental | null> {
+  return RENTALS.find((r) => r.slug === slug && r.isPublished) ?? null;
 }

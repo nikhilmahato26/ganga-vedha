@@ -23,11 +23,22 @@ import {
  * behind what they just saved.
  */
 
-export async function listAdventuresAdmin(kind: "rafting" | "bungee") {
+export async function listAdventuresAdmin(
+  kind: "rafting" | "bungee" | "paragliding" | "zipline",
+) {
   return getDb()
     .select()
     .from(adventures)
     .where(eq(adventures.kind, kind))
+    .orderBy(adventures.sortOrder);
+}
+
+/** The non-river activities — paragliding, zip-lining — for their own admin list. */
+export async function listActivitiesAdmin() {
+  return getDb()
+    .select()
+    .from(adventures)
+    .where(inArray(adventures.kind, ["paragliding", "zipline"]))
     .orderBy(adventures.sortOrder);
 }
 

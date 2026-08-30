@@ -21,7 +21,7 @@ export function parseLines(raw: string): string[] {
 
 export const adventureSchema = z
   .object({
-    kind: z.enum(["rafting", "bungee"]),
+    kind: z.enum(["rafting", "bungee", "paragliding", "zipline"]),
     name: z.string().trim().min(3, "Give it a name.").max(160),
     slug: z
       .string()

@@ -1,8 +1,14 @@
-import type { Closure, ServiceKey } from "./content";
+import type { Closure, EnquiryKind } from "./content";
 
+/**
+ * `service` is widened to every enquiry kind so an activity, package or rental
+ * enquiry can be checked with the same helper — those simply never match a
+ * service-scoped closure (only hotel/rafting/bungee ever have one) and fall
+ * through to the global check.
+ */
 export type ClosureTarget =
-  | { service: ServiceKey }
-  | { service: ServiceKey; entityType: "adventure" | "hotel"; entityId: number };
+  | { service: EnquiryKind }
+  | { service: EnquiryKind; entityType: "adventure" | "hotel"; entityId: number };
 
 /**
  * Resolve whether a thing can be booked, most specific scope winning:

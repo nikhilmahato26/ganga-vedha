@@ -13,6 +13,7 @@ type ServiceKey = "hotel" | "rafting" | "bungee";
 export type GalleryItemRow = {
   id: number;
   category: ServiceKey | null;
+  album: string | null;
   caption: string | null;
   isPublished: boolean;
   media: { id: number; secureUrl: string; altText: string };
@@ -23,6 +24,17 @@ const CATEGORY_LABEL: Record<ServiceKey, string> = {
   bungee: "Bungee",
   hotel: "Hotels",
 };
+
+/** Suggested albums for the /gallery page — the client can also type their own. */
+const SUGGESTED_ALBUMS = [
+  "Rafting",
+  "Bungee jumping",
+  "Mountains",
+  "Resorts",
+  "Rishikesh & the Ganga",
+  "Manali",
+  "Shimla",
+];
 
 /**
  * No form, no submit button — each control saves itself the moment it
@@ -55,11 +67,15 @@ export function GalleryManager({ items }: { items: GalleryItemRow[] }) {
       const result = await createGalleryItem({
         mediaId: item.id,
         category: null,
+        album: null,
         caption: null,
         isPublished: true,
       });
       if (result?.ok) {
-        setRows((prev) => [...prev, { id: result.id, category: null, caption: null, isPublished: true, media: item }]);
+        setRows((prev) => [
+          ...prev,
+          { id: result.id, category: null, album: null, caption: null, isPublished: true, media: item },
+        ]);
       }
     }
     toast({ tone: "success", title: added.length > 1 ? `${added.length} photos added` : "Photo added" });
@@ -79,6 +95,20 @@ export function GalleryManager({ items }: { items: GalleryItemRow[] }) {
     await updateGalleryItem(id, { caption: caption.trim() || null });
   }
 
+  function setAlbumLocal(id: number, album: string) {
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, album } : r)));
+  }
+
+  async function saveAlbum(id: number, album: string) {
+    await updateGalleryItem(id, { album: album.trim() || null });
+  }
+
+  const albumOptions = React.useMemo(() => {
+    const set = new Set<string>(SUGGESTED_ALBUMS);
+    for (const r of rows) if (r.album) set.add(r.album);
+    return [...set].sort();
+  }, [rows]);
+
   async function togglePublished(id: number, isPublished: boolean) {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, isPublished } : r)));
     await updateGalleryItem(id, { isPublished });
@@ -93,6 +123,11 @@ export function GalleryManager({ items }: { items: GalleryItemRow[] }) {
 
   return (
     <div className="space-y-6">
+      <datalist id="gallery-album-options">
+        {albumOptions.map((a) => (
+          <option key={a} value={a} />
+        ))}
+      </datalist>
       <Card elevation="flat">
         <CardBody className="p-6">
           <h2 className="text-subtitle text-ink">Add photos</h2>
@@ -138,6 +173,15 @@ export function GalleryManager({ items }: { items: GalleryItemRow[] }) {
                       </option>
                     ))}
                   </Select>
+                </Field>
+                <Field label="Album" hint="Groups the /gallery page. Optional.">
+                  <Input
+                    list="gallery-album-options"
+                    value={row.album ?? ""}
+                    onChange={(e) => setAlbumLocal(row.id, e.target.value)}
+                    onBlur={(e) => saveAlbum(row.id, e.target.value)}
+                    placeholder="e.g. Mountains"
+                  />
                 </Field>
                 <Field label="Caption" hint="Optional">
                   <Input

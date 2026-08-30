@@ -15,14 +15,15 @@ import { formatINR, todayIST, whatsappHref } from "@/lib/format";
 import { submitEnquiry } from "@/app/actions/enquiry";
 
 export type EnquiryProduct = {
-  kind: "rafting" | "bungee" | "hotel";
+  kind: "rafting" | "bungee" | "paragliding" | "zipline" | "hotel" | "package" | "rental";
   slug: string;
   name: string;
-  priceInr: number;
+  /** `null` for a quote-only product (car rental) — the modal shows "Custom quote". */
+  priceInr: number | null;
   priceUnit: string;
 };
 
-type Source = "hero" | "card" | "detail" | "floating";
+type Source = "hero" | "card" | "detail" | "floating" | "contact";
 
 export function EnquiryDialog({
   product,
@@ -224,9 +225,12 @@ export function EnquiryDialog({
           )}
 
           <p className="sm:col-span-2 rounded-md bg-canvas-sunk p-3 text-small text-ink-muted">
-            {product.name} · <strong className="tabular font-semibold text-ink">{formatINR(product.priceInr)}</strong>{" "}
-            {product.priceUnit}. Nothing is charged now — this is an enquiry, and
-            we confirm before you pay anything.
+            {product.name} ·{" "}
+            <strong className="tabular font-semibold text-ink">
+              {product.priceInr === null ? "Custom quote" : formatINR(product.priceInr)}
+            </strong>{" "}
+            {product.priceInr === null ? "" : product.priceUnit}. Nothing is charged now — this is an
+            enquiry, and we confirm before you pay anything.
           </p>
         </form>
       )}

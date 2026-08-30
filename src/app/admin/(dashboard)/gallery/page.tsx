@@ -8,7 +8,10 @@ export default async function GalleryAdminPage() {
   const rows = await listGalleryItemsAdmin();
   const items: GalleryItemRow[] = rows.map((r) => ({
     id: r.item.id,
-    category: r.item.category,
+    // The column is the wide service_key enum, but a gallery category is only
+    // ever one of the three core services in the app.
+    category: r.item.category as GalleryItemRow["category"],
+    album: r.item.album,
     caption: r.item.caption,
     isPublished: r.item.isPublished,
     media: { id: r.media.id, secureUrl: r.media.secureUrl, altText: r.media.altText ?? "" },

@@ -21,9 +21,33 @@ import { relations, sql } from "drizzle-orm";
    Enums
    ========================================================================== */
 
-export const adventureKind = pgEnum("adventure_kind", ["rafting", "bungee"]);
+/**
+ * `rafting` and `bungee` are the original two. `paragliding` and `zipline` are
+ * the "Other adventures" from the content blueprint — same table, same admin
+ * form, distance/height left null and the price shown per person.
+ */
+export const adventureKind = pgEnum("adventure_kind", [
+  "rafting",
+  "bungee",
+  "paragliding",
+  "zipline",
+]);
 export const gradeLevel = pgEnum("grade_level", ["easy", "moderate", "challenging"]);
-export const serviceKey = pgEnum("service_key", ["hotel", "rafting", "bungee"]);
+/**
+ * `hotel` / `rafting` / `bungee` are the three homepage service lines. The rest
+ * are enquiry product kinds only — a package, a rental, a non-river activity
+ * (paragliding/zip-line), or a general contact-form message with no product
+ * attached. They never create a service_lines row.
+ */
+export const serviceKey = pgEnum("service_key", [
+  "hotel",
+  "rafting",
+  "bungee",
+  "package",
+  "rental",
+  "activity",
+  "general",
+]);
 export const closureScope = pgEnum("closure_scope", ["global", "service", "entity"]);
 export const closureIcon = pgEnum("closure_icon", ["rain", "wrench", "calendar", "alert"]);
 export const entityKind = pgEnum("entity_kind", [
@@ -32,7 +56,10 @@ export const entityKind = pgEnum("entity_kind", [
   "gallery",
   "service_line",
   "review",
+  "package",
+  "destination",
 ]);
+export const rentalKind = pgEnum("rental_kind", ["car", "bike"]);
 export const enquiryStatus = pgEnum("enquiry_status", [
   "new",
   "contacted",
@@ -46,6 +73,7 @@ export const enquirySource = pgEnum("enquiry_source", [
   "detail",
   "floating",
   "admin",
+  "contact",
 ]);
 export const mediaKind = pgEnum("media_kind", ["image", "video"]);
 
@@ -129,12 +157,23 @@ export const galleryItems = pgTable(
       .notNull()
       .references(() => media.id, { onDelete: "cascade" }),
     category: serviceKey("category"),
+    /**
+     * Free-text album name — "Rafting", "Bungee jumping", "Mountains",
+     * "Resorts", "Rishikesh & the Ganga", "Manali", "Shimla". The gallery page
+     * groups by whatever distinct values exist, so the owner can add an album
+     * just by typing its name, without a schema change. `category` stays for
+     * the homepage strip's three-service filter.
+     */
+    album: varchar("album", { length: 80 }),
     caption: varchar("caption", { length: 200 }),
     sortOrder: integer("sort_order").default(0).notNull(),
     isPublished: boolean("is_published").default(true).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [index("gallery_items_sort_idx").on(t.sortOrder)],
+  (t) => [
+    index("gallery_items_sort_idx").on(t.sortOrder),
+    index("gallery_items_album_idx").on(t.album, t.sortOrder),
+  ],
 );
 
 /* =============================================================================
@@ -216,6 +255,47 @@ export const contentBlocks = pgTable(
 /* =============================================================================
    Products
    ========================================================================== */
+
+/**
+ * The places the company sells — Haridwar, Rishikesh, Dehradun, Mussoorie,
+ * Tehri Lake, Nainital, Jim Corbett, Mukteshwar, Manali, Shimla. A destination
+ * page pulls together its intro, best experiences, the stays that sit in it
+ * (`hotels.destination_id`) and the packages that visit it
+ * (`packages.destination_id`).
+ */
+export const destinations = pgTable(
+  "destinations",
+  {
+    id: serial("id").primaryKey(),
+    slug: varchar("slug", { length: 100 }).notNull(),
+    name: varchar("name", { length: 120 }).notNull(),
+    /** "Uttarakhand" | "Himachal Pradesh" — groups the index page. */
+    region: varchar("region", { length: 80 }),
+    tagline: varchar("tagline", { length: 200 }),
+    intro: text("intro"),
+    /** "Best experiences" bullets. */
+    highlights: jsonb("highlights").$type<string[]>().default([]).notNull(),
+    bestTime: varchar("best_time", { length: 160 }),
+    howToReach: text("how_to_reach"),
+    faqs: jsonb("faqs").$type<{ q: string; a: string }[]>().default([]).notNull(),
+
+    coverMediaId: integer("cover_media_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    isPublished: boolean("is_published").default(false).notNull(),
+
+    seoTitle: varchar("seo_title", { length: 70 }),
+    seoDescription: varchar("seo_description", { length: 180 }),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("destinations_slug_key").on(t.slug),
+    index("destinations_published_idx").on(t.isPublished, t.sortOrder),
+  ],
+);
 
 /**
  * Rafting stretches and bungee packages share one table and one admin form.
@@ -305,6 +385,10 @@ export const hotels = pgTable(
     lat: numeric("lat", { precision: 9, scale: 6 }),
     lng: numeric("lng", { precision: 9, scale: 6 }),
     mapUrl: text("map_url"),
+    /** Primary destination this stay sits in, for the /stays/[destination] page. */
+    destinationId: integer("destination_id").references(() => destinations.id, {
+      onDelete: "set null",
+    }),
 
     starRating: smallint("star_rating"),
     pricePerNightInr: integer("price_per_night_inr").notNull(),
@@ -360,6 +444,133 @@ export const hotelRooms = pgTable(
     index("hotel_rooms_hotel_idx").on(t.hotelId, t.sortOrder),
     check("hotel_rooms_price_positive", sql`${t.pricePerNightInr} >= 0`),
     check("hotel_rooms_occupancy_positive", sql`${t.occupancy} > 0`),
+  ],
+);
+
+/**
+ * Holiday packages — Yoga course, Char Dham / Do Dham yatra, and the multi-day
+ * Rishikesh+Mussoorie / Shimla+Manali tours. `priceInr` is the "starting from"
+ * figure; `itinerary` is a day-by-day list.
+ */
+export const packages = pgTable(
+  "packages",
+  {
+    id: serial("id").primaryKey(),
+    slug: varchar("slug", { length: 100 }).notNull(),
+    name: varchar("name", { length: 160 }).notNull(),
+    /** "Pilgrimage", "Yoga & wellness", "Multi-day tour" — a small free-text grouping. */
+    category: varchar("category", { length: 60 }),
+    /** Primary destination, for cross-linking from a destination page. */
+    destinationId: integer("destination_id").references(() => destinations.id, {
+      onDelete: "set null",
+    }),
+
+    durationLabel: varchar("duration_label", { length: 60 }),
+    nights: integer("nights"),
+    routeLabel: varchar("route_label", { length: 200 }),
+
+    priceInr: integer("price_inr").notNull(),
+    compareAtPriceInr: integer("compare_at_price_inr"),
+    priceNote: varchar("price_note", { length: 80 }),
+
+    rating: numeric("rating", { precision: 2, scale: 1 }),
+    reviewCount: integer("review_count"),
+    badge: varchar("badge", { length: 40 }),
+
+    summary: text("summary"),
+    description: text("description"),
+    itinerary: jsonb("itinerary")
+      .$type<{ title: string; detail: string }[]>()
+      .default([])
+      .notNull(),
+    inclusions: jsonb("inclusions").$type<string[]>().default([]).notNull(),
+    exclusions: jsonb("exclusions").$type<string[]>().default([]).notNull(),
+    accommodationNote: text("accommodation_note"),
+    transportNote: text("transport_note"),
+    mealsNote: text("meals_note"),
+    terms: jsonb("terms").$type<string[]>().default([]).notNull(),
+    faqs: jsonb("faqs").$type<{ q: string; a: string }[]>().default([]).notNull(),
+
+    coverMediaId: integer("cover_media_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    isPublished: boolean("is_published").default(false).notNull(),
+
+    seoTitle: varchar("seo_title", { length: 70 }),
+    seoDescription: varchar("seo_description", { length: 180 }),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("packages_slug_key").on(t.slug),
+    index("packages_published_idx").on(t.isPublished, t.sortOrder),
+    check("packages_price_positive", sql`${t.priceInr} >= 0`),
+    check(
+      "packages_compare_price_higher",
+      sql`${t.compareAtPriceInr} IS NULL OR ${t.compareAtPriceInr} > ${t.priceInr}`,
+    ),
+    check(
+      "packages_rating_range",
+      sql`${t.rating} IS NULL OR (${t.rating} >= 0 AND ${t.rating} <= 5)`,
+    ),
+  ],
+);
+
+/**
+ * Car and bike rental. A car is quote-only (`quoteOnly = true`, `perDayInr`
+ * null) — the enquiry is a request for a custom quotation. A bike carries a
+ * real per-day rate.
+ */
+export const rentals = pgTable(
+  "rentals",
+  {
+    id: serial("id").primaryKey(),
+    kind: rentalKind("kind").notNull(),
+    slug: varchar("slug", { length: 100 }).notNull(),
+    name: varchar("name", { length: 160 }).notNull(),
+
+    perDayInr: integer("per_day_inr"),
+    quoteOnly: boolean("quote_only").default(false).notNull(),
+    depositInr: integer("deposit_inr"),
+
+    seats: smallint("seats"),
+    /** A short vehicle-type / transmission label — "Sedan · SUV", "Geared scooter", "Manual". */
+    transmission: varchar("transmission", { length: 60 }),
+    fuelNote: varchar("fuel_note", { length: 100 }),
+
+    summary: text("summary"),
+    description: text("description"),
+    includes: jsonb("includes").$type<string[]>().default([]).notNull(),
+    documentsRequired: jsonb("documents_required").$type<string[]>().default([]).notNull(),
+    terms: jsonb("terms").$type<string[]>().default([]).notNull(),
+    pickupNote: text("pickup_note"),
+    faqs: jsonb("faqs").$type<{ q: string; a: string }[]>().default([]).notNull(),
+
+    coverMediaId: integer("cover_media_id").references(() => media.id, {
+      onDelete: "set null",
+    }),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    isPublished: boolean("is_published").default(false).notNull(),
+
+    seoTitle: varchar("seo_title", { length: 70 }),
+    seoDescription: varchar("seo_description", { length: 180 }),
+
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("rentals_slug_key").on(t.slug),
+    index("rentals_kind_idx").on(t.kind, t.isPublished, t.sortOrder),
+    check(
+      "rentals_per_day_positive",
+      sql`${t.perDayInr} IS NULL OR ${t.perDayInr} >= 0`,
+    ),
+    check(
+      "rentals_quote_or_price",
+      sql`${t.quoteOnly} = true OR ${t.perDayInr} IS NOT NULL`,
+    ),
   ],
 );
 
@@ -449,8 +660,16 @@ export const enquiries = pgTable(
     hotelId: integer("hotel_id").references(() => hotels.id, {
       onDelete: "set null",
     }),
+    packageId: integer("package_id").references(() => packages.id, {
+      onDelete: "set null",
+    }),
+    rentalId: integer("rental_id").references(() => rentals.id, {
+      onDelete: "set null",
+    }),
     productNameSnapshot: varchar("product_name_snapshot", { length: 200 }).notNull(),
     productPriceSnapshotInr: integer("product_price_snapshot_inr"),
+    /** Free text from the contact form: the destination / activity / package the message is about. */
+    subject: varchar("subject", { length: 200 }),
 
     name: varchar("name", { length: 120 }).notNull(),
     phone: varchar("phone", { length: 10 }).notNull(),
@@ -479,7 +698,7 @@ export const enquiries = pgTable(
     check("enquiries_phone_shape", sql`${t.phone} ~ '^[6-9][0-9]{9}$'`),
     check(
       "enquiries_one_product",
-      sql`num_nonnulls(${t.adventureId}, ${t.hotelId}) <= 1`,
+      sql`num_nonnulls(${t.adventureId}, ${t.hotelId}, ${t.packageId}, ${t.rentalId}) <= 1`,
     ),
   ],
 );
@@ -535,14 +754,30 @@ export const auditLog = pgTable(
    Relations — enables db.query.hotels.findMany({ with: { rooms: true } })
    ========================================================================== */
 
-export const hotelsRelations = relations(hotels, ({ many }) => ({
+export const hotelsRelations = relations(hotels, ({ many, one }) => ({
   rooms: many(hotelRooms),
+  destination: one(destinations, {
+    fields: [hotels.destinationId],
+    references: [destinations.id],
+  }),
 }));
 
 export const hotelRoomsRelations = relations(hotelRooms, ({ one }) => ({
   hotel: one(hotels, {
     fields: [hotelRooms.hotelId],
     references: [hotels.id],
+  }),
+}));
+
+export const destinationsRelations = relations(destinations, ({ many }) => ({
+  hotels: many(hotels),
+  packages: many(packages),
+}));
+
+export const packagesRelations = relations(packages, ({ one }) => ({
+  destination: one(destinations, {
+    fields: [packages.destinationId],
+    references: [destinations.id],
   }),
 }));
 
@@ -555,6 +790,9 @@ export type GalleryItem = typeof galleryItems.$inferSelect;
 export type Adventure = typeof adventures.$inferSelect;
 export type Hotel = typeof hotels.$inferSelect;
 export type HotelRoom = typeof hotelRooms.$inferSelect;
+export type Destination = typeof destinations.$inferSelect;
+export type Package = typeof packages.$inferSelect;
+export type Rental = typeof rentals.$inferSelect;
 export type Closure = typeof closures.$inferSelect;
 export type Enquiry = typeof enquiries.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
