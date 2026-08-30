@@ -37,11 +37,13 @@ export function HotelForm({
   rooms: initialRooms,
   coverMedia,
   gallery,
+  destinationOptions,
 }: {
   hotel?: Hotel;
   rooms: (HotelRoom & { media: MediaItem | null })[];
   coverMedia: MediaItem | null;
   gallery: MediaItem[];
+  destinationOptions: { id: number; name: string }[];
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -55,6 +57,9 @@ export function HotelForm({
   const [description, setDescription] = React.useState(hotel?.description ?? "");
   const [address, setAddress] = React.useState(hotel?.address ?? "");
   const [locality, setLocality] = React.useState(hotel?.locality ?? "");
+  const [destinationId, setDestinationId] = React.useState(
+    hotel?.destinationId ? String(hotel.destinationId) : "",
+  );
   const [mapUrl, setMapUrl] = React.useState(hotel?.mapUrl ?? "");
   const [starRating, setStarRating] = React.useState(
     hotel?.starRating ? String(hotel.starRating) : "3",
@@ -119,6 +124,7 @@ export function HotelForm({
       description,
       address,
       locality: locality || null,
+      destinationId: destinationId ? Number(destinationId) : null,
       mapUrl: mapUrl || null,
       starRating: starRating ? Number(starRating) : null,
       pricePerNightInr: Number(pricePerNightInr),
@@ -221,6 +227,16 @@ export function HotelForm({
             </Field>
             <Field label="Locality" hint='e.g. "Tapovan"'>
               <Input value={locality} onChange={(e) => setLocality(e.target.value)} />
+            </Field>
+            <Field label="Destination" hint="Groups this stay on the Stays page.">
+              <Select value={destinationId} onChange={(e) => setDestinationId(e.target.value)}>
+                <option value="">— None —</option>
+                {destinationOptions.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </Select>
             </Field>
             <Field label="Map link" hint="Google Maps URL" error={errors.mapUrl}>
               <Input value={mapUrl} onChange={(e) => setMapUrl(e.target.value)} />

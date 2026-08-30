@@ -131,7 +131,7 @@ export default async function PackageDetail({
               Based around{" "}
               <Link
                 href={`/stays/${pkg.destinationSlug}`}
-                className="font-semibold text-link hover:underline"
+                className="font-semibold capitalize text-link hover:underline"
               >
                 {pkg.destinationSlug.replace(/-/g, " ")}
               </Link>

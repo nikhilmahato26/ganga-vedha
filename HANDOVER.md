@@ -24,6 +24,14 @@ Use a password manager. Don't reuse a password from anywhere else.
 
 **Rafting / Bungee / Hotels** — Add, edit, reorder, or remove what you sell. For rafting stretches specifically, each one has its own distance, price, and grade — that's what shows on the card and detail page. Every listing has a **published/unpublished** toggle: unpublish something you're not ready to sell yet, rather than deleting it, so you can bring it back later without re-entering everything.
 
+**Adventures** — Paragliding, zip-lining, and anything else that isn't rafting or the bungee jump. These appear on the site's *Adventures* page. Each one carries its own price, duration, minimum age and weight limits, just like a rafting stretch. Pick "Paragliding" or "Zip lining" as the type when you add one.
+
+**Packages** — The holiday packages (Char Dham, Do Dham, the yoga course, the multi-day tours). Each has a starting-from price, a day-by-day itinerary you can reorder, inclusions/exclusions, notes on accommodation, transport and meals, terms, and an FAQ. Tie a package to a **primary destination** so it also shows on that destination's page. The price on the site is always labelled "from" — you confirm the real quote with the customer.
+
+**Destinations** — The places on the *Stays* page: Haridwar, Rishikesh, Manali, and the rest. Each has an intro, a "best experiences" list, best-time-to-visit and how-to-reach notes. A destination's page automatically pulls in the stays and packages you've tied to it. Tie a hotel to a destination on the hotel's own edit screen (the "Destination" dropdown), and a package on the package's edit screen ("Primary destination").
+
+**Rentals** — Car and bike rental. A car is usually **quote-only** — turn that switch on and leave the daily price blank; the enquiry becomes a request for a custom quotation. A bike carries a real per-day rate and a deposit. Both list the documents a renter must bring and the pickup details.
+
 **Reviews** — Add customer testimonials that appear on the homepage. Only published reviews show up publicly.
 
 **Media** — Every photo you've ever uploaded lives here. If you replace a hotel's cover photo, the old one doesn't get deleted automatically — this screen shows you which uploaded photos are no longer used anywhere on the site, so you can clean them up in bulk instead of them piling up forever.

@@ -24,6 +24,8 @@ function revalidateHotelPaths(slug: string, prevSlug?: string) {
   revalidatePath("/");
   revalidatePath("/hotels");
   revalidatePath(`/hotels/${slug}`);
+  // Destination pages list the stays tied to them.
+  revalidatePath("/stays/[slug]", "page");
   if (prevSlug && prevSlug !== slug) revalidatePath(`/hotels/${prevSlug}`);
 }
 
@@ -49,6 +51,7 @@ function toHotelShape(data: import("@/lib/schemas/hotel").HotelFormValues) {
     description: data.description,
     address: data.address,
     locality: data.locality,
+    destinationId: data.destinationId,
     mapUrl: data.mapUrl || null,
     starRating: data.starRating,
     pricePerNightInr: data.pricePerNightInr,

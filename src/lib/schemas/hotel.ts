@@ -29,6 +29,7 @@ export const hotelSchema = z
 
     address: z.string().trim().min(1, "Add an address.").max(400),
     locality: z.string().trim().max(120).nullable(),
+    destinationId: z.coerce.number().int().positive().nullable(),
     mapUrl: z.union([z.literal(""), z.url()]).nullable(),
 
     starRating: z.coerce.number().int().min(1).max(5).nullable(),
