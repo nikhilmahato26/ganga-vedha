@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Mountain, Waves, Wind, Zap } from "lucide-react";
+import { notFound } from "next/navigation";
+import { ArrowLeft, ArrowRight, Mountain, Waves, Wind, Zap } from "lucide-react";
 import {
   Breadcrumb,
   Card,
@@ -9,6 +10,7 @@ import {
   SectionHeading,
 } from "@/components/ui";
 import { AdventureCard } from "@/components/site/product-card";
+import { BungeeBrands } from "@/components/site/bungee-brands";
 import {
   getActivities,
   getAdventures,
@@ -17,14 +19,14 @@ import {
   getSiteSettings,
 } from "@/lib/content";
 import { resolveClosure } from "@/lib/closure";
-import { formatINR } from "@/lib/format";
+import { formatINR, slugify } from "@/lib/format";
 
 export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Adventure activities in Rishikesh",
   description:
-    "Everything we run in one place — river rafting by the kilometre, an 83 m bungee jump, tandem paragliding and a valley zip line. Price, grade and age limit on every card.",
+    "Everything we run in one place — river rafting by the kilometre, bungee jumps from several operators, tandem paragliding and a valley zip line. Price, grade and age limit on every card.",
   alternates: { canonical: "/adventures" },
 };
 
@@ -35,7 +37,12 @@ const KIND_META = {
   zipline: { icon: Zap, label: "Zip lining" },
 } as const;
 
-export default async function AdventuresIndex() {
+export default async function AdventuresIndex({
+  searchParams,
+}: {
+  searchParams: Promise<{ brand?: string }>;
+}) {
+  const { brand } = await searchParams;
   const [rafting, bungeeList, activities, settings, closures] = await Promise.all([
     getRaftingByDistance(),
     getAdventures("bungee"),
@@ -44,9 +51,58 @@ export default async function AdventuresIndex() {
     getClosures(),
   ]);
 
+  /* ── One operator's jumps (the "See all" target) ──────────────────────── */
+  if (brand) {
+    const items = bungeeList.filter((a) => a.brand && slugify(a.brand) === brand);
+    if (items.length === 0) notFound();
+    const brandName = items[0].brand!;
+
+    return (
+      <div className="container-page pt-6 pb-8">
+        <Breadcrumb
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Adventures", href: "/adventures" },
+            { label: brandName },
+          ]}
+        />
+        <Link
+          href="/adventures"
+          className="mt-4 inline-flex items-center gap-1.5 text-small font-semibold text-ink-muted no-underline hover:text-ink"
+        >
+          <ArrowLeft className="size-4" aria-hidden /> All adventures
+        </Link>
+        <div className="pt-6">
+          <SectionHeading
+            as="h1"
+            title={brandName}
+            description={`Every bungee jump we book with ${brandName}. Prices are the operator's starting rate — we confirm on WhatsApp before anything is paid.`}
+          />
+        </div>
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((a) => (
+            <AdventureCard
+              key={a.id}
+              adventure={a}
+              closure={resolveClosure(closures, {
+                service: "bungee",
+                entityType: "adventure",
+                entityId: a.id,
+              })}
+              whatsappNumber={settings.whatsappNumber}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const cheapest = Math.min(
     ...[...rafting, ...bungeeList, ...activities].map((a) => a.priceInr),
   );
+  const brandCount = new Set(
+    bungeeList.map((b) => b.brand?.trim()).filter(Boolean),
+  ).size;
 
   const pillars = [
     {
@@ -59,11 +115,11 @@ export default async function AdventuresIndex() {
     },
     {
       kind: "bungee" as const,
-      count: bungeeList.length ? `${bungeeList.length} operators` : "Fixed platforms",
+      count: brandCount ? `${brandCount} operators` : "Fixed platforms",
       from: bungeeList.length ? Math.min(...bungeeList.map((b) => b.priceInr)) : null,
-      href: "#dry-land",
+      href: "#bungee",
       blurb:
-        "Several fixed-platform bungee operators around Rishikesh and Jim Corbett, each run by trained jump masters against a written checklist.",
+        "Fixed-platform bungee from several operators around Rishikesh and Jim Corbett, each run by trained jump masters against a written checklist.",
     },
     ...activities.map((a) => ({
       kind: a.kind as "paragliding" | "zipline",
@@ -82,7 +138,7 @@ export default async function AdventuresIndex() {
         <SectionHeading
           as="h1"
           title="Everything we run"
-          description="Four ways to spend a morning here — rafting, bungee, paragliding and a zip line. Every one lists its price, its grade and its age and weight limits before you book, and nothing takes an enquiry while it is closed."
+          description="Rafting, bungee, paragliding and a zip line. Every one lists its price, its grade and its age and weight limits before you book, and nothing takes an enquiry while it is closed."
         />
       </div>
 
@@ -162,17 +218,31 @@ export default async function AdventuresIndex() {
         </div>
       </section>
 
-      {/* Everything else */}
-      {(bungeeList.length > 0 || activities.length > 0) && (
-        <section id="dry-land" className="mt-20 scroll-mt-24">
-          <SectionHeading as="h2" title="Bungee, paragliding & zip line" />
+      {/* Bungee jumping — grouped by operator */}
+      {bungeeList.length > 0 && (
+        <section id="bungee" className="mt-20 scroll-mt-24">
+          <SectionHeading as="h2" title="Bungee jumping" />
+          <div className="mt-8">
+            <BungeeBrands
+              bungee={bungeeList}
+              closures={closures}
+              whatsappNumber={settings.whatsappNumber}
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Paragliding & zip line */}
+      {activities.length > 0 && (
+        <section className="mt-20">
+          <SectionHeading as="h2" title="Paragliding & zip line" />
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[...bungeeList, ...activities].map((a) => (
+            {activities.map((a) => (
               <AdventureCard
                 key={a.id}
                 adventure={a}
                 closure={resolveClosure(closures, {
-                  service: a.kind === "bungee" ? "bungee" : "activity",
+                  service: "activity",
                   entityType: "adventure",
                   entityId: a.id,
                 })}

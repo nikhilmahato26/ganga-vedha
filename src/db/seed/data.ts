@@ -336,6 +336,7 @@ export const ADVENTURES: AdventureInsert[] = [
   {
     kind: "bungee",
     slug: "maa-ganga-bungy",
+    brand: "Maa Ganga Bungee",
     name: "Maa Ganga Bungy",
     distanceKm: null,
     heightM: 83,
@@ -367,6 +368,7 @@ export const ADVENTURES: AdventureInsert[] = [
   {
     kind: "bungee",
     slug: "himalayan-bungee",
+    brand: "Himalayan Bungee",
     name: "Himalayan Bungee",
     distanceKm: null,
     heightM: 107,
@@ -398,6 +400,7 @@ export const ADVENTURES: AdventureInsert[] = [
   {
     kind: "bungee",
     slug: "splash-bungy",
+    brand: "Splash Bungy",
     name: "Splash Bungy",
     distanceKm: null,
     heightM: 25,
@@ -429,6 +432,7 @@ export const ADVENTURES: AdventureInsert[] = [
   {
     kind: "bungee",
     slug: "jumpin-height",
+    brand: "Jumpin Heights",
     name: "Jumpin Height",
     distanceKm: null,
     heightM: 83,
@@ -460,6 +464,7 @@ export const ADVENTURES: AdventureInsert[] = [
   {
     kind: "bungee",
     slug: "thrill-factory-rishikesh",
+    brand: "Thrill Factory",
     name: "Thrill Factory Rishikesh",
     distanceKm: null,
     heightM: 83,
@@ -491,6 +496,7 @@ export const ADVENTURES: AdventureInsert[] = [
   {
     kind: "bungee",
     slug: "himalayan-bungy-jim-corbett",
+    brand: "Himalayan Bungy (Jim Corbett)",
     name: "Himalayan Bungy · Jim Corbett",
     distanceKm: null,
     heightM: 83,

@@ -43,6 +43,8 @@ export const adventureSchema = z
     reviewCount: z.coerce.number().int().nonnegative().nullable(),
     badge: z.string().trim().max(40).nullable(),
     bestFor: z.string().trim().max(60).nullable(),
+    /** Operator / brand — groups bungee jumps by operator on the site. */
+    brand: z.string().trim().max(80).nullable(),
 
     summary: z.string().trim().min(1, "Write a one-line summary.").max(400),
     description: z.string().trim().min(1, "Write a description.").max(4000),
