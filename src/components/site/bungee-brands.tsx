@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { AdventureCard } from "@/components/site/product-card";
+import { BungeeCard } from "@/components/site/bungee-card";
 import { resolveClosure } from "@/lib/closure";
 import { slugify } from "@/lib/format";
 import type { Adventure, Closure } from "@/lib/content";
@@ -52,21 +52,38 @@ export function BungeeBrands({
             )}
           </div>
 
-          <div className="-mx-4 mt-5 flex snap-x gap-5 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
-            {items.map((a) => (
-              <div key={a.id} className="w-[19rem] shrink-0 snap-start">
-                <AdventureCard
-                  adventure={a}
-                  closure={resolveClosure(closures, {
-                    service: "bungee",
-                    entityType: "adventure",
-                    entityId: a.id,
-                  })}
-                  whatsappNumber={whatsappNumber}
-                />
-              </div>
-            ))}
-          </div>
+          {items.length === 1 ? (
+            <div className="mt-5 max-w-3xl">
+              <BungeeCard
+                adventure={items[0]}
+                closure={resolveClosure(closures, {
+                  service: "bungee",
+                  entityType: "adventure",
+                  entityId: items[0].id,
+                })}
+                whatsappNumber={whatsappNumber}
+              />
+            </div>
+          ) : (
+            <div className="-mx-4 mt-5 flex snap-x gap-5 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
+              {items.map((a) => (
+                <div
+                  key={a.id}
+                  className="w-[min(88vw,40rem)] shrink-0 snap-start last:pr-4 sm:last:pr-0"
+                >
+                  <BungeeCard
+                    adventure={a}
+                    closure={resolveClosure(closures, {
+                      service: "bungee",
+                      entityType: "adventure",
+                      entityId: a.id,
+                    })}
+                    whatsappNumber={whatsappNumber}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       ))}
     </div>

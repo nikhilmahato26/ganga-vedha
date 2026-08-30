@@ -11,6 +11,7 @@ import {
 } from "@/components/ui";
 import { AdventureCard } from "@/components/site/product-card";
 import { BungeeBrands } from "@/components/site/bungee-brands";
+import { BungeeCard } from "@/components/site/bungee-card";
 import {
   getActivities,
   getAdventures,
@@ -79,9 +80,9 @@ export default async function AdventuresIndex({
             description={`Every bungee jump we book with ${brandName}. Prices are the operator's starting rate — we confirm on WhatsApp before anything is paid.`}
           />
         </div>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 max-w-3xl space-y-5">
           {items.map((a) => (
-            <AdventureCard
+            <BungeeCard
               key={a.id}
               adventure={a}
               closure={resolveClosure(closures, {
