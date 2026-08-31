@@ -54,6 +54,19 @@ Click **Edit message** to write what visitors see when a service is closed (e.g.
 
 Brand name and tagline, your contact details (WhatsApp, phone, email, address, map link), the homepage hero text, the "river status" strap at the top of the site, an optional site-wide announcement bar, and the four "Why book with us" reasons on the homepage — all editable here, all live instantly on save.
 
+## Email alerts for new enquiries
+
+Every enquiry from the site is also emailed to you the moment it lands, with the
+person's name, phone, what they asked about, dates and message, plus one-tap
+WhatsApp and Call buttons. This is set up with a Gmail account and a Google
+**App Password** (not the normal account password). If the alerts stop arriving:
+
+1. The database still has every enquiry — check **Bookings** in the admin panel.
+   Nothing is ever lost because email failed.
+2. Ask your developer to check the mail settings. The usual cause is the Gmail
+   App Password being changed or expired, or 2-step verification being turned
+   off on that Gmail account (an App Password needs it on).
+
 ## A few things worth knowing
 
 - **Deleting is permanent** for enquiries and reviews. For rafting/bungee/hotel listings, prefer **unpublish** over delete unless you're sure you'll never need it again.

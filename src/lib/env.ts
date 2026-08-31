@@ -107,3 +107,25 @@ export function authSecret(): Uint8Array {
   }
   return new TextEncoder().encode(secret);
 }
+
+/**
+ * Gmail (or any) SMTP for the new-enquiry notification email. Optional: with
+ * no SMTP_USER/SMTP_PASS the site still takes enquiries, it just doesn't
+ * email anyone. Validated lazily so a missing value never breaks a build.
+ */
+export function hasEmail(): boolean {
+  return Boolean(process.env.SMTP_USER?.trim() && process.env.SMTP_PASS?.trim());
+}
+
+export function emailConfig() {
+  const user = required("SMTP_USER", process.env.SMTP_USER, "The Gmail address that sends the alert.");
+  const pass = required(
+    "SMTP_PASS",
+    process.env.SMTP_PASS,
+    "A Google app password (16 chars, no spaces) — not the account password.",
+  );
+  const host = process.env.SMTP_HOST?.trim() || "smtp.gmail.com";
+  const port = Number(process.env.SMTP_PORT?.trim() || "465");
+  const to = process.env.ENQUIRY_NOTIFY_TO?.trim() || user;
+  return { host, port, secure: port === 465, user, pass, to };
+}
