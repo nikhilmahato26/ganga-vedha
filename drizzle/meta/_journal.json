@@ -36,6 +36,13 @@
       "when": 1788073727280,
       "tag": "0004_chemical_wonder_man",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788101879307,
+      "tag": "0005_narrow_squadron_supreme",
+      "breakpoints": true
     }
   ]
 }

@@ -8,8 +8,11 @@ export default async function BungeeAdminPage() {
   const items = await listAdventuresAdmin("bungee");
   return (
     <div className="mx-auto max-w-5xl">
-      <h1 className="text-display-md text-ink">Bungee packages</h1>
-      <p className="mt-2 text-ink-muted">Usually just one, but the list works the same as rafting.</p>
+      <h1 className="text-display-md text-ink">Bungee jumps</h1>
+      <p className="mt-2 text-ink-muted">
+        One row per jump. Set the <strong className="font-semibold">Operator</strong> on each so the
+        site groups them by brand — Himalayan Bungee, Jumpin Heights, Maa Ganga Bungee and so on.
+      </p>
       <div className="mt-8">
         <AdventureList kind="bungee" items={items} />
       </div>

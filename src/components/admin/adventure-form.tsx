@@ -74,6 +74,7 @@ export function AdventureForm({
   );
   const [badge, setBadge] = React.useState(adventure?.badge ?? "");
   const [bestFor, setBestFor] = React.useState(adventure?.bestFor ?? "");
+  const [brand, setBrand] = React.useState(adventure?.brand ?? "");
   const [summary, setSummary] = React.useState(adventure?.summary ?? "");
   const [description, setDescription] = React.useState(adventure?.description ?? "");
   const [inclusions, setInclusions] = React.useState(joinLines(adventure?.inclusions ?? []));
@@ -124,6 +125,7 @@ export function AdventureForm({
       reviewCount: reviewCount ? Number(reviewCount) : null,
       badge: badge || null,
       bestFor: bestFor || null,
+      brand: brand || null,
       summary,
       description,
       inclusions: parseLines(inclusions),
@@ -262,6 +264,33 @@ export function AdventureForm({
                 required
               />
             </Field>
+
+            {kind === "bungee" && (
+              <Field
+                label="Operator / brand"
+                hint="Bungee jumps are grouped by this on the site."
+                className="sm:col-span-2"
+              >
+                <Input
+                  list="bungee-brand-options"
+                  value={brand}
+                  onChange={(e) => setBrand(e.target.value)}
+                  placeholder="e.g. Jumpin Heights"
+                />
+                <datalist id="bungee-brand-options">
+                  {[
+                    "Maa Ganga Bungee",
+                    "Himalayan Bungee",
+                    "Splash Bungy",
+                    "Jumpin Heights",
+                    "Thrill Factory",
+                    "Himalayan Bungy (Jim Corbett)",
+                  ].map((b) => (
+                    <option key={b} value={b} />
+                  ))}
+                </datalist>
+              </Field>
+            )}
 
             <Field label="Badge" hint='e.g. "Most popular"'>
               <Input value={badge} onChange={(e) => setBadge(e.target.value)} />

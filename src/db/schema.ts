@@ -324,6 +324,12 @@ export const adventures = pgTable(
     reviewCount: integer("review_count"),
     badge: varchar("badge", { length: 40 }),
     bestFor: varchar("best_for", { length: 60 }),
+    /**
+     * Operator / brand this listing belongs to — used to group bungee jumps by
+     * operator on the site (Himalayan Bungee, Jumpin Heights, Maa Ganga Bungee…).
+     * Null for rafting and the non-branded activities.
+     */
+    brand: varchar("brand", { length: 80 }),
 
     summary: text("summary"),
     description: text("description"),

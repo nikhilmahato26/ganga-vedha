@@ -10,6 +10,7 @@ import {
 import { AdventureCard, CardLink, HotelCard } from "@/components/site/product-card";
 import { DestinationCard, PackageCard, RentalCard } from "@/components/site/catalog-cards";
 import { RaftingSection } from "@/components/site/rafting-section";
+import { BungeeBrands } from "@/components/site/bungee-brands";
 import { GallerySection } from "@/components/site/gallery";
 import {
   getActivities,
@@ -288,13 +289,36 @@ export default async function LandingPage() {
         whatsappNumber={settings.whatsappNumber}
       />
 
-      {/* ── Bungee, paragliding & zip line ────────────────────────────────── */}
-      {(bungeeList.length > 0 || activities.length > 0) && (
+      {/* ── Bungee jumping, by operator ───────────────────────────────────── */}
+      {bungeeList.length > 0 && (
         <section className="container-page pt-24">
           <SectionHeading
             as="h2"
-            title="Bungee, paragliding & zip line"
-            description="The dry-land adventures — several bungee operators, tandem paragliding and a valley zip line. Height, grade and age limit on every card."
+            title="Bungee jumping"
+            description="The operators we book with around Rishikesh and Jim Corbett. Each runs its jumps against a written safety checklist — height, grade and age limit on every card."
+            action={
+              <LinkButton href="/adventures" variant="outline">
+                All adventures
+              </LinkButton>
+            }
+          />
+          <div className="mt-10">
+            <BungeeBrands
+              bungee={bungeeList}
+              closures={closures}
+              whatsappNumber={settings.whatsappNumber}
+            />
+          </div>
+        </section>
+      )}
+
+      {/* ── Paragliding & zip line ────────────────────────────────────────── */}
+      {activities.length > 0 && (
+        <section className="container-page pt-24">
+          <SectionHeading
+            as="h2"
+            title="Paragliding & zip line"
+            description="A tandem flight and a valley zip line, both a short drive from town."
             action={
               <LinkButton href="/adventures" variant="outline">
                 All adventures
@@ -302,12 +326,12 @@ export default async function LandingPage() {
             }
           />
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[...bungeeList, ...activities].map((a) => (
+            {activities.map((a) => (
               <AdventureCard
                 key={a.id}
                 adventure={a}
                 closure={resolveClosure(closures, {
-                  service: a.kind === "bungee" ? "bungee" : "activity",
+                  service: "activity",
                   entityType: "adventure",
                   entityId: a.id,
                 })}

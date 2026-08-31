@@ -151,6 +151,7 @@ function mapAdventure(
     reviewCount: row.reviewCount,
     badge: row.badge,
     bestFor: row.bestFor,
+    brand: row.brand,
     summary: row.summary ?? "",
     description: row.description ?? "",
     inclusions: row.inclusions,

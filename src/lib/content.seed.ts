@@ -52,6 +52,8 @@ export type Adventure = {
   reviewCount: number | null;
   badge: string | null;
   bestFor: string | null;
+  /** Operator / brand — bungee jumps are grouped by this on the site. */
+  brand?: string | null;
   summary: string;
   description: string;
   inclusions: string[];
@@ -541,6 +543,7 @@ const ADVENTURES: Adventure[] = [
     id: 9,
     kind: "bungee",
     slug: "maa-ganga-bungy",
+    brand: "Maa Ganga Bungee",
     name: "Maa Ganga Bungy",
     distanceKm: null,
     heightM: 83,
@@ -573,6 +576,7 @@ const ADVENTURES: Adventure[] = [
     id: 10,
     kind: "bungee",
     slug: "himalayan-bungee",
+    brand: "Himalayan Bungee",
     name: "Himalayan Bungee",
     distanceKm: null,
     heightM: 107,
@@ -604,6 +608,7 @@ const ADVENTURES: Adventure[] = [
     id: 11,
     kind: "bungee",
     slug: "splash-bungy",
+    brand: "Splash Bungy",
     name: "Splash Bungy",
     distanceKm: null,
     heightM: 25,
@@ -636,6 +641,7 @@ const ADVENTURES: Adventure[] = [
     id: 12,
     kind: "bungee",
     slug: "jumpin-height",
+    brand: "Jumpin Heights",
     name: "Jumpin Height",
     distanceKm: null,
     heightM: 83,
@@ -669,6 +675,7 @@ const ADVENTURES: Adventure[] = [
     id: 13,
     kind: "bungee",
     slug: "thrill-factory-rishikesh",
+    brand: "Thrill Factory",
     name: "Thrill Factory Rishikesh",
     distanceKm: null,
     heightM: 83,
@@ -700,6 +707,7 @@ const ADVENTURES: Adventure[] = [
     id: 14,
     kind: "bungee",
     slug: "himalayan-bungy-jim-corbett",
+    brand: "Himalayan Bungy (Jim Corbett)",
     name: "Himalayan Bungy · Jim Corbett",
     distanceKm: null,
     heightM: 83,

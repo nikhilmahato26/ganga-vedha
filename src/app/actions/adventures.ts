@@ -220,6 +220,7 @@ function toInsertShape(data: AdventureFormValues) {
     reviewCount: data.reviewCount,
     badge: data.badge,
     bestFor: data.bestFor,
+    brand: data.brand,
     summary: data.summary,
     description: data.description,
     inclusions: data.inclusions,

@@ -112,6 +112,7 @@ export function AdventureList({
             <thead>
               <tr>
                 <Th>Name</Th>
+                {kind === "bungee" && <Th>Operator</Th>}
                 {kind === "rafting" && <Th>Grade</Th>}
                 {!isActivities && (
                   <Th className="text-right">{kind === "rafting" ? "Distance" : "Height"}</Th>
@@ -127,6 +128,9 @@ export function AdventureList({
               {filtered.map((r, i) => (
                 <Tr key={r.id}>
                   <Td className="font-semibold whitespace-nowrap text-ink">{r.name}</Td>
+                  {kind === "bungee" && (
+                    <Td className="text-ink-muted">{r.brand ?? "—"}</Td>
+                  )}
                   {kind === "rafting" && (
                     <Td>{r.grade && <GradeChip grade={r.grade} size="sm" />}</Td>
                   )}
