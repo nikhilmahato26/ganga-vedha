@@ -17,6 +17,7 @@ import {
   siteSettings as siteSettingsTable,
 } from "@/db/schema";
 import { hasDatabase } from "@/lib/env";
+import { slugify } from "@/lib/format";
 import * as seed from "./content.seed";
 import type { MediaSource } from "@/components/ui/media";
 
@@ -331,6 +332,22 @@ export async function getAdventures(kind?: AdventureKind): Promise<Adventure[]> 
 export async function getActivities(): Promise<Adventure[]> {
   const all = await getAdventures();
   return all.filter((a) => a.kind !== "rafting" && a.kind !== "bungee");
+}
+
+/**
+ * Distinct bungee operators, first-seen order, with a URL slug for the
+ * `/adventures?brand=` grouping. Powers the operator list in the nav.
+ */
+export async function getBungeeBrands(): Promise<{ name: string; slug: string }[]> {
+  const list = await getAdventures("bungee");
+  const bySlug = new Map<string, string>();
+  for (const a of list) {
+    const name = a.brand?.trim();
+    if (!name) continue;
+    const slug = slugify(name);
+    if (slug && !bySlug.has(slug)) bySlug.set(slug, name);
+  }
+  return [...bySlug.entries()].map(([slug, name]) => ({ slug, name }));
 }
 
 /** Rafting stretches ordered by the axis the whole product is sold on. */

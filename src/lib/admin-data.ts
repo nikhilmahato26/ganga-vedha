@@ -36,6 +36,20 @@ export async function listAdventuresAdmin(
     .orderBy(adventures.sortOrder);
 }
 
+/** Distinct operator names already used on published/draft bungee jumps. */
+export async function listBungeeBrands(): Promise<string[]> {
+  const rows = await getDb()
+    .select({ brand: adventures.brand })
+    .from(adventures)
+    .where(eq(adventures.kind, "bungee"));
+  const set = new Set<string>();
+  for (const r of rows) {
+    const b = r.brand?.trim();
+    if (b) set.add(b);
+  }
+  return [...set].sort((a, b) => a.localeCompare(b));
+}
+
 /** The non-river activities — paragliding, zip-lining — for their own admin list. */
 export async function listActivitiesAdmin() {
   return getDb()

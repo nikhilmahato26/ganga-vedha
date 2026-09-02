@@ -33,11 +33,14 @@ export function AdventureForm({
   kind,
   adventure,
   coverMedia,
+  knownBrands = [],
 }: {
   kind: AdventureAdminKind;
   /** Present when editing; absent when creating. */
   adventure?: Adventure;
   coverMedia: MediaItem | null;
+  /** Operator names already in use — bungee only, to keep grouping consistent. */
+  knownBrands?: string[];
 }) {
   const router = useRouter();
   const { toast } = useToast();
@@ -75,6 +78,14 @@ export function AdventureForm({
   const [badge, setBadge] = React.useState(adventure?.badge ?? "");
   const [bestFor, setBestFor] = React.useState(adventure?.bestFor ?? "");
   const [brand, setBrand] = React.useState(adventure?.brand ?? "");
+  // "pick" = choose an existing operator; "new" = type a brand-new one. Start
+  // in "new" only when there's nothing to pick, or the saved value isn't a
+  // known operator (e.g. a legacy typo the owner is now fixing).
+  const [brandMode, setBrandMode] = React.useState<"pick" | "new">(() => {
+    const b = (adventure?.brand ?? "").trim();
+    if (!b) return knownBrands.length ? "pick" : "new";
+    return knownBrands.includes(b) ? "pick" : "new";
+  });
   const [summary, setSummary] = React.useState(adventure?.summary ?? "");
   const [description, setDescription] = React.useState(adventure?.description ?? "");
   const [inclusions, setInclusions] = React.useState(joinLines(adventure?.inclusions ?? []));
@@ -96,7 +107,7 @@ export function AdventureForm({
   const basePath =
     kind === "rafting" || kind === "bungee" ? `/admin/${kind}` : "/admin/adventures";
   const label =
-    kind === "rafting" ? "stretch" : kind === "bungee" ? "package" : "activity";
+    kind === "rafting" ? "stretch" : kind === "bungee" ? "jump" : "activity";
   const backLabel =
     kind === "rafting" ? "rafting" : kind === "bungee" ? "bungee" : "adventures";
 
@@ -267,28 +278,51 @@ export function AdventureForm({
 
             {kind === "bungee" && (
               <Field
-                label="Operator / brand"
-                hint="Bungee jumps are grouped by this on the site."
+                label="Operator"
+                hint="Jumps are grouped by operator on the site. Pick an existing one so a typo doesn't split a brand into two."
                 className="sm:col-span-2"
               >
-                <Input
-                  list="bungee-brand-options"
-                  value={brand}
-                  onChange={(e) => setBrand(e.target.value)}
-                  placeholder="e.g. Jumpin Heights"
-                />
-                <datalist id="bungee-brand-options">
-                  {[
-                    "Maa Ganga Bungee",
-                    "Himalayan Bungee",
-                    "Splash Bungy",
-                    "Jumpin Heights",
-                    "Thrill Factory",
-                    "Himalayan Bungy (Jim Corbett)",
-                  ].map((b) => (
-                    <option key={b} value={b} />
-                  ))}
-                </datalist>
+                {brandMode === "pick" && knownBrands.length > 0 ? (
+                  <Select
+                    value={knownBrands.includes(brand) ? brand : ""}
+                    onChange={(e) => {
+                      if (e.target.value === "__new__") {
+                        setBrandMode("new");
+                        setBrand("");
+                      } else {
+                        setBrand(e.target.value);
+                      }
+                    }}
+                  >
+                    <option value="">— No operator —</option>
+                    {knownBrands.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                    <option value="__new__">＋ Add a new operator…</option>
+                  </Select>
+                ) : (
+                  <div className="flex gap-2">
+                    <Input
+                      value={brand}
+                      onChange={(e) => setBrand(e.target.value)}
+                      placeholder="e.g. Jumpin Heights"
+                    />
+                    {knownBrands.length > 0 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => {
+                          setBrandMode("pick");
+                          if (!knownBrands.includes(brand)) setBrand("");
+                        }}
+                      >
+                        Pick existing
+                      </Button>
+                    )}
+                  </div>
+                )}
               </Field>
             )}
 
