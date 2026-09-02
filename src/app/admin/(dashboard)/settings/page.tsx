@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { getDb } from "@/db";
+import { getMediaById } from "@/lib/admin-data";
 import { contentBlocks, siteSettings } from "@/db/schema";
 import { Card, CardBody } from "@/components/ui";
 import { PasswordForm } from "./password-form";
@@ -46,6 +47,7 @@ export default async function SettingsPage() {
     .from(contentBlocks)
     .where(eq(contentBlocks.key, "why-choose-us"))
     .limit(1);
+  const heroMediaRow = await getMediaById(settings?.heroMediaId ?? null);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -53,7 +55,18 @@ export default async function SettingsPage() {
       <p className="mt-2 text-ink-muted">Signed in as {session?.email}</p>
 
       <div className="mt-8">
-        <SettingsForm settings={settings} />
+        <SettingsForm
+          settings={settings}
+          heroMedia={
+            heroMediaRow
+              ? {
+                  id: heroMediaRow.id,
+                  secureUrl: heroMediaRow.secureUrl,
+                  altText: heroMediaRow.altText ?? "",
+                }
+              : null
+          }
+        />
       </div>
 
       <Card elevation="flat" className="mt-8">

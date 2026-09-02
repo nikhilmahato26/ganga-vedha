@@ -25,6 +25,8 @@ const signInput = z.object({
     "packages",
     "rentals",
     "destinations",
+    "hero",
+    "promotions",
   ]),
 });
 

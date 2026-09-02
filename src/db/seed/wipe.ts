@@ -35,7 +35,7 @@ async function main() {
     truncate table
       admin_users, adventures, audit_log, closures, content_blocks,
       destinations, enquiries, gallery_items, hotel_rooms, hotels,
-      media, media_links, packages, rentals,
+      media, media_links, packages, promotions, rentals,
       reviews, service_lines, site_settings
     restart identity cascade
   `;

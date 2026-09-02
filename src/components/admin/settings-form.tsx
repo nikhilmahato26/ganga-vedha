@@ -12,10 +12,18 @@ import {
   Textarea,
   useToast,
 } from "@/components/ui";
+import { ImageUploader } from "@/components/admin/uploader";
+import type { MediaItem } from "@/lib/media-types";
 import { updateSettings } from "@/app/actions/settings";
 import type { SiteSettings } from "@/db/schema";
 
-export function SettingsForm({ settings }: { settings: SiteSettings }) {
+export function SettingsForm({
+  settings,
+  heroMedia,
+}: {
+  settings: SiteSettings;
+  heroMedia: MediaItem | null;
+}) {
   const { toast } = useToast();
   const [pending, setPending] = React.useState(false);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
@@ -29,6 +37,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
   const [mapUrl, setMapUrl] = React.useState(settings.mapUrl ?? "");
   const [heroHeading, setHeroHeading] = React.useState(settings.heroHeading ?? "");
   const [heroSubheading, setHeroSubheading] = React.useState(settings.heroSubheading ?? "");
+  const [hero, setHero] = React.useState<MediaItem[]>(heroMedia ? [heroMedia] : []);
   const [announcement, setAnnouncement] = React.useState(settings.announcement ?? "");
   const [announcementActive, setAnnouncementActive] = React.useState(settings.announcementActive);
   const [riverStatusLabel, setRiverStatusLabel] = React.useState(settings.riverStatusLabel);
@@ -49,6 +58,7 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
       mapUrl,
       heroHeading,
       heroSubheading,
+      heroMediaId: hero[0]?.id ?? null,
       announcement: announcement || null,
       announcementActive,
       riverStatusLabel,
@@ -106,6 +116,9 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
       <Card elevation="flat">
         <CardBody className="space-y-5 p-6">
           <h2 className="text-subtitle text-ink">Homepage hero</h2>
+          <Field label="Background image" hint="A wide, dark-ish photo. A green stand-in shows until you add one.">
+            <ImageUploader folder="hero" items={hero} onChange={setHero} max={1} />
+          </Field>
           <Field label="Heading" hint="Use a line break for the two-line hero.">
             <Textarea rows={2} value={heroHeading} onChange={(e) => setHeroHeading(e.target.value)} />
           </Field>

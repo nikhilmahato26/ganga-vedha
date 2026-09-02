@@ -13,11 +13,21 @@ import {
   StatusStrap,
   WhatsappFab,
 } from "@/components/site/chrome";
-import { getClosures, getRaftingByDistance, getSiteSettings, isSeedContent } from "@/lib/content";
+import {
+  getBungeeBrands,
+  getClosures,
+  getRaftingByDistance,
+  getSiteSettings,
+  isSeedContent,
+} from "@/lib/content";
 import { resolveClosure } from "@/lib/closure";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [settings, closures] = await Promise.all([getSiteSettings(), getClosures()]);
+  const [settings, closures, bungeeBrands] = await Promise.all([
+    getSiteSettings(),
+    getClosures(),
+    getBungeeBrands(),
+  ]);
 
   const raftingClosure = resolveClosure(closures, { service: "rafting" });
   // No full-screen takeover on page load, anywhere, for any scope — a
@@ -49,6 +59,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         brandName={settings.brandName}
         whatsappNumber={settings.whatsappNumber}
         closedServices={closedServices}
+        bungeeBrands={bungeeBrands}
       />
       <main className="flex-1">{children}</main>
       <SiteFooter />

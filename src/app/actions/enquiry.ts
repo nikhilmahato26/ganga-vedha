@@ -2,6 +2,7 @@
 
 import { createHash } from "node:crypto";
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { enquiries } from "@/db/schema";
@@ -12,6 +13,7 @@ import {
   type EnquiryResult,
 } from "@/lib/enquiry-schema";
 import { hasDatabase } from "@/lib/env";
+import { sendEnquiryNotification } from "@/lib/email";
 import {
   getAdventure,
   getClosures,
@@ -127,6 +129,25 @@ export async function submitEnquiry(raw: EnquiryInput): Promise<EnquiryResult> {
         `[enquiry, no DB configured] ${refCode} · GENERAL · ${data.subject} · ${phone}`,
       );
     }
+
+    // Emails the owner after the response is sent — never blocks or fails the enquiry.
+    after(() =>
+      sendEnquiryNotification({
+        refCode,
+        productKind: "general",
+        productName,
+        priceInr: null,
+        name: data.name,
+        phone,
+        email: data.email || null,
+        travelDate: data.travelDate || null,
+        groupSize: data.groupSize,
+        message: data.message || null,
+        source: data.source,
+        subject: data.subject || null,
+      }),
+    );
+
     return { ok: true, refCode, productName, persisted: hasDatabase() };
   }
 
@@ -227,6 +248,24 @@ export async function submitEnquiry(raw: EnquiryInput): Promise<EnquiryResult> {
         `${data.travelDate || "no date"} · ${data.groupSize} pax · via ${data.source}`,
     );
   }
+
+  // Emails the owner after the response is sent — never blocks or fails the enquiry.
+  after(() =>
+    sendEnquiryNotification({
+      refCode,
+      productKind: storedKind,
+      productName: product.name,
+      priceInr: priceSnapshot,
+      name: data.name,
+      phone,
+      email: data.email || null,
+      travelDate: data.travelDate || null,
+      groupSize: data.groupSize,
+      message: data.message || null,
+      source: data.source,
+      subject: null,
+    }),
+  );
 
   return {
     ok: true,

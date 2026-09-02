@@ -735,6 +735,28 @@ export const reviews = pgTable(
   ],
 );
 
+/**
+ * Small, owner-managed promo cards shown in a strip under the hero — a seasonal
+ * offer, a new package, a "monsoon rates" note. Optional image and call-to-
+ * action; toggled on and off from the admin panel.
+ */
+export const promotions = pgTable(
+  "promotions",
+  {
+    id: serial("id").primaryKey(),
+    title: varchar("title", { length: 120 }).notNull(),
+    body: varchar("body", { length: 300 }),
+    ctaLabel: varchar("cta_label", { length: 32 }),
+    ctaHref: varchar("cta_href", { length: 300 }),
+    mediaId: integer("media_id").references(() => media.id, { onDelete: "set null" }),
+    isActive: boolean("is_active").default(true).notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("promotions_active_idx").on(t.isActive, t.sortOrder)],
+);
+
 /* =============================================================================
    Audit
    ========================================================================== */
@@ -802,6 +824,7 @@ export type Rental = typeof rentals.$inferSelect;
 export type Closure = typeof closures.$inferSelect;
 export type Enquiry = typeof enquiries.$inferSelect;
 export type Review = typeof reviews.$inferSelect;
+export type Promotion = typeof promotions.$inferSelect;
 export type ServiceLine = typeof serviceLines.$inferSelect;
 export type SiteSettings = typeof siteSettings.$inferSelect;
 export type ContentBlock = typeof contentBlocks.$inferSelect;

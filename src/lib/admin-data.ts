@@ -14,6 +14,7 @@ import {
   media,
   mediaLinks,
   packages,
+  promotions,
   rentals,
   reviews,
   siteSettings,
@@ -34,6 +35,20 @@ export async function listAdventuresAdmin(
     .from(adventures)
     .where(eq(adventures.kind, kind))
     .orderBy(adventures.sortOrder);
+}
+
+/** Distinct operator names already used on published/draft bungee jumps. */
+export async function listBungeeBrands(): Promise<string[]> {
+  const rows = await getDb()
+    .select({ brand: adventures.brand })
+    .from(adventures)
+    .where(eq(adventures.kind, "bungee"));
+  const set = new Set<string>();
+  for (const r of rows) {
+    const b = r.brand?.trim();
+    if (b) set.add(b);
+  }
+  return [...set].sort((a, b) => a.localeCompare(b));
 }
 
 /** The non-river activities — paragliding, zip-lining — for their own admin list. */
@@ -101,6 +116,15 @@ export async function listDestinationOptions() {
 
 export async function listReviewsAdmin() {
   return getDb().select().from(reviews).orderBy(reviews.sortOrder);
+}
+
+export async function listPromotionsAdmin() {
+  return getDb().select().from(promotions).orderBy(promotions.sortOrder);
+}
+
+export async function getPromotionAdmin(id: number) {
+  const [row] = await getDb().select().from(promotions).where(eq(promotions.id, id)).limit(1);
+  return row ?? null;
 }
 
 /** Every gallery photo, published or not, newest-added first — the admin's own review of what's in it. */
@@ -319,6 +343,7 @@ export async function listUnusedMedia() {
         ),
         notExists(db.select().from(mediaLinks).where(eq(mediaLinks.mediaId, media.id))),
         notExists(db.select().from(galleryItems).where(eq(galleryItems.mediaId, media.id))),
+        notExists(db.select().from(promotions).where(eq(promotions.mediaId, media.id))),
       ),
     )
     .orderBy(desc(media.createdAt));

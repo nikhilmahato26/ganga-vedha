@@ -227,10 +227,21 @@ export type SiteSettings = {
   mapUrl: string;
   heroHeading: string;
   heroSubheading: string;
+  /** Absent in seed mode — there is no database to have uploaded one to. */
+  heroMedia?: MediaSource | null;
   announcement: string | null;
   announcementActive: boolean;
   riverStatusLabel: string;
   gaugeLocation: string;
+};
+
+export type Promotion = {
+  id: number;
+  title: string;
+  body: string | null;
+  ctaLabel: string | null;
+  ctaHref: string | null;
+  media: MediaSource | null;
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1697,4 +1708,9 @@ export async function getRentalsSeed(): Promise<Rental[]> {
 
 export async function getRentalSeed(slug: string): Promise<Rental | null> {
   return RENTALS.find((r) => r.slug === slug && r.isPublished) ?? null;
+}
+
+/** Owner-managed content — nothing to show until the admin adds one. */
+export async function getPromotionsSeed(): Promise<Promotion[]> {
+  return [];
 }

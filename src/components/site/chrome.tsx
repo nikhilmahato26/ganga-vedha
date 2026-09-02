@@ -102,24 +102,35 @@ export function SiteHeader({
   brandName,
   whatsappNumber,
   closedServices,
+  bungeeBrands = [],
 }: {
   brandName: string;
   whatsappNumber: string;
   /** Service keys currently closed, e.g. `["rafting", "bungee"]` — empty when everything is open. */
   closedServices: string[];
+  /** Bungee operators for the Adventures dropdown. */
+  bungeeBrands?: { name: string; slug: string }[];
 }) {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [raftOpen, setRaftOpen] = React.useState(false);
+  const [advOpen, setAdvOpen] = React.useState(false);
   const raftRef = React.useRef<HTMLDivElement>(null);
+  const advRef = React.useRef<HTMLDivElement>(null);
   const wa = whatsappHref(whatsappNumber, "Hi Ganga Vedha — I'd like to book a trip.");
   const closedIndex = useRotatingIndex(closedServices.length);
 
   React.useEffect(() => {
     function onDown(e: PointerEvent) {
-      if (raftRef.current && !raftRef.current.contains(e.target as Node)) setRaftOpen(false);
+      const t = e.target as Node;
+      if (raftRef.current && !raftRef.current.contains(t)) setRaftOpen(false);
+      if (advRef.current && !advRef.current.contains(t)) setAdvOpen(false);
     }
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") { setRaftOpen(false); setMenuOpen(false); }
+      if (e.key === "Escape") {
+        setRaftOpen(false);
+        setAdvOpen(false);
+        setMenuOpen(false);
+      }
     }
     document.addEventListener("pointerdown", onDown);
     document.addEventListener("keydown", onKey);
@@ -177,8 +188,50 @@ export function SiteHeader({
               </div>
             )}
           </div>
+          <div ref={advRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setAdvOpen((v) => !v)}
+              aria-expanded={advOpen}
+              aria-haspopup="true"
+              className="inline-flex h-11 items-center gap-1.5 rounded-md px-2.5 text-small font-semibold text-ink-muted transition-colors hover:bg-granite-100 hover:text-ink"
+            >
+              Adventures
+              <ChevronDown
+                className={cn("size-4 transition-transform", advOpen && "rotate-180")}
+                aria-hidden
+              />
+            </button>
+            {advOpen && (
+              <div className="absolute left-0 top-full mt-1 w-64 overflow-hidden rounded-lg bg-canvas p-1.5 shadow-lg">
+                <Link
+                  href="/adventures"
+                  onClick={() => setAdvOpen(false)}
+                  className="block rounded-sm px-3 py-2.5 text-small font-semibold text-ink no-underline transition-colors hover:bg-granite-100"
+                >
+                  All adventures
+                </Link>
+                {bungeeBrands.length > 0 && (
+                  <>
+                    <p className="px-3 pt-3 pb-1 text-label uppercase text-ink-faint">
+                      Bungee operators
+                    </p>
+                    {bungeeBrands.map((b) => (
+                      <Link
+                        key={b.slug}
+                        href={`/adventures?brand=${b.slug}`}
+                        onClick={() => setAdvOpen(false)}
+                        className="block rounded-sm px-3 py-2.5 text-small font-semibold text-ink no-underline transition-colors hover:bg-granite-100"
+                      >
+                        {b.name}
+                      </Link>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
           {[
-            ["Adventures", "/adventures"],
             ["Packages", "/packages"],
             ["Stays", "/stays"],
             ["Rentals", "/rentals"],
@@ -265,9 +318,30 @@ export function SiteHeader({
               >
                 Compare all stretches
               </Link>
+
+              <p className="mt-4 border-t border-hairline px-2 pb-2 pt-4 text-label uppercase text-ink-faint">
+                Adventures
+              </p>
+              <Link
+                href="/adventures"
+                onClick={() => setMenuOpen(false)}
+                className="flex min-h-12 items-center rounded-md px-2 text-small font-semibold text-ink no-underline"
+              >
+                All adventures
+              </Link>
+              {bungeeBrands.map((b) => (
+                <Link
+                  key={b.slug}
+                  href={`/adventures?brand=${b.slug}`}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex min-h-12 items-center rounded-md px-2 text-small font-semibold text-ink no-underline"
+                >
+                  {b.name}
+                </Link>
+              ))}
+
               <div className="mt-4 border-t border-hairline pt-4">
                 {[
-                  ["Adventures", "/adventures"],
                   ["Packages", "/packages"],
                   ["Stays & destinations", "/stays"],
                   ["Car & bike rental", "/rentals"],
