@@ -10,6 +10,7 @@ export const settingsSchema = z.object({
   mapUrl: z.union([z.literal(""), z.url()]),
   heroHeading: z.string().trim().max(300),
   heroSubheading: z.string().trim().max(600),
+  heroMediaId: z.coerce.number().int().positive().nullable(),
   announcement: z.string().trim().max(300).nullable(),
   announcementActive: z.coerce.boolean(),
   riverStatusLabel: z.string().trim().min(1).max(60),

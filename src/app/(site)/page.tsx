@@ -11,6 +11,7 @@ import { AdventureCard, CardLink, HotelCard } from "@/components/site/product-ca
 import { DestinationCard, PackageCard, RentalCard } from "@/components/site/catalog-cards";
 import { RaftingSection } from "@/components/site/rafting-section";
 import { BungeeBrands } from "@/components/site/bungee-brands";
+import { PromoStrip } from "@/components/site/promo-strip";
 import { GallerySection } from "@/components/site/gallery";
 import {
   getActivities,
@@ -21,6 +22,7 @@ import {
   getGalleryItems,
   getHotels,
   getPackages,
+  getPromotions,
   getRaftingByDistance,
   getRentals,
   getReviews,
@@ -79,6 +81,7 @@ export default async function LandingPage() {
     packages,
     destinations,
     rentals,
+    promotions,
   ] = await Promise.all([
     getSiteSettings(),
     getRaftingByDistance(),
@@ -92,6 +95,7 @@ export default async function LandingPage() {
     getPackages(),
     getDestinations(),
     getRentals(),
+    getPromotions(),
   ]);
   const whyUs = whyUsBlock ?? WHY_US_FALLBACK;
 
@@ -107,7 +111,7 @@ export default async function LandingPage() {
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="relative isolate overflow-hidden bg-jade-950">
         <MediaFrame
-          media={null}
+          media={settings.heroMedia ?? null}
           ratio="hero"
           standInSeed="ganga-vedha-hero"
           priority
@@ -182,6 +186,9 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Promotions ────────────────────────────────────────────────────── */}
+      <PromoStrip promotions={promotions} />
 
       {/* ── The three service lines ───────────────────────────────────────── */}
       <section id="adventures" className="container-page scroll-mt-28 pt-20">

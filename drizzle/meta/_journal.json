@@ -43,6 +43,13 @@
       "when": 1788101879307,
       "tag": "0005_narrow_squadron_supreme",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788343280489,
+      "tag": "0006_faulty_alex_wilder",
+      "breakpoints": true
     }
   ]
 }

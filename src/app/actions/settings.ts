@@ -42,6 +42,7 @@ export async function updateSettings(input: unknown): Promise<SettingsActionStat
       mapUrl: data.mapUrl || null,
       heroHeading: data.heroHeading,
       heroSubheading: data.heroSubheading,
+      heroMediaId: data.heroMediaId,
       announcement: data.announcement,
       announcementActive: data.announcementActive,
       riverStatusLabel: data.riverStatusLabel,

@@ -12,6 +12,7 @@ import {
   media as mediaTable,
   mediaLinks as mediaLinksTable,
   packages as packagesTable,
+  promotions as promotionsTable,
   rentals as rentalsTable,
   reviews as reviewsTable,
   siteSettings as siteSettingsTable,
@@ -33,6 +34,7 @@ export type {
   HotelRoom,
   Package,
   PackageItinerary,
+  Promotion,
   Rental,
   Review,
   ServiceKey,
@@ -46,6 +48,7 @@ import type {
   GalleryItem,
   Hotel,
   Package,
+  Promotion,
   Rental,
   Review,
   SiteSettings,
@@ -76,6 +79,7 @@ const TAGS = {
   closures: "closures",
   content: "content-blocks",
   gallery: "gallery",
+  promotions: "promotions",
   destinations: "destinations",
   packages: "packages",
   rentals: "rentals",
@@ -264,7 +268,10 @@ function mapClosure(row: typeof closuresTable.$inferSelect): Closure {
   };
 }
 
-function mapSettings(row: typeof siteSettingsTable.$inferSelect): SiteSettings {
+function mapSettings(
+  row: typeof siteSettingsTable.$inferSelect,
+  heroMediaRow?: typeof mediaTable.$inferSelect,
+): SiteSettings {
   return {
     brandName: row.brandName,
     tagline: row.tagline ?? "",
@@ -275,10 +282,25 @@ function mapSettings(row: typeof siteSettingsTable.$inferSelect): SiteSettings {
     mapUrl: row.mapUrl ?? "",
     heroHeading: row.heroHeading ?? "",
     heroSubheading: row.heroSubheading ?? "",
+    heroMedia: toMediaSource(heroMediaRow),
     announcement: row.announcement,
     announcementActive: row.announcementActive,
     riverStatusLabel: row.riverStatusLabel,
     gaugeLocation: row.gaugeLocation,
+  };
+}
+
+function mapPromotion(
+  row: typeof promotionsTable.$inferSelect,
+  mediaRow?: typeof mediaTable.$inferSelect,
+): Promotion {
+  return {
+    id: row.id,
+    title: row.title,
+    body: row.body,
+    ctaLabel: row.ctaLabel,
+    ctaHref: row.ctaHref,
+    media: toMediaSource(mediaRow),
   };
 }
 
@@ -296,10 +318,29 @@ export async function getSiteSettings(): Promise<SiteSettings> {
         .from(siteSettingsTable)
         .where(eq(siteSettingsTable.id, 1))
         .limit(1);
-      return row ? mapSettings(row) : seed.getSiteSettingsSeed();
+      if (!row) return seed.getSiteSettingsSeed();
+      const heroMap = await getMediaByIds([row.heroMediaId]);
+      return mapSettings(row, row.heroMediaId ? heroMap.get(row.heroMediaId) : undefined);
     },
     ["site-settings"],
     { tags: [TAGS.settings], revalidate: 300 },
+  )();
+}
+
+export async function getPromotions(): Promise<Promotion[]> {
+  if (!hasDatabase()) return seed.getPromotionsSeed();
+  return cache(
+    async () => {
+      const rows = await getDb()
+        .select()
+        .from(promotionsTable)
+        .where(eq(promotionsTable.isActive, true))
+        .orderBy(promotionsTable.sortOrder);
+      const mediaMap = await getMediaByIds(rows.map((r) => r.mediaId));
+      return rows.map((r) => mapPromotion(r, r.mediaId ? mediaMap.get(r.mediaId) : undefined));
+    },
+    ["promotions"],
+    { tags: [TAGS.promotions], revalidate: 120 },
   )();
 }
 

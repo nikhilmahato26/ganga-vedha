@@ -74,7 +74,9 @@ export function ImageUploader({
     | "site"
     | "packages"
     | "rentals"
-    | "destinations";
+    | "destinations"
+    | "hero"
+    | "promotions";
   items: MediaItem[];
   onChange: (items: MediaItem[]) => void;
   /** 1 for a single cover image; higher for a gallery. */
