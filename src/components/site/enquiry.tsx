@@ -13,6 +13,7 @@ import {
 } from "@/components/ui";
 import { formatINR, todayIST, whatsappHref } from "@/lib/format";
 import { submitEnquiry } from "@/app/actions/enquiry";
+import { INDIAN_STATES } from "@/lib/enquiry-schema";
 
 export type EnquiryProduct = {
   kind: "rafting" | "bungee" | "paragliding" | "zipline" | "hotel" | "package" | "rental";
@@ -24,6 +25,35 @@ export type EnquiryProduct = {
 };
 
 type Source = "hero" | "card" | "detail" | "floating" | "contact";
+
+/**
+ * Where the guest is travelling from. A picker rather than a text box for the
+ * same reason the operator picker is one: the owner sorts the inbox by state,
+ * and "UK", "Uttrakhand" and "Uttarakhand" are one place typed three ways.
+ * Optional — an enquiry is worth more than a complete form.
+ */
+export function StateField({
+  value,
+  onChange,
+  error,
+}: {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  error?: string;
+}) {
+  return (
+    <Field label="Which state are you travelling from?" error={error}>
+      <Select value={value} onChange={onChange}>
+        <option value="">Select a state (optional)</option>
+        {INDIAN_STATES.map((st) => (
+          <option key={st} value={st}>
+            {st}
+          </option>
+        ))}
+      </Select>
+    </Field>
+  );
+}
 
 export function EnquiryDialog({
   product,
@@ -54,6 +84,7 @@ export function EnquiryDialog({
     name: "",
     phone: "",
     email: "",
+    state: "",
     travelDate: "",
     groupSize: "2",
     message: "",
@@ -185,6 +216,12 @@ export function EnquiryDialog({
               autoComplete="tel"
             />
           </Field>
+
+          <StateField
+            value={values.state}
+            onChange={set("state")}
+            error={errors.state}
+          />
 
           <Field label="Date" error={errors.travelDate} hint="Leave blank if you're flexible.">
             <Input

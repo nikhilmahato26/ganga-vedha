@@ -50,6 +50,13 @@
       "when": 1788343280489,
       "tag": "0006_faulty_alex_wilder",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788707134820,
+      "tag": "0007_aspiring_garia",
+      "breakpoints": true
     }
   ]
 }

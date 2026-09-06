@@ -51,6 +51,7 @@ function toCsv(rows: Enquiry[]): string {
     "Date",
     "Name",
     "Phone",
+    "State",
     "Product",
     "Price",
     "Travel date",
@@ -66,6 +67,7 @@ function toCsv(rows: Enquiry[]): string {
       formatDateTimeIST(r.createdAt),
       r.name,
       formatPhoneIN(r.phone),
+      r.state ?? "",
       r.productNameSnapshot,
       r.productPriceSnapshotInr ?? "",
       r.travelDate ?? "",
@@ -167,7 +169,10 @@ export function BookingInbox({ items }: { items: Enquiry[] }) {
                   <Td className="whitespace-nowrap text-ink-muted">{formatDateTimeIST(r.createdAt)}</Td>
                   <Td className="whitespace-nowrap">
                     <p className="font-semibold text-ink">{r.name}</p>
-                    <p className="text-caption text-ink-faint">{formatPhoneIN(r.phone)}</p>
+                    <p className="text-caption text-ink-faint">
+                      {formatPhoneIN(r.phone)}
+                      {r.state && <span> · {r.state}</span>}
+                    </p>
                   </Td>
                   <Td className="max-w-48 truncate">{r.productNameSnapshot}</Td>
                   <Td className="text-right tabular">

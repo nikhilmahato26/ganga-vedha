@@ -460,6 +460,9 @@ export function SiteHeader({
               className="hidden sm:inline-flex"
             />
           )}
+          {/* The visible label is the CTA; the aria-label keeps the destination
+              honest, since this leaves for WhatsApp rather than opening a form
+              on the page. */}
           {wa && (
             <LinkButton
               href={wa}
@@ -467,9 +470,10 @@ export function SiteHeader({
               rel="noopener"
               variant="secondary"
               className="hidden sm:inline-flex"
+              aria-label="Book now on WhatsApp"
             >
               <MessageCircle className="size-4" aria-hidden />
-              WhatsApp
+              Book now
             </LinkButton>
           )}
           <button
@@ -645,7 +649,7 @@ export function SiteHeader({
                     className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-jade-700 font-semibold text-white no-underline"
                   >
                     <MessageCircle className="size-4" aria-hidden />
-                    Message us on WhatsApp
+                    Book now on WhatsApp
                   </a>
                 </div>
               )}

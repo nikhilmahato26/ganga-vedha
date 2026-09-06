@@ -680,6 +680,8 @@ export const enquiries = pgTable(
     name: varchar("name", { length: 120 }).notNull(),
     phone: varchar("phone", { length: 10 }).notNull(),
     email: varchar("email", { length: 254 }),
+    /** The state the guest is travelling from — one of `INDIAN_STATES`. */
+    state: varchar("state", { length: 60 }),
     travelDate: date("travel_date"),
     groupSize: smallint("group_size"),
     message: text("message"),

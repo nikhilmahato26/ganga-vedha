@@ -11,6 +11,7 @@ export type EnquiryEmail = {
   name: string;
   phone: string;
   email: string | null;
+  state: string | null;
   travelDate: string | null;
   groupSize: number | null;
   message: string | null;
@@ -66,6 +67,7 @@ export async function sendEnquiryNotification(e: EnquiryEmail): Promise<void> {
       ["Name", e.name],
       ["Phone", formatPhoneIN(e.phone)],
       ["Email", e.email || "—"],
+      ["Travelling from", e.state || "—"],
       ["Travel date", e.travelDate ? formatDateIST(e.travelDate) : "flexible / not given"],
       ["Group size", e.groupSize ? String(e.groupSize) : "—"],
       ["Came from", e.source],

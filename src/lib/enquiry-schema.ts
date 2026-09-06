@@ -27,6 +27,52 @@ export const ENQUIRY_PRODUCT_KINDS = [
   "general",
 ] as const;
 
+/**
+ * Indian states and union territories, plus an escape hatch for the foreign
+ * visitors Rishikesh gets a lot of. Both enquiry forms render this list and
+ * the server validates against it, so the admin inbox never has to reconcile
+ * "UK", "Uttrakhand" and "Uttarakhand" as three different places.
+ */
+export const INDIAN_STATES = [
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+  "Andaman & Nicobar Islands",
+  "Chandigarh",
+  "Dadra & Nagar Haveli and Daman & Diu",
+  "Delhi",
+  "Jammu & Kashmir",
+  "Ladakh",
+  "Lakshadweep",
+  "Puducherry",
+  "Outside India",
+] as const;
+
 export const enquirySchema = z
   .object({
     name: z
@@ -41,6 +87,23 @@ export const enquirySchema = z
         message: "Indian mobile numbers are 10 digits starting with 6, 7, 8 or 9.",
       }),
     email: z.union([z.literal(""), z.email("That email address doesn't look right.")]),
+    /**
+     * Which state the guest is travelling from. Optional, like the email and
+     * the date — an enquiry is worth more than a complete form — but pinned to
+     * the known list so nothing arbitrary can be posted straight past the UI.
+     */
+    state: z
+      .string()
+      .trim()
+      .max(60)
+      // A plain string rather than `z.enum`, so the forms can hold the value
+      // as the `string` a <select> hands back — the check below is what
+      // actually enforces the list, on the server, where it counts.
+      .refine((v) => v === "" || (INDIAN_STATES as readonly string[]).includes(v), {
+        message: "Pick your state from the list.",
+      })
+      .optional()
+      .default(""),
     travelDate: z.string().refine((v) => v === "" || v >= todayIST(), {
       message: "Pick a date from today onwards.",
     }),

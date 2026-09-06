@@ -117,6 +117,7 @@ export async function submitEnquiry(raw: EnquiryInput): Promise<EnquiryResult> {
           name: data.name,
           phone,
           email: data.email || null,
+          state: data.state || null,
           travelDate: data.travelDate || null,
           groupSize: data.groupSize,
           message: data.message || null,
@@ -126,7 +127,8 @@ export async function submitEnquiry(raw: EnquiryInput): Promise<EnquiryResult> {
         });
     } else {
       console.info(
-        `[enquiry, no DB configured] ${refCode} · GENERAL · ${data.subject} · ${phone}`,
+        `[enquiry, no DB configured] ${refCode} · GENERAL · ${data.subject} · ${phone}` +
+          `${data.state ? ` · from ${data.state}` : ""}`,
       );
     }
 
@@ -140,6 +142,7 @@ export async function submitEnquiry(raw: EnquiryInput): Promise<EnquiryResult> {
         name: data.name,
         phone,
         email: data.email || null,
+        state: data.state || null,
         travelDate: data.travelDate || null,
         groupSize: data.groupSize,
         message: data.message || null,
@@ -235,6 +238,7 @@ export async function submitEnquiry(raw: EnquiryInput): Promise<EnquiryResult> {
         name: data.name,
         phone,
         email: data.email || null,
+        state: data.state || null,
         travelDate: data.travelDate || null,
         groupSize: data.groupSize,
         message: data.message || null,
@@ -245,7 +249,8 @@ export async function submitEnquiry(raw: EnquiryInput): Promise<EnquiryResult> {
   } else {
     console.info(
       `[enquiry, no DB configured] ${refCode} · ${product.name} @ ₹${priceSnapshot ?? "quote"} · ${phone} · ` +
-        `${data.travelDate || "no date"} · ${data.groupSize} pax · via ${data.source}`,
+        `${data.travelDate || "no date"} · ${data.groupSize} pax · ` +
+        `${data.state || "state not given"} · via ${data.source}`,
     );
   }
 
@@ -259,6 +264,7 @@ export async function submitEnquiry(raw: EnquiryInput): Promise<EnquiryResult> {
       name: data.name,
       phone,
       email: data.email || null,
+      state: data.state || null,
       travelDate: data.travelDate || null,
       groupSize: data.groupSize,
       message: data.message || null,

@@ -5,6 +5,7 @@ import { ArrowRight, CircleCheck, MessageCircle } from "lucide-react";
 import { Button, Field, Input, LinkButton, Select, Textarea } from "@/components/ui";
 import { todayIST, whatsappHref } from "@/lib/format";
 import { submitEnquiry } from "@/app/actions/enquiry";
+import { StateField } from "@/components/site/enquiry";
 
 /**
  * The contact-page enquiry form. Unlike the product modal, this has no trip
@@ -20,6 +21,7 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
     name: "",
     phone: "",
     email: "",
+    state: "",
     subject: "",
     travelDate: "",
     groupSize: "2",
@@ -121,6 +123,8 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
           placeholder="you@example.com"
         />
       </Field>
+
+      <StateField value={values.state} onChange={set("state")} error={errors.state} />
 
       <Field
         label="Destination, activity or package"
