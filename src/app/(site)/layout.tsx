@@ -16,18 +16,25 @@ import {
 import {
   getBungeeBrands,
   getClosures,
+  getDestinations,
+  getPackageCategories,
   getRaftingByDistance,
+  getRentalKinds,
   getSiteSettings,
   isSeedContent,
 } from "@/lib/content";
 import { resolveClosure } from "@/lib/closure";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [settings, closures, bungeeBrands] = await Promise.all([
-    getSiteSettings(),
-    getClosures(),
-    getBungeeBrands(),
-  ]);
+  const [settings, closures, bungeeBrands, packageCategories, rentalKinds, destinations] =
+    await Promise.all([
+      getSiteSettings(),
+      getClosures(),
+      getBungeeBrands(),
+      getPackageCategories(),
+      getRentalKinds(),
+      getDestinations(),
+    ]);
 
   const raftingClosure = resolveClosure(closures, { service: "rafting" });
   // No full-screen takeover on page load, anywhere, for any scope — a
@@ -47,6 +54,15 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
     ] as const
   ).filter((s): s is "rafting" | "bungee" | "hotel" => Boolean(s));
 
+  // The nav only needs a name, a slug and the region — the rest of a
+  // destination row (cover image, FAQs, how-to-reach) would ride into the
+  // client bundle on every page for nothing.
+  const navDestinations = destinations.map((d) => ({
+    name: d.name,
+    slug: d.slug,
+    note: d.region,
+  }));
+
   return (
     <div className="flex min-h-dvh flex-col">
       {isSeedContent() && <SeedBanner />}
@@ -60,6 +76,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         whatsappNumber={settings.whatsappNumber}
         closedServices={closedServices}
         bungeeBrands={bungeeBrands}
+        packageCategories={packageCategories}
+        rentalKinds={rentalKinds}
+        destinations={navDestinations}
       />
       <main className="flex-1">{children}</main>
       <SiteFooter />

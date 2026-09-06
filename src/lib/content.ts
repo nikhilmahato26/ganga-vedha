@@ -773,6 +773,39 @@ export async function getRentals(): Promise<Rental[]> {
   )();
 }
 
+/**
+ * Distinct package categories, first-seen order, with a URL slug for the
+ * `/packages?category=` grouping. Powers the Packages list in the nav —
+ * same shape and same reasoning as `getBungeeBrands`.
+ */
+export async function getPackageCategories(): Promise<{ name: string; slug: string }[]> {
+  const list = await getPackages();
+  const bySlug = new Map<string, string>();
+  for (const p of list) {
+    const name = p.category?.trim();
+    if (!name) continue;
+    const slug = slugify(name);
+    if (slug && !bySlug.has(slug)) bySlug.set(slug, name);
+  }
+  return [...bySlug.entries()].map(([slug, name]) => ({ slug, name }));
+}
+
+/**
+ * Which rental kinds actually have something published, in card order, so
+ * the nav never offers "Bikes & scooters" when there is not a single bike
+ * listed. Powers the `/rentals?kind=` grouping.
+ */
+export async function getRentalKinds(): Promise<{ kind: Rental["kind"]; count: number }[]> {
+  const list = await getRentals();
+  const counts = new Map<Rental["kind"], number>();
+  for (const r of list) counts.set(r.kind, (counts.get(r.kind) ?? 0) + 1);
+  // Cars first, then bikes — the order the page title, the footer and every
+  // bit of copy already say it in, rather than whichever happens to sort first.
+  return (["car", "bike"] as const)
+    .filter((kind) => counts.has(kind))
+    .map((kind) => ({ kind, count: counts.get(kind)! }));
+}
+
 export async function getRental(slug: string): Promise<Rental | null> {
   if (!hasDatabase()) return seed.getRentalSeed(slug);
   return cache(
