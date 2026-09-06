@@ -12,6 +12,7 @@ import {
   TriangleAlert,
   Menu,
   MessageCircle,
+  Search,
   X,
 } from "lucide-react";
 import { AvailabilityPill, Button, LinkButton } from "@/components/ui";
@@ -98,37 +99,203 @@ export function StatusStrap({
   );
 }
 
+/** A row in one of the header's dropdowns — a brand, a category, a city. */
+export type NavItem = { name: string; slug: string; note?: string | null };
+
+/** The vehicle wording the Rentals dropdown uses, per rental kind. */
+const RENTAL_KIND_LABEL: Record<string, string> = {
+  car: "Cars with a driver",
+  bike: "Bikes & scooters",
+};
+
+/** Shared item and caption styling, so every dropdown row looks the same. */
+const MENU_ITEM =
+  "block rounded-sm px-3 py-2.5 text-small font-semibold text-ink no-underline transition-colors hover:bg-granite-100";
+const DRAWER_ITEM =
+  "flex min-h-12 items-center rounded-md px-2 text-small font-semibold text-ink no-underline";
+
+function MenuCaption({ children }: { children: React.ReactNode }) {
+  return <p className="px-3 pt-3 pb-1 text-label uppercase text-ink-faint">{children}</p>;
+}
+
+/**
+ * One header dropdown. The open/closed state lives in `SiteHeader` — only one
+ * menu is ever open, and clicking a second button swaps rather than stacking.
+ */
+function NavMenu({
+  label,
+  open,
+  onToggle,
+  width = "w-64",
+  children,
+}: {
+  label: string;
+  open: boolean;
+  onToggle: () => void;
+  width?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-haspopup="true"
+        className="inline-flex h-11 items-center gap-1.5 rounded-md px-2.5 text-small font-semibold text-ink-muted transition-colors hover:bg-granite-100 hover:text-ink"
+      >
+        {label}
+        <ChevronDown
+          className={cn("size-4 transition-transform", open && "rotate-180")}
+          aria-hidden
+        />
+      </button>
+      {open && (
+        <div
+          className={cn(
+            "absolute left-0 top-full mt-1 overflow-hidden rounded-lg bg-canvas p-1.5 shadow-lg",
+            width,
+          )}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * The destination picker inside the Stays menu. Ten cities today and more
+ * whenever the owner adds one, which is past the point where a plain list is
+ * quick to scan — so it types down. Enter goes straight to the first match,
+ * which is what someone who typed "rish" and stopped reading actually wants;
+ * each city lands on `/stays/<slug>`, the page listing every stay there.
+ */
+function DestinationSearch({
+  destinations,
+  onNavigate,
+  variant = "menu",
+}: {
+  destinations: NavItem[];
+  onNavigate: () => void;
+  variant?: "menu" | "drawer";
+}) {
+  const router = useRouter();
+  const [query, setQuery] = React.useState("");
+  const needle = query.trim().toLowerCase();
+  const matches = React.useMemo(
+    () =>
+      needle
+        ? destinations.filter((d) =>
+            `${d.name} ${d.note ?? ""}`.toLowerCase().includes(needle),
+          )
+        : destinations,
+    [destinations, needle],
+  );
+
+  function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== "Enter" || matches.length === 0) return;
+    e.preventDefault();
+    onNavigate();
+    router.push(`/stays/${matches[0].slug}`);
+  }
+
+  const menu = variant === "menu";
+
+  return (
+    <>
+      <div className={cn("relative", menu ? "px-1.5 pt-1.5 pb-1" : "px-2 pt-1 pb-2")}>
+        <Search
+          className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-ink-faint"
+          aria-hidden
+        />
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={onKeyDown}
+          placeholder="Search a city…"
+          aria-label="Search destinations"
+          autoFocus={menu}
+          className="min-h-11 w-full rounded-md border border-granite-300 bg-canvas py-2 pl-9 pr-3 text-small text-ink transition-[border-color,box-shadow] duration-[--duration-fast] placeholder:text-ink-faint hover:border-granite-400 focus:border-jade-600 focus:outline-none focus:ring-2 focus:ring-jade-600/25"
+        />
+      </div>
+
+      {matches.length === 0 ? (
+        <p className={cn("text-small text-ink-muted", menu ? "px-3 py-3" : "px-2 py-3")}>
+          No destination matches “{query.trim()}”. Ask us on WhatsApp — we plan trips
+          beyond this list too.
+        </p>
+      ) : (
+        <div className={menu ? "max-h-72 overflow-y-auto" : undefined}>
+          {matches.map((d) => (
+            <Link
+              key={d.slug}
+              href={`/stays/${d.slug}`}
+              onClick={onNavigate}
+              className={cn(
+                menu ? MENU_ITEM : DRAWER_ITEM,
+                "flex items-center justify-between gap-3",
+              )}
+            >
+              {d.name}
+              {d.note && (
+                <span className="shrink-0 text-caption font-normal text-ink-faint">
+                  {d.note}
+                </span>
+              )}
+            </Link>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 export function SiteHeader({
   brandName,
   whatsappNumber,
   closedServices,
   bungeeBrands = [],
+  packageCategories = [],
+  rentalKinds = [],
+  destinations = [],
 }: {
   brandName: string;
   whatsappNumber: string;
   /** Service keys currently closed, e.g. `["rafting", "bungee"]` — empty when everything is open. */
   closedServices: string[];
   /** Bungee operators for the Adventures dropdown. */
-  bungeeBrands?: { name: string; slug: string }[];
+  bungeeBrands?: NavItem[];
+  /** Package categories — Pilgrimage, Yoga & wellness — for the Packages dropdown. */
+  packageCategories?: NavItem[];
+  /** Rental kinds that actually have something published, for the Rentals dropdown. */
+  rentalKinds?: { kind: string; count: number }[];
+  /** Destinations for the searchable Stays dropdown. `note` carries the region. */
+  destinations?: NavItem[];
 }) {
   const [menuOpen, setMenuOpen] = React.useState(false);
-  const [raftOpen, setRaftOpen] = React.useState(false);
-  const [advOpen, setAdvOpen] = React.useState(false);
-  const raftRef = React.useRef<HTMLDivElement>(null);
-  const advRef = React.useRef<HTMLDivElement>(null);
+  const [openMenu, setOpenMenu] = React.useState<string | null>(null);
+  const navRef = React.useRef<HTMLElement>(null);
   const wa = whatsappHref(whatsappNumber, "Hi Ganga Vedha — I'd like to book a trip.");
   const closedIndex = useRotatingIndex(closedServices.length);
 
+  const closeMenus = React.useCallback(() => setOpenMenu(null), []);
+  const toggle = React.useCallback(
+    (id: string) => setOpenMenu((cur) => (cur === id ? null : id)),
+    [],
+  );
+
   React.useEffect(() => {
+    // One listener for the whole nav, not one per dropdown: a press inside the
+    // nav either hits the open panel (which handles itself) or another menu's
+    // button (which swaps), so anything outside is the only case to close on.
     function onDown(e: PointerEvent) {
-      const t = e.target as Node;
-      if (raftRef.current && !raftRef.current.contains(t)) setRaftOpen(false);
-      if (advRef.current && !advRef.current.contains(t)) setAdvOpen(false);
+      if (navRef.current && !navRef.current.contains(e.target as Node)) setOpenMenu(null);
     }
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        setRaftOpen(false);
-        setAdvOpen(false);
+        setOpenMenu(null);
         setMenuOpen(false);
       }
     }
@@ -151,90 +318,126 @@ export function SiteHeader({
           {brandName}
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
-          <div ref={raftRef} className="relative">
-            <button
-              type="button"
-              onClick={() => setRaftOpen((v) => !v)}
-              aria-expanded={raftOpen}
-              aria-haspopup="true"
-              className="inline-flex h-11 items-center gap-1.5 rounded-md px-3.5 text-small font-semibold text-ink-muted transition-colors hover:bg-granite-100 hover:text-ink"
+        <nav ref={navRef} className="hidden items-center gap-1 lg:flex" aria-label="Main">
+          <NavMenu
+            label="Rafting"
+            open={openMenu === "rafting"}
+            onToggle={() => toggle("rafting")}
+            width="w-60"
+          >
+            {RAFTING_LINKS.map(([label, href]) => (
+              <Link key={label} href={href} onClick={closeMenus} className={MENU_ITEM}>
+                {label}
+              </Link>
+            ))}
+            <Link
+              href="/rafting"
+              onClick={closeMenus}
+              className="mt-1 block rounded-sm border-t border-hairline px-3 pt-3 pb-2 text-small font-semibold text-link no-underline"
             >
-              Rafting
-              <ChevronDown
-                className={cn("size-4 transition-transform", raftOpen && "rotate-180")}
-                aria-hidden
-              />
-            </button>
-            {raftOpen && (
-              <div className="absolute left-0 top-full mt-1 w-60 overflow-hidden rounded-lg bg-canvas p-1.5 shadow-lg">
-                {RAFTING_LINKS.map(([label, href]) => (
+              Compare all stretches
+            </Link>
+          </NavMenu>
+
+          <NavMenu
+            label="Adventures"
+            open={openMenu === "adventures"}
+            onToggle={() => toggle("adventures")}
+          >
+            <Link href="/adventures" onClick={closeMenus} className={MENU_ITEM}>
+              All adventures
+            </Link>
+            {bungeeBrands.length > 0 && (
+              <>
+                <MenuCaption>Bungee operators</MenuCaption>
+                {bungeeBrands.map((b) => (
                   <Link
-                    key={label}
-                    href={href}
-                    onClick={() => setRaftOpen(false)}
-                    className="block rounded-sm px-3 py-2.5 text-small font-semibold text-ink no-underline transition-colors hover:bg-granite-100"
+                    key={b.slug}
+                    href={`/adventures?brand=${b.slug}`}
+                    onClick={closeMenus}
+                    className={MENU_ITEM}
                   >
-                    {label}
+                    {b.name}
                   </Link>
                 ))}
-                <Link
-                  href="/rafting"
-                  onClick={() => setRaftOpen(false)}
-                  className="mt-1 block rounded-sm border-t border-hairline px-3 pt-3 pb-2 text-small font-semibold text-link no-underline"
-                >
-                  Compare all stretches
-                </Link>
-              </div>
+              </>
             )}
-          </div>
-          <div ref={advRef} className="relative">
-            <button
-              type="button"
-              onClick={() => setAdvOpen((v) => !v)}
-              aria-expanded={advOpen}
-              aria-haspopup="true"
-              className="inline-flex h-11 items-center gap-1.5 rounded-md px-2.5 text-small font-semibold text-ink-muted transition-colors hover:bg-granite-100 hover:text-ink"
-            >
-              Adventures
-              <ChevronDown
-                className={cn("size-4 transition-transform", advOpen && "rotate-180")}
-                aria-hidden
-              />
-            </button>
-            {advOpen && (
-              <div className="absolute left-0 top-full mt-1 w-64 overflow-hidden rounded-lg bg-canvas p-1.5 shadow-lg">
-                <Link
-                  href="/adventures"
-                  onClick={() => setAdvOpen(false)}
-                  className="block rounded-sm px-3 py-2.5 text-small font-semibold text-ink no-underline transition-colors hover:bg-granite-100"
-                >
-                  All adventures
-                </Link>
-                {bungeeBrands.length > 0 && (
-                  <>
-                    <p className="px-3 pt-3 pb-1 text-label uppercase text-ink-faint">
-                      Bungee operators
-                    </p>
-                    {bungeeBrands.map((b) => (
-                      <Link
-                        key={b.slug}
-                        href={`/adventures?brand=${b.slug}`}
-                        onClick={() => setAdvOpen(false)}
-                        className="block rounded-sm px-3 py-2.5 text-small font-semibold text-ink no-underline transition-colors hover:bg-granite-100"
-                      >
-                        {b.name}
-                      </Link>
-                    ))}
-                  </>
-                )}
-              </div>
+          </NavMenu>
+
+          <NavMenu
+            label="Packages"
+            open={openMenu === "packages"}
+            onToggle={() => toggle("packages")}
+          >
+            <Link href="/packages" onClick={closeMenus} className={MENU_ITEM}>
+              All packages
+            </Link>
+            {packageCategories.length > 0 && (
+              <>
+                <MenuCaption>By type</MenuCaption>
+                {packageCategories.map((c) => (
+                  <Link
+                    key={c.slug}
+                    href={`/packages?category=${c.slug}`}
+                    onClick={closeMenus}
+                    className={MENU_ITEM}
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </>
             )}
-          </div>
+          </NavMenu>
+
+          <NavMenu
+            label="Stays"
+            open={openMenu === "stays"}
+            onToggle={() => toggle("stays")}
+            width="w-80"
+          >
+            <Link href="/stays" onClick={closeMenus} className={MENU_ITEM}>
+              All stays &amp; destinations
+            </Link>
+            <Link href="/hotels" onClick={closeMenus} className={MENU_ITEM}>
+              Our Rishikesh properties
+            </Link>
+            {destinations.length > 0 && (
+              <>
+                <MenuCaption>Destinations</MenuCaption>
+                <DestinationSearch destinations={destinations} onNavigate={closeMenus} />
+              </>
+            )}
+          </NavMenu>
+
+          <NavMenu
+            label="Rentals"
+            open={openMenu === "rentals"}
+            onToggle={() => toggle("rentals")}
+          >
+            <Link href="/rentals" onClick={closeMenus} className={MENU_ITEM}>
+              All rentals
+            </Link>
+            {rentalKinds.length > 0 && (
+              <>
+                <MenuCaption>By vehicle</MenuCaption>
+                {rentalKinds.map(({ kind, count }) => (
+                  <Link
+                    key={kind}
+                    href={`/rentals?kind=${kind}`}
+                    onClick={closeMenus}
+                    className={cn(MENU_ITEM, "flex items-center justify-between gap-3")}
+                  >
+                    {RENTAL_KIND_LABEL[kind] ?? kind}
+                    <span className="shrink-0 text-caption font-normal text-ink-faint">
+                      {count}
+                    </span>
+                  </Link>
+                ))}
+              </>
+            )}
+          </NavMenu>
+
           {[
-            ["Packages", "/packages"],
-            ["Stays", "/stays"],
-            ["Rentals", "/rentals"],
             ["Gallery", "/gallery"],
             ["About", "/about"],
             ["Contact", "/contact"],
@@ -280,102 +483,176 @@ export function SiteHeader({
         </div>
       </div>
 
-      {menuOpen && (
-        <div className="fixed inset-0 z-(--z-overlay) lg:hidden">
-          <div
-            className="absolute inset-0 bg-granite-950/55"
-            onClick={() => setMenuOpen(false)}
-            aria-hidden
-          />
-          <div className="absolute inset-y-0 right-0 flex w-[min(20rem,88vw)] flex-col bg-canvas shadow-xl">
-            <div className="flex h-16 items-center justify-between border-b border-hairline px-5">
-              <span className="text-subtitle text-ink">Menu</span>
-              <button
-                type="button"
-                onClick={() => setMenuOpen(false)}
-                className="grid size-11 place-items-center rounded-md text-ink-faint"
-              >
-                <X className="size-5" aria-hidden />
-                <span className="sr-only">Close menu</span>
-              </button>
-            </div>
-            <nav className="flex-1 overflow-y-auto p-4" aria-label="Mobile">
-              <p className="px-2 pb-2 text-label uppercase text-ink-faint">Rafting</p>
-              {RAFTING_LINKS.map(([label, href]) => (
-                <Link
-                  key={label}
-                  href={href}
+      {/*
+        Portalled to `document.body` for the same reason `ClosureNoticeVisual`
+        is: this header carries `backdrop-blur-md`, and a backdrop-filter makes
+        its element a containing block for `fixed` descendants — so `inset-0`
+        here resolved to the 64px header box and squashed the whole drawer into
+        it. Only ever mounted after a click, well past hydration, so `document`
+        is always there.
+      */}
+      {menuOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-(--z-overlay) lg:hidden">
+            <div
+              className="absolute inset-0 bg-granite-950/55"
+              onClick={() => setMenuOpen(false)}
+              aria-hidden
+            />
+            <div className="absolute inset-y-0 right-0 flex w-[min(20rem,88vw)] flex-col bg-canvas shadow-xl">
+              <div className="flex h-16 items-center justify-between border-b border-hairline px-5">
+                <span className="text-subtitle text-ink">Menu</span>
+                <button
+                  type="button"
                   onClick={() => setMenuOpen(false)}
-                  className="flex min-h-12 items-center rounded-md px-2 text-small font-semibold text-ink no-underline"
+                  className="grid size-11 place-items-center rounded-md text-ink-faint"
                 >
-                  {label}
-                </Link>
-              ))}
-              <Link
-                href="/rafting"
-                onClick={() => setMenuOpen(false)}
-                className="flex min-h-12 items-center rounded-md px-2 text-small font-semibold text-link no-underline"
-              >
-                Compare all stretches
-              </Link>
-
-              <p className="mt-4 border-t border-hairline px-2 pb-2 pt-4 text-label uppercase text-ink-faint">
-                Adventures
-              </p>
-              <Link
-                href="/adventures"
-                onClick={() => setMenuOpen(false)}
-                className="flex min-h-12 items-center rounded-md px-2 text-small font-semibold text-ink no-underline"
-              >
-                All adventures
-              </Link>
-              {bungeeBrands.map((b) => (
-                <Link
-                  key={b.slug}
-                  href={`/adventures?brand=${b.slug}`}
-                  onClick={() => setMenuOpen(false)}
-                  className="flex min-h-12 items-center rounded-md px-2 text-small font-semibold text-ink no-underline"
-                >
-                  {b.name}
-                </Link>
-              ))}
-
-              <div className="mt-4 border-t border-hairline pt-4">
-                {[
-                  ["Packages", "/packages"],
-                  ["Stays & destinations", "/stays"],
-                  ["Car & bike rental", "/rentals"],
-                  ["Gallery", "/gallery"],
-                  ["About us", "/about"],
-                  ["Contact", "/contact"],
-                ].map(([label, href]) => (
+                  <X className="size-5" aria-hidden />
+                  <span className="sr-only">Close menu</span>
+                </button>
+              </div>
+              <nav className="flex-1 overflow-y-auto p-4" aria-label="Mobile">
+                <p className="px-2 pb-2 text-label uppercase text-ink-faint">Rafting</p>
+                {RAFTING_LINKS.map(([label, href]) => (
                   <Link
                     key={label}
                     href={href}
                     onClick={() => setMenuOpen(false)}
-                    className="flex min-h-12 items-center rounded-md px-2 text-small font-semibold text-ink no-underline"
+                    className={DRAWER_ITEM}
                   >
                     {label}
                   </Link>
                 ))}
-              </div>
-            </nav>
-            {wa && (
-              <div className="border-t border-hairline p-4 pb-safe">
-                <a
-                  href={wa}
-                  target="_blank"
-                  rel="noopener"
-                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-jade-700 font-semibold text-white no-underline"
+                <Link
+                  href="/rafting"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex min-h-12 items-center rounded-md px-2 text-small font-semibold text-link no-underline"
                 >
-                  <MessageCircle className="size-4" aria-hidden />
-                  Message us on WhatsApp
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+                  Compare all stretches
+                </Link>
+
+                <p className="mt-4 border-t border-hairline px-2 pb-2 pt-4 text-label uppercase text-ink-faint">
+                  Adventures
+                </p>
+                <Link
+                  href="/adventures"
+                  onClick={() => setMenuOpen(false)}
+                  className={DRAWER_ITEM}
+                >
+                  All adventures
+                </Link>
+                {bungeeBrands.map((b) => (
+                  <Link
+                    key={b.slug}
+                    href={`/adventures?brand=${b.slug}`}
+                    onClick={() => setMenuOpen(false)}
+                    className={DRAWER_ITEM}
+                  >
+                    {b.name}
+                  </Link>
+                ))}
+
+                <p className="mt-4 border-t border-hairline px-2 pb-2 pt-4 text-label uppercase text-ink-faint">
+                  Packages
+                </p>
+                <Link
+                  href="/packages"
+                  onClick={() => setMenuOpen(false)}
+                  className={DRAWER_ITEM}
+                >
+                  All packages
+                </Link>
+                {packageCategories.map((c) => (
+                  <Link
+                    key={c.slug}
+                    href={`/packages?category=${c.slug}`}
+                    onClick={() => setMenuOpen(false)}
+                    className={DRAWER_ITEM}
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+
+                <p className="mt-4 border-t border-hairline px-2 pb-2 pt-4 text-label uppercase text-ink-faint">
+                  Stays &amp; destinations
+                </p>
+                <Link
+                  href="/stays"
+                  onClick={() => setMenuOpen(false)}
+                  className={DRAWER_ITEM}
+                >
+                  All stays &amp; destinations
+                </Link>
+                <Link
+                  href="/hotels"
+                  onClick={() => setMenuOpen(false)}
+                  className={DRAWER_ITEM}
+                >
+                  Our Rishikesh properties
+                </Link>
+                {destinations.length > 0 && (
+                  <DestinationSearch
+                    destinations={destinations}
+                    onNavigate={() => setMenuOpen(false)}
+                    variant="drawer"
+                  />
+                )}
+
+                <p className="mt-4 border-t border-hairline px-2 pb-2 pt-4 text-label uppercase text-ink-faint">
+                  Car &amp; bike rental
+                </p>
+                <Link
+                  href="/rentals"
+                  onClick={() => setMenuOpen(false)}
+                  className={DRAWER_ITEM}
+                >
+                  All rentals
+                </Link>
+                {rentalKinds.map(({ kind }) => (
+                  <Link
+                    key={kind}
+                    href={`/rentals?kind=${kind}`}
+                    onClick={() => setMenuOpen(false)}
+                    className={DRAWER_ITEM}
+                  >
+                    {RENTAL_KIND_LABEL[kind] ?? kind}
+                  </Link>
+                ))}
+
+                <div className="mt-4 border-t border-hairline pt-4">
+                  {[
+                    ["Gallery", "/gallery"],
+                    ["About us", "/about"],
+                    ["Contact", "/contact"],
+                  ].map(([label, href]) => (
+                    <Link
+                      key={label}
+                      href={href}
+                      onClick={() => setMenuOpen(false)}
+                      className={DRAWER_ITEM}
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              </nav>
+              {wa && (
+                <div className="border-t border-hairline p-4 pb-safe">
+                  <a
+                    href={wa}
+                    target="_blank"
+                    rel="noopener"
+                    className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-jade-700 font-semibold text-white no-underline"
+                  >
+                    <MessageCircle className="size-4" aria-hidden />
+                    Message us on WhatsApp
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </header>
   );
 }
