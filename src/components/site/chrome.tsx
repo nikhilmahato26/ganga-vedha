@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { AvailabilityPill, Button, LinkButton } from "@/components/ui";
+import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
 import { whatsappHref } from "@/lib/format";
 import type { Closure } from "@/lib/content";
@@ -312,9 +313,10 @@ export function SiteHeader({
       <div className="container-page flex h-16 items-center justify-between gap-4">
         <Link
           href="/"
-          className="text-title tracking-[-0.03em] text-ink no-underline"
+          className="flex items-center gap-2.5 text-title tracking-[-0.03em] text-ink no-underline"
           style={{ fontVariationSettings: '"wdth" 112' }}
         >
+          <BrandLogo size="sm" priority />
           {brandName}
         </Link>
 

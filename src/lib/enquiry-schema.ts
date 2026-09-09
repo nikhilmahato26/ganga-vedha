@@ -132,6 +132,35 @@ export const enquirySchema = z
   });
 
 export type EnquiryProductKind = (typeof ENQUIRY_PRODUCT_KINDS)[number];
+
+/**
+ * One pickable thing in the contact form's "what is this about" picker.
+ *
+ * Built on the server from every published listing (see `enquiry-catalogue.ts`)
+ * and handed to the client whole: the whole catalogue is a few dozen short
+ * rows, so filtering happens in the browser with no round trip per keystroke.
+ *
+ * `kind` is what the enquiry is actually submitted as. A listing carries its
+ * real kind and slug, so the server can resolve the product, snapshot its
+ * price and file the enquiry against it. A destination, or anything the guest
+ * types themselves, carries `general` and travels as a subject line.
+ */
+export type EnquiryOption = {
+  /** `kind:slug` for a listing, `free:<text>` for something typed. */
+  id: string;
+  kind: EnquiryProductKind;
+  slug: string;
+  name: string;
+  group: string;
+  /** The one line under the name: distance, grade, locality, price. */
+  meta: string | null;
+  /** Bookings closed right now. Still pickable; it travels as a subject. */
+  closed: boolean;
+  /** Lowercased haystack: name, group, brand, locality, category, kind. */
+  keywords: string;
+};
+
+export type EnquiryOptionGroup = { label: string; options: EnquiryOption[] };
 export type EnquiryInput = z.input<typeof enquirySchema>;
 
 export type EnquiryResult =

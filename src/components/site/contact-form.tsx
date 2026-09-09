@@ -2,21 +2,48 @@
 
 import * as React from "react";
 import { ArrowRight, CircleCheck, MessageCircle } from "lucide-react";
-import { Button, Field, Input, LinkButton, Select, Textarea } from "@/components/ui";
+import {
+  Alert,
+  Button,
+  Combobox,
+  Field,
+  Input,
+  LinkButton,
+  Select,
+  Textarea,
+  type ComboboxGroup,
+  type ComboboxOption,
+} from "@/components/ui";
 import { todayIST, whatsappHref } from "@/lib/format";
 import { submitEnquiry } from "@/app/actions/enquiry";
 import { StateField } from "@/components/site/enquiry";
+import type { EnquiryOption, EnquiryOptionGroup } from "@/lib/enquiry-schema";
 
 /**
  * The contact-page enquiry form. Unlike the product modal, this has no trip
  * attached — it submits as a `general` enquiry with a free-text subject, and
  * still lands in the same admin inbox.
  */
-export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
+export function ContactForm({
+  whatsappNumber,
+  catalogue,
+}: {
+  whatsappNumber: string;
+  /** Every published listing, grouped, for the "what is this about" picker. */
+  catalogue: EnquiryOptionGroup[];
+}) {
   const [busy, setBusy] = React.useState(false);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [formError, setFormError] = React.useState<string | null>(null);
-  const [done, setDone] = React.useState<{ refCode: string } | null>(null);
+  const [done, setDone] = React.useState<{ refCode: string; productName: string } | null>(
+    null,
+  );
+  /**
+   * What the enquiry is about, held as two mutually exclusive things: a
+   * listing the guest picked, or the words they typed. Whichever is set
+   * decides how the enquiry is filed on submit.
+   */
+  const [picked, setPicked] = React.useState<EnquiryOption | null>(null);
   const [values, setValues] = React.useState({
     name: "",
     phone: "",
@@ -28,6 +55,24 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
     message: "",
   });
 
+  /**
+   * The catalogue arrives grouped for display and is indexed once for lookup,
+   * so choosing a row does not walk every group on each keystroke.
+   */
+  const comboGroups = React.useMemo<ComboboxGroup[]>(
+    () =>
+      catalogue.map((group) => ({
+        label: group.label,
+        shortLabel: CHIP_LABEL[group.label],
+        options: group.options.map(toComboOption),
+      })),
+    [catalogue],
+  );
+  const byId = React.useMemo(
+    () => new Map(catalogue.flatMap((g) => g.options).map((o) => [o.id, o])),
+    [catalogue],
+  );
+
   const set =
     (k: keyof typeof values) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -38,15 +83,28 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
     setBusy(true);
     setErrors({});
     setFormError(null);
+    /**
+     * A picked listing travels as its real kind and slug, so the server
+     * resolves the row, checks its closure and snapshots the price — the
+     * enquiry lands in the inbox attached to the product rather than as a
+     * line of text somebody has to look up.
+     *
+     * A destination, a closed listing, or anything typed by hand has no row
+     * to attach to, so it travels as a general enquiry with a subject. A
+     * closed listing is deliberately not sent as a product: the server
+     * refuses those outright, and losing the lead helps nobody.
+     */
+    const attachable = picked !== null && picked.kind !== "general" && !picked.closed;
     const res = await submitEnquiry({
       ...values,
-      productKind: "general",
-      productSlug: "",
+      subject: attachable ? "" : (picked?.name ?? values.subject),
+      productKind: attachable ? picked.kind : "general",
+      productSlug: attachable ? picked.slug : "",
       source: "contact",
       website: "",
     });
     setBusy(false);
-    if (res.ok) setDone({ refCode: res.refCode });
+    if (res.ok) setDone({ refCode: res.refCode, productName: res.productName });
     else {
       setErrors(res.fieldErrors);
       setFormError(res.formError ?? null);
@@ -56,7 +114,7 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
   const waLink = whatsappHref(
     whatsappNumber,
     done
-      ? `Hi Ganga Vedha — I've sent an enquiry. My reference is ${done.refCode}.`
+      ? `Hi Ganga Vedha — I've sent an enquiry about ${done.productName}. My reference is ${done.refCode}.`
       : "Hi Ganga Vedha — I have a question about a trip.",
   );
 
@@ -68,9 +126,12 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
           Thanks — your reference is{" "}
           <strong className="tabular font-semibold">{done.refCode}</strong>.
         </p>
+        <p className="mt-1 text-small text-ink-muted">
+          Your enquiry about <span className="font-semibold text-ink">{done.productName}</span> is with us.
+        </p>
         <p className="mt-2 text-small text-ink-muted">
-          We have your details and will reply, usually within a couple of hours. The
-          fastest way to carry on is WhatsApp.
+          We will reply, usually within a couple of hours. The fastest way to carry
+          on is WhatsApp.
         </p>
         {waLink && (
           <LinkButton
@@ -129,14 +190,35 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
       <Field
         label="Destination, activity or package"
         required
-        error={errors.subject}
+        error={errors.subject ?? errors.productSlug}
+        hint="Search our trips and stays, or type it yourself."
         className="sm:col-span-1"
       >
-        <Input
-          value={values.subject}
-          onChange={set("subject")}
-          placeholder="e.g. Char Dham Yatra, or 16 km rafting"
+        <Combobox
+          groups={comboGroups}
+          selected={picked ? toComboOption(picked) : null}
+          onSelect={(option) => {
+            setPicked(option ? byId.get(option.id) ?? null : null);
+            if (option) setValues((v) => ({ ...v, subject: option.label }));
+          }}
+          text={values.subject}
+          onTextChange={(subject) => {
+            setPicked(null);
+            setValues((v) => ({ ...v, subject }));
+          }}
+          placeholder="Search trips, stays and rentals"
+          filterable
+          allLabel="Everything"
+          allowFreeText
+          freeTextLabel="Ask about this"
+          emptyLabel="Nothing we list matches that. Ask for it anyway."
         />
+        {picked?.closed && (
+          <Alert tone="closed" className="mt-1 p-3">
+            Bookings for this are closed right now. Send the enquiry anyway and we
+            will tell you the moment it reopens.
+          </Alert>
+        )}
       </Field>
 
       <Field label="Preferred travel date" error={errors.travelDate} hint="Leave blank if flexible.">
@@ -178,4 +260,31 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
       </div>
     </form>
   );
+}
+
+/**
+ * Filter chips speak the nav's words, not the list heading's: a guest who
+ * came here from "Rentals" in the header should find "Rentals" in the picker,
+ * and the shorter labels keep the filter row to two lines.
+ */
+const CHIP_LABEL: Record<string, string> = {
+  "Other adventures": "Adventures",
+  "Holiday packages": "Packages",
+  "Hotels & resorts": "Hotels",
+  "Car & bike rental": "Rentals",
+};
+
+/**
+ * A catalogue row as the picker renders it. Closed is stated on the row
+ * rather than hidden from the list: a guest looking for the monsoon-shut
+ * stretch should find it and read why, not conclude we stopped running it.
+ */
+function toComboOption(option: EnquiryOption): ComboboxOption {
+  return {
+    id: option.id,
+    label: option.name,
+    meta: option.meta,
+    tag: option.closed ? "Closed" : null,
+    keywords: option.keywords,
+  };
 }

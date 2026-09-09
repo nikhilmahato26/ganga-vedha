@@ -1,7 +1,8 @@
 export { Button, LinkButton } from "./button";
 export { Chip, GradeChip } from "./chip";
 export { Card, CardBody, SectionHeading, StatRow } from "./card";
-export { Field, Input, Textarea, Select } from "./field";
+export { Field, Input, Textarea, Select, useFieldControl } from "./field";
+export { Combobox, type ComboboxGroup, type ComboboxOption } from "./combobox";
 export { Checkbox, Radio, Switch } from "./choice";
 export { Modal } from "./modal";
 export { ToastProvider, ToastCard, useToast, type ToastTone } from "./toast";

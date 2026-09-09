@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Compass } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 /**
  * Catches a genuinely unmatched URL outside both the (site) and admin route
@@ -10,7 +11,8 @@ export default function RootNotFound() {
   return (
     <main className="grid min-h-dvh place-items-center bg-canvas px-4 text-center">
       <div>
-        <span className="mx-auto grid size-16 place-items-center rounded-full bg-jade-100 text-jade-800">
+        <BrandLogo size="xl" alt="Ganga Vedha" className="mx-auto" />
+        <span className="mx-auto mt-6 grid size-16 place-items-center rounded-full bg-jade-100 text-jade-800">
           <Compass className="size-7" aria-hidden />
         </span>
         <h1 className="mt-6 text-display-md text-ink">Page not found</h1>

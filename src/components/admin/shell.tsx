@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { ToastProvider } from "@/components/ui";
 import type { SessionPayload } from "@/lib/auth";
 import { logoutAction } from "@/app/actions/auth";
+import { BrandLogo } from "@/components/brand-logo";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -92,7 +93,8 @@ export function AdminShell({
     <div className="min-h-dvh bg-canvas-sunk lg:flex">
       {/* Desktop sidebar */}
       <aside className="hidden w-60 shrink-0 border-r border-hairline bg-canvas lg:flex lg:flex-col">
-        <div className="flex h-16 items-center border-b border-hairline px-5">
+        <div className="flex h-16 items-center gap-2.5 border-b border-hairline px-5">
+          <BrandLogo size="sm" priority />
           <span
             className="text-subtitle text-ink"
             style={{ fontVariationSettings: '"wdth" 112' }}
@@ -127,7 +129,10 @@ export function AdminShell({
           />
           <div className="absolute inset-y-0 left-0 flex w-[min(17rem,85vw)] flex-col bg-canvas shadow-xl">
             <div className="flex h-16 items-center justify-between border-b border-hairline px-5">
-              <span className="text-subtitle text-ink">Menu</span>
+              <span className="flex items-center gap-2.5 text-subtitle text-ink">
+                <BrandLogo size="sm" />
+                Menu
+              </span>
               <button
                 type="button"
                 onClick={() => setDrawerOpen(false)}
@@ -166,6 +171,7 @@ export function AdminShell({
             <Menu className="size-6" aria-hidden />
             <span className="sr-only">Open menu</span>
           </button>
+          <BrandLogo size="sm" />
           <span
             className="text-subtitle text-ink"
             style={{ fontVariationSettings: '"wdth" 112' }}

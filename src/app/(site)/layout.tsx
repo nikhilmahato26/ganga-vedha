@@ -23,6 +23,7 @@ import {
   getSiteSettings,
   isSeedContent,
 } from "@/lib/content";
+import { BrandLogo } from "@/components/brand-logo";
 import { resolveClosure } from "@/lib/closure";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
@@ -102,12 +103,15 @@ async function SiteFooter() {
     <footer id="contact" className="mt-24 bg-jade-950 text-jade-100">
       <div className="container-page grid gap-10 py-16 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-1">
-          <p
-            className="text-title text-white"
-            style={{ fontVariationSettings: '"wdth" 112' }}
-          >
-            {settings.brandName}
-          </p>
+          <div className="flex items-center gap-3">
+            <BrandLogo size="lg" className="ring-1 ring-white/15" />
+            <p
+              className="text-title text-white"
+              style={{ fontVariationSettings: '"wdth" 112' }}
+            >
+              {settings.brandName}
+            </p>
+          </div>
           <p className="mt-3 text-small text-jade-200">{settings.tagline}</p>
         </div>
 

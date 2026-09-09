@@ -26,6 +26,13 @@ function useField() {
   return ctx;
 }
 
+/**
+ * The id and aria wiring a <Field> hands its control. Exported so a control
+ * built outside this file (the Combobox) is labelled, described and marked
+ * invalid by exactly the same contract as Input, Select and Textarea.
+ */
+export const useFieldControl = useField;
+
 export function Field({
   label,
   hint,

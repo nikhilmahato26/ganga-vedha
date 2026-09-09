@@ -3,6 +3,7 @@ import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Breadcrumb, LinkButton, SectionHeading } from "@/components/ui";
 import { ContactForm } from "@/components/site/contact-form";
 import { getSiteSettings } from "@/lib/content";
+import { getEnquiryCatalogue } from "@/lib/enquiry-catalogue";
 import { formatPhoneIN, whatsappHref } from "@/lib/format";
 
 export const revalidate = 300;
@@ -15,7 +16,10 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage() {
-  const settings = await getSiteSettings();
+  const [settings, catalogue] = await Promise.all([
+    getSiteSettings(),
+    getEnquiryCatalogue(),
+  ]);
   const wa = whatsappHref(
     settings.whatsappNumber,
     "Hi Ganga Vedha — I'd like to plan a trip.",
@@ -37,7 +41,7 @@ export default async function ContactPage() {
         <div className="min-w-0">
           <h2 className="text-subtitle text-ink">Enquiry form</h2>
           <div className="mt-5">
-            <ContactForm whatsappNumber={settings.whatsappNumber} />
+            <ContactForm whatsappNumber={settings.whatsappNumber} catalogue={catalogue} />
           </div>
         </div>
 

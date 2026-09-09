@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ArrowRight, Compass } from "lucide-react";
 import { LinkButton } from "@/components/ui";
+import { BrandLogo } from "@/components/brand-logo";
 
 export default function SiteNotFound() {
   return (
     <div className="container-page flex min-h-[60vh] flex-col items-center justify-center py-20 text-center">
-      <span className="grid size-16 place-items-center rounded-full bg-jade-100 text-jade-800">
+      <BrandLogo size="xl" alt="Ganga Vedha" />
+      <span className="mt-6 grid size-16 place-items-center rounded-full bg-jade-100 text-jade-800">
         <Compass className="size-7" aria-hidden />
       </span>
       <h1 className="mt-6 text-display-md text-ink">That page has moved on</h1>
