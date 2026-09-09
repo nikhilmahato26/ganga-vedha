@@ -14,10 +14,10 @@ import { cn } from "@/lib/utils";
  */
 
 const SIZES = {
-  sm: 32,
-  md: 40,
-  lg: 56,
-  xl: 72,
+  sm: 44,
+  md: 56,
+  lg: 76,
+  xl: 104,
 } as const;
 
 export type BrandLogoSize = keyof typeof SIZES;
