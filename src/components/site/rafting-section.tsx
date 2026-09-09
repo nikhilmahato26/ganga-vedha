@@ -24,8 +24,8 @@ const isDroneCraft = (slug: string) => slug.includes("drone-craft");
 
 const FILTERS = [
   { key: "all", label: "All" },
-  { key: "river", label: "River rafting" },
-  { key: "dronecraft", label: "Dronecraft rafting" },
+  { key: "river", label: "Super Deluxe River Rafting" },
+  { key: "dronecraft", label: "Premium Drone Craft River Rafting" },
 ] as const;
 type FilterKey = (typeof FILTERS)[number]["key"];
 

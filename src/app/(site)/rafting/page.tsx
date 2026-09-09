@@ -34,8 +34,12 @@ const isDroneCraft = (slug: string) => slug.includes("drone-craft");
 
 const FILTERS: { key: string; label: string; href: string }[] = [
   { key: "all", label: "All", href: "/rafting" },
-  { key: "river", label: "River rafting", href: "/rafting?type=river" },
-  { key: "dronecraft", label: "Dronecraft rafting", href: "/rafting?type=dronecraft" },
+  { key: "river", label: "Super Deluxe River Rafting", href: "/rafting?type=river" },
+  {
+    key: "dronecraft",
+    label: "Premium Drone Craft River Rafting",
+    href: "/rafting?type=dronecraft",
+  },
 ];
 
 export default async function RaftingIndex({

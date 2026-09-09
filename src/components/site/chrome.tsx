@@ -23,8 +23,8 @@ import type { Closure } from "@/lib/content";
 
 /** The two rafting categories the workbook splits Rishikesh into. */
 const RAFTING_LINKS: [string, string][] = [
-  ["Dronecraft rafting", "/rafting?type=dronecraft"],
-  ["River rafting", "/rafting?type=river"],
+  ["Premium Drone Craft River Rafting", "/rafting?type=dronecraft"],
+  ["Super Deluxe River Rafting", "/rafting?type=river"],
 ];
 
 /** The fuller phrasing for the strap, which has room for it. */
