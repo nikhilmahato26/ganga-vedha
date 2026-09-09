@@ -470,7 +470,7 @@ export function SiteHeader({
               href={wa}
               target="_blank"
               rel="noopener"
-              variant="secondary"
+              variant="danger"
               className="hidden sm:inline-flex"
               aria-label="Book now on WhatsApp"
             >
@@ -648,7 +648,7 @@ export function SiteHeader({
                     href={wa}
                     target="_blank"
                     rel="noopener"
-                    className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-jade-700 font-semibold text-white no-underline"
+                    className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-danger font-semibold text-white no-underline hover:brightness-110"
                   >
                     <MessageCircle className="size-4" aria-hidden />
                     Book now on WhatsApp

@@ -30,7 +30,8 @@ type Source = "hero" | "card" | "detail" | "floating" | "contact";
  * Where the guest is travelling from. A picker rather than a text box for the
  * same reason the operator picker is one: the owner sorts the inbox by state,
  * and "UK", "Uttrakhand" and "Uttarakhand" are one place typed three ways.
- * Optional — an enquiry is worth more than a complete form.
+ * Mandatory, alongside name and phone — the three fields the owner calls
+ * back off before anything else on the row.
  */
 export function StateField({
   value,
@@ -42,9 +43,9 @@ export function StateField({
   error?: string;
 }) {
   return (
-    <Field label="Which state are you travelling from?" error={error}>
+    <Field label="Which state are you travelling from?" required error={error}>
       <Select value={value} onChange={onChange}>
-        <option value="">Select a state (optional)</option>
+        <option value="">Select your state</option>
         {INDIAN_STATES.map((st) => (
           <option key={st} value={st}>
             {st}

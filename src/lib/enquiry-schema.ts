@@ -88,22 +88,21 @@ export const enquirySchema = z
       }),
     email: z.union([z.literal(""), z.email("That email address doesn't look right.")]),
     /**
-     * Which state the guest is travelling from. Optional, like the email and
-     * the date — an enquiry is worth more than a complete form — but pinned to
-     * the known list so nothing arbitrary can be posted straight past the UI.
+     * Which state the guest is travelling from. Mandatory alongside name and
+     * phone — the owner sorts and calls back off these three fields before
+     * anything else on the row.
      */
     state: z
       .string()
       .trim()
       .max(60)
+      .min(1, "Pick your state so we know who's calling.")
       // A plain string rather than `z.enum`, so the forms can hold the value
       // as the `string` a <select> hands back — the check below is what
       // actually enforces the list, on the server, where it counts.
-      .refine((v) => v === "" || (INDIAN_STATES as readonly string[]).includes(v), {
+      .refine((v) => (INDIAN_STATES as readonly string[]).includes(v), {
         message: "Pick your state from the list.",
-      })
-      .optional()
-      .default(""),
+      }),
     travelDate: z.string().refine((v) => v === "" || v >= todayIST(), {
       message: "Pick a date from today onwards.",
     }),
