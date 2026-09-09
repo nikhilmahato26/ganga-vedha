@@ -80,11 +80,13 @@ const BUNGEE_INCLUSIONS = [
   "Jump master and full safety briefing",
   "Certified harness and body gear",
   "Weight check and medical screening",
+  "Free DSLR video of your jump",
+  "Free pickup and drop — Tapovan booking office to the activity point",
   "Certificate of completion",
 ];
 const BUNGEE_EXCLUSIONS = [
-  "Jump video and photographs (add-on)",
-  "Transport to the site",
+  "Still photographs beyond the jump video (add-on)",
+  "Transport to Rishikesh from outside the city",
   "Meals and refreshments",
 ];
 const BUNGEE_BRING = [

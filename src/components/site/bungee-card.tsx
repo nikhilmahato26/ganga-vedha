@@ -1,7 +1,8 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { Card, LinkButton, MediaFrame, Rating } from "@/components/ui";
 import { EnquireButton, type EnquiryProduct } from "./enquiry";
 import { CardLink } from "./product-card";
+import { freePerks } from "./detail";
 import { ClosureTrigger } from "./chrome";
 import { formatINR } from "@/lib/format";
 import type { Adventure, Closure } from "@/lib/content";
@@ -34,6 +35,9 @@ export function BungeeCard({
     adventure.compareAtPriceInr && adventure.compareAtPriceInr > adventure.priceInr
       ? Math.round((1 - adventure.priceInr / adventure.compareAtPriceInr) * 100)
       : null;
+  // The giveaways sell the card harder than the summary does, so they get
+  // the line above the price rather than staying buried in the detail tab.
+  const perks = freePerks(adventure.inclusions);
 
   return (
     <Card elevation="flat" className="overflow-hidden">
@@ -69,6 +73,20 @@ export function BungeeCard({
               {adventure.name}
             </CardLink>
           </h4>
+
+          {perks.length > 0 && (
+            <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+              {perks.map((p) => (
+                <li
+                  key={p}
+                  className="flex items-start gap-1.5 text-caption font-medium text-jade-800"
+                >
+                  <Check className="mt-0.5 size-3.5 shrink-0 text-open" aria-hidden />
+                  {p}
+                </li>
+              ))}
+            </ul>
+          )}
 
           <p className="mt-auto flex flex-wrap items-baseline gap-x-2 gap-y-0.5 pt-2">
             {adventure.compareAtPriceInr ? (

@@ -27,6 +27,44 @@ export function SpecGrid({
   );
 }
 
+/**
+ * Pulls the "Free …" lines out of an inclusions list so the giveaways —
+ * the DSLR video, the pickup and drop — get read before the tab is opened.
+ * Data-driven on purpose: whatever the owner types in the admin inclusions
+ * field starting with "Free" surfaces here, and nothing is hard-coded that
+ * could go stale against the list below it.
+ */
+export function freePerks(inclusions: string[]): string[] {
+  return inclusions.filter((i) => /^free\b/i.test(i.trim()));
+}
+
+/** The perk strip. Renders nothing when there are no "Free …" inclusions. */
+export function FreePerks({
+  inclusions,
+  className,
+}: {
+  inclusions: string[];
+  className?: string;
+}) {
+  const perks = freePerks(inclusions);
+  if (perks.length === 0) return null;
+  return (
+    <ul
+      className={cn(
+        "flex flex-wrap gap-x-6 gap-y-2 rounded-lg border border-jade-200 bg-jade-50 px-4 py-3",
+        className,
+      )}
+    >
+      {perks.map((p) => (
+        <li key={p} className="flex items-start gap-2 text-small font-medium text-jade-900">
+          <Check className="mt-0.5 size-4 shrink-0 text-open" aria-hidden />
+          {p}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function IncludedList({
   inclusions,
   exclusions,

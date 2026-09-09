@@ -87,6 +87,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   );
 }
 
+/** The policy pages, in the order the footer lists them. */
+const LEGAL_LINKS: [string, string][] = [
+  ["Privacy Policy", "/privacy-policy"],
+  ["Return & Refund Policy", "/refund-policy"],
+];
+
 async function SiteFooter() {
   const [settings, stretches] = await Promise.all([
     getSiteSettings(),
@@ -163,8 +169,22 @@ async function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-white/10">
-        <div className="container-page flex flex-col gap-2 py-6 text-caption text-jade-300 sm:flex-row sm:justify-between">
+        <div className="container-page flex flex-col gap-4 py-6 text-caption text-jade-300 lg:flex-row lg:items-center lg:justify-between">
           <p>© {new Date().getFullYear()} {settings.brandName}. All rights reserved.</p>
+          <nav aria-label="Legal">
+            <ul className="flex flex-wrap items-center gap-x-5 gap-y-2">
+              {LEGAL_LINKS.map(([label, href]) => (
+                <li key={href}>
+                  <a
+                    href={href}
+                    className="text-jade-200 no-underline hover:text-white hover:underline"
+                  >
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
           <p>Rafting operates mid-September to mid-June, water levels permitting.</p>
         </div>
       </div>

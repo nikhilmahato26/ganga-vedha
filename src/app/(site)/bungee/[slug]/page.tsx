@@ -14,7 +14,7 @@ import {
   Tabs,
 } from "@/components/ui";
 import { EnquireButton } from "@/components/site/enquiry";
-import { BookingPanel, IncludedList, SpecGrid } from "@/components/site/detail";
+import { BookingPanel, FreePerks, IncludedList, SpecGrid } from "@/components/site/detail";
 import { AdventureCard } from "@/components/site/product-card";
 import { ClosureTrigger } from "@/components/site/chrome";
 import {
@@ -188,6 +188,8 @@ export default async function BungeeDetail({
               },
             ]}
           />
+
+          <FreePerks className="mt-4" inclusions={adventure.inclusions} />
 
           <div className="mt-10">
             <Tabs
