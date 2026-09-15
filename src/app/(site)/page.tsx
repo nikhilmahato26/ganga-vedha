@@ -13,6 +13,7 @@ import { RaftingSection } from "@/components/site/rafting-section";
 import { BungeeBrands } from "@/components/site/bungee-brands";
 import { PromoStrip } from "@/components/site/promo-strip";
 import { GallerySection } from "@/components/site/gallery";
+import { InstagramIcon, SOCIAL_LINKS } from "@/components/icons";
 import {
   getActivities,
   getAdventures,
@@ -171,6 +172,17 @@ export default async function LandingPage() {
                 className="border-white/30 bg-white/10 text-white hover:border-white/50 hover:bg-white/20"
               >
                 Where to stay
+              </LinkButton>
+              <LinkButton
+                href={SOCIAL_LINKS.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                size="lg"
+                variant="outline"
+                className="border-white/30 bg-white/10 text-white hover:border-white/50 hover:bg-white/20"
+              >
+                <InstagramIcon className="size-4.5 shrink-0" aria-hidden="true" />
+                <span>See Reel</span>
               </LinkButton>
             </div>
 

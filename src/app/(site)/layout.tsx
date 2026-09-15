@@ -25,6 +25,7 @@ import {
 } from "@/lib/content";
 import { BrandLogo } from "@/components/brand-logo";
 import { resolveClosure } from "@/lib/closure";
+import { InstagramIcon, FacebookIcon, SOCIAL_LINKS } from "@/components/icons";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const [settings, closures, bungeeBrands, packageCategories, rentalKinds, destinations] =
@@ -113,6 +114,31 @@ async function SiteFooter() {
             </p>
           </div>
           <p className="mt-3 text-small text-jade-200">{settings.tagline}</p>
+          <div className="mt-5">
+            <p className="text-caption font-semibold uppercase tracking-wide text-jade-300">
+              Follow us
+            </p>
+            <div className="mt-2.5 flex items-center gap-2.5">
+              <a
+                href={SOCIAL_LINKS.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow Ganga Vedha on Instagram"
+                className="inline-flex size-9 items-center justify-center rounded-full bg-white/10 text-jade-200 ring-1 ring-white/15 transition hover:bg-white/20 hover:text-white"
+              >
+                <InstagramIcon className="size-4.5" aria-hidden="true" />
+              </a>
+              <a
+                href={SOCIAL_LINKS.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow Ganga Vedha on Facebook"
+                className="inline-flex size-9 items-center justify-center rounded-full bg-white/10 text-jade-200 ring-1 ring-white/15 transition hover:bg-white/20 hover:text-white"
+              >
+                <FacebookIcon className="size-4.5" aria-hidden="true" />
+              </a>
+            </div>
+          </div>
         </div>
 
         <nav aria-label="Rafting">
@@ -169,6 +195,32 @@ async function SiteFooter() {
                 {settings.email}
               </a>
             </p>
+            <div className="pt-2">
+              <p className="text-caption font-semibold uppercase tracking-wide text-jade-300">
+                Social
+              </p>
+              <div className="mt-2 flex items-center gap-3">
+                <a
+                  href={SOCIAL_LINKS.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-small text-jade-100 no-underline hover:text-white hover:underline"
+                >
+                  <InstagramIcon className="size-4 text-jade-300" aria-hidden="true" />
+                  <span>Instagram</span>
+                </a>
+                <span className="text-white/20" aria-hidden="true">·</span>
+                <a
+                  href={SOCIAL_LINKS.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-small text-jade-100 no-underline hover:text-white hover:underline"
+                >
+                  <FacebookIcon className="size-4 text-jade-300" aria-hidden="true" />
+                  <span>Facebook</span>
+                </a>
+              </div>
+            </div>
           </address>
         </div>
       </div>
@@ -189,6 +241,27 @@ async function SiteFooter() {
               ))}
             </ul>
           </nav>
+          <div className="flex items-center gap-3">
+            <a
+              href={SOCIAL_LINKS.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-jade-200 no-underline hover:text-white hover:underline"
+            >
+              <InstagramIcon className="size-3.5" aria-hidden="true" />
+              <span>Instagram</span>
+            </a>
+            <span className="text-white/20" aria-hidden="true">·</span>
+            <a
+              href={SOCIAL_LINKS.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-jade-200 no-underline hover:text-white hover:underline"
+            >
+              <FacebookIcon className="size-3.5" aria-hidden="true" />
+              <span>Facebook</span>
+            </a>
+          </div>
           <p>Rafting operates mid-September to mid-June, water levels permitting.</p>
         </div>
       </div>

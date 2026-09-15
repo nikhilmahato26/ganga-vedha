@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Breadcrumb, LinkButton, SectionHeading } from "@/components/ui";
 import { ContactForm } from "@/components/site/contact-form";
+import { InstagramIcon, FacebookIcon, SOCIAL_LINKS } from "@/components/icons";
 import { getSiteSettings } from "@/lib/content";
 import { getEnquiryCatalogue } from "@/lib/enquiry-catalogue";
 import { formatPhoneIN, whatsappHref } from "@/lib/format";
@@ -95,6 +96,34 @@ export default async function ContactPage() {
                   </span>
                 </li>
               )}
+              <li className="flex items-start gap-3">
+                <InstagramIcon className="mt-0.5 size-4 shrink-0 text-jade-600" aria-hidden />
+                <span>
+                  <span className="block font-semibold text-ink">Instagram</span>
+                  <a
+                    href={SOCIAL_LINKS.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:underline"
+                  >
+                    @ganga_veda.in
+                  </a>
+                </span>
+              </li>
+              <li className="flex items-start gap-3">
+                <FacebookIcon className="mt-0.5 size-4 shrink-0 text-jade-600" aria-hidden />
+                <span>
+                  <span className="block font-semibold text-ink">Facebook</span>
+                  <a
+                    href={SOCIAL_LINKS.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-link hover:underline"
+                  >
+                    Ganga Vedha on Facebook
+                  </a>
+                </span>
+              </li>
             </ul>
             {settings.mapUrl && (
               <LinkButton
