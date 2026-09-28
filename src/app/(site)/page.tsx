@@ -13,6 +13,7 @@ import { RaftingSection } from "@/components/site/rafting-section";
 import { BungeeBrands } from "@/components/site/bungee-brands";
 import { PromoStrip } from "@/components/site/promo-strip";
 import { GallerySection } from "@/components/site/gallery";
+import { HeroQuickBooking } from "@/components/site/hero-quick-booking";
 import { InstagramIcon, SOCIAL_LINKS } from "@/components/icons";
 import {
   getActivities,
@@ -107,6 +108,54 @@ export default async function LandingPage() {
   const headline = settings.heroHeading.split("\n");
   const cheapest = Math.min(...rafting.map((r) => r.priceInr));
 
+  const raftingProduct = rafting[0]
+    ? {
+        kind: "rafting" as const,
+        slug: rafting[0].slug,
+        name: rafting[0].name,
+        priceInr: rafting[0].priceInr,
+        priceUnit: "per person",
+      }
+    : {
+        kind: "rafting" as const,
+        slug: "12-km-rafting-brahmpuri",
+        name: "River Rafting in Rishikesh",
+        priceInr: 600,
+        priceUnit: "per person",
+      };
+
+  const hotelProduct = hotels[0]
+    ? {
+        kind: "hotel" as const,
+        slug: hotels[0].slug,
+        name: hotels[0].name,
+        priceInr: hotels[0].pricePerNightInr,
+        priceUnit: "per night",
+      }
+    : {
+        kind: "hotel" as const,
+        slug: "ganga-vedha-riverside-camp",
+        name: "Hotels & Stays in Rishikesh",
+        priceInr: 2200,
+        priceUnit: "per night",
+      };
+
+  const bungeeProduct = bungeeList[0]
+    ? {
+        kind: "bungee" as const,
+        slug: bungeeList[0].slug,
+        name: bungeeList[0].name,
+        priceInr: bungeeList[0].priceInr,
+        priceUnit: "per jump",
+      }
+    : {
+        kind: "bungee" as const,
+        slug: "maa-ganga-bungy",
+        name: "Bungee Jumping in Rishikesh",
+        priceInr: 3500,
+        priceUnit: "per jump",
+      };
+
   return (
     <>
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
@@ -126,7 +175,7 @@ export default async function LandingPage() {
           aria-hidden
         />
         <div className="container-page relative flex min-h-[clamp(30rem,72vh,44rem)] flex-col justify-end py-14 lg:py-20">
-          <div className="max-w-3xl">
+          <div className="max-w-4xl">
             <p className="text-caption font-semibold uppercase tracking-wide text-jade-300">
               Where the Ganga meets adventure
             </p>
@@ -160,7 +209,15 @@ export default async function LandingPage() {
               Your Rishikesh adventure starts here.
             </p>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+            <HeroQuickBooking
+              raftingProduct={raftingProduct}
+              hotelProduct={hotelProduct}
+              bungeeProduct={bungeeProduct}
+              whatsappNumber={settings.whatsappNumber}
+              className="mt-6"
+            />
+
+            <div className="mt-8 flex flex-wrap items-center gap-3">
               <LinkButton href="/adventures" size="lg">
                 Explore Rishikesh
                 <ArrowRight className="size-4" aria-hidden />
