@@ -12,6 +12,7 @@ import {
   TriangleAlert,
   Menu,
   MessageCircle,
+  Phone,
   Search,
   X,
 } from "lucide-react";
@@ -841,19 +842,32 @@ export function ClosureLink({
   );
 }
 
-export function WhatsappFab({ number }: { number: string }) {
-  const href = whatsappHref(number, "Hi Ganga Vedha — I have a question about booking.");
-  if (!href) return null;
+export function ContactFabs({ whatsappNumber, phone }: { whatsappNumber: string; phone: string }) {
+  const waHref = whatsappHref(whatsappNumber, "Hi Ganga Vedha — I have a question about booking.");
+  
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener"
-      className="whatsapp-fab fixed right-4 bottom-4 z-(--z-sticky) grid size-14 place-items-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-105"
-    >
-      <MessageCircle className="size-7 fill-current" aria-hidden />
-      <span className="sr-only">Message Ganga Vedha on WhatsApp</span>
-    </a>
+    <div className="whatsapp-fab fixed right-4 bottom-4 z-(--z-sticky) flex flex-col gap-3">
+      {phone ? (
+        <a
+          href={`tel:+91${phone.replace(/\D+/g, '')}`}
+          className="grid size-14 place-items-center rounded-full bg-jade-600 text-white shadow-lg transition-transform hover:scale-105"
+          aria-label="Call Ganga Vedha"
+        >
+          <Phone className="size-6" aria-hidden />
+        </a>
+      ) : null}
+      {waHref ? (
+        <a
+          href={waHref}
+          target="_blank"
+          rel="noopener"
+          className="grid size-14 place-items-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-105"
+          aria-label="Message Ganga Vedha on WhatsApp"
+        >
+          <MessageCircle className="size-7 fill-current" aria-hidden />
+        </a>
+      ) : null}
+    </div>
   );
 }
 

@@ -11,7 +11,7 @@ import {
   SeedBanner,
   SiteHeader,
   StatusStrap,
-  WhatsappFab,
+  ContactFabs,
 } from "@/components/site/chrome";
 import {
   getBungeeBrands,
@@ -84,7 +84,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       />
       <main className="flex-1">{children}</main>
       <SiteFooter />
-      <WhatsappFab number={settings.whatsappNumber} />
+      <ContactFabs whatsappNumber={settings.whatsappNumber} phone={settings.phone} />
     </div>
   );
 }
