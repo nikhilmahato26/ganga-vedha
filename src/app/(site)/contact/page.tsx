@@ -5,7 +5,7 @@ import { ContactForm } from "@/components/site/contact-form";
 import { InstagramIcon, FacebookIcon, SOCIAL_LINKS } from "@/components/icons";
 import { getSiteSettings } from "@/lib/content";
 import { getEnquiryCatalogue } from "@/lib/enquiry-catalogue";
-import { formatPhoneIN, whatsappHref } from "@/lib/format";
+import { formatPhoneIN, mapEmbedSrc, whatsappHref } from "@/lib/format";
 
 export const revalidate = 300;
 
@@ -25,6 +25,7 @@ export default async function ContactPage() {
     settings.whatsappNumber,
     "Hi Ganga Vedha — I'd like to plan a trip.",
   );
+  const mapSrc = mapEmbedSrc(settings.mapUrl);
 
   return (
     <div className="container-page pt-6 pb-8">
@@ -125,13 +126,24 @@ export default async function ContactPage() {
                 </span>
               </li>
             </ul>
+            {mapSrc && (
+              <div className="mt-5 overflow-hidden rounded-md border border-hairline">
+                <iframe
+                  src={mapSrc}
+                  title="Ganga Vedha location on Google Maps"
+                  className="h-48 w-full"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+            )}
             {settings.mapUrl && (
               <LinkButton
                 href={settings.mapUrl}
                 target="_blank"
                 rel="noopener"
                 variant="outline"
-                className="mt-5"
+                className="mt-3"
               >
                 <MapPin className="size-4" aria-hidden /> Open in Maps
               </LinkButton>

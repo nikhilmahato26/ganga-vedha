@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Download, MessageCircle, StickyNote } from "lucide-react";
+import Image from "next/image";
+import { Download, MessageCircle, QrCode, StickyNote } from "lucide-react";
 import {
   Button,
   Chip,
@@ -87,6 +88,7 @@ export function BookingInbox({ items }: { items: Enquiry[] }) {
   const [rows, setRows] = React.useState(items);
   const [filter, setFilter] = React.useState<EnquiryStatus | "all">("all");
   const [noteRow, setNoteRow] = React.useState<Enquiry | null>(null);
+  const [showQr, setShowQr] = React.useState(false);
 
   const filtered = filter === "all" ? rows : rows.filter((r) => r.status === filter);
 
@@ -137,13 +139,22 @@ export function BookingInbox({ items }: { items: Enquiry[] }) {
             );
           })}
         </div>
-        <button
-          type="button"
-          onClick={exportCsv}
-          className="inline-flex h-9 items-center gap-1.5 rounded-md border border-granite-300 px-3.5 text-small font-semibold text-ink-muted transition-colors hover:border-granite-400 hover:text-ink"
-        >
-          <Download className="size-4" aria-hidden /> Export CSV
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setShowQr(true)}
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-granite-300 px-3.5 text-small font-semibold text-ink-muted transition-colors hover:border-granite-400 hover:text-ink"
+          >
+            <QrCode className="size-4" aria-hidden /> Payment QR
+          </button>
+          <button
+            type="button"
+            onClick={exportCsv}
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-granite-300 px-3.5 text-small font-semibold text-ink-muted transition-colors hover:border-granite-400 hover:text-ink"
+          >
+            <Download className="size-4" aria-hidden /> Export CSV
+          </button>
+        </div>
       </div>
 
       <TableScroller label="Bookings" className="mt-5">
@@ -253,7 +264,31 @@ export function BookingInbox({ items }: { items: Enquiry[] }) {
           }}
         />
       )}
+
+      {showQr && <PaymentQrModal onClose={() => setShowQr(false)} />}
     </div>
+  );
+}
+
+function PaymentQrModal({ onClose }: { onClose: () => void }) {
+  return (
+    <Modal open onClose={onClose} title="Payment QR" description="Show this to a guest so they can pay instantly.">
+      <div className="flex flex-col items-center gap-3 text-center">
+        <p className="text-small font-semibold text-ink">Ganga Veda Hotels and Resorts</p>
+        <div className="overflow-hidden rounded-lg border border-hairline">
+          <Image
+            src="/payments/hdfc-smarthub-qr.jpg"
+            alt="Scan this QR code with any UPI app to pay Ganga Veda Hotels and Resorts"
+            width={480}
+            height={718}
+            className="h-auto w-72"
+          />
+        </div>
+        <p className="text-caption text-ink-faint">
+          Scan with Google Pay, PhonePe, Paytm, BHIM or any UPI app.
+        </p>
+      </div>
+    </Modal>
   );
 }
 

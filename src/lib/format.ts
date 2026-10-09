@@ -80,6 +80,25 @@ export function whatsappHref(
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 
+/**
+ * A Google Maps link (place search, coordinates, or share.google redirect) ->
+ * an embeddable `output=embed` src, reusing whatever `q`/coordinate the link
+ * already carries so admin only ever has to edit the one "Map link" field.
+ */
+export function mapEmbedSrc(mapUrl: string | null | undefined): string | null {
+  if (!mapUrl) return null;
+  try {
+    const url = new URL(mapUrl);
+    const q = url.searchParams.get("q");
+    if (q) return `https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=${url.searchParams.get("z") ?? "16"}&output=embed`;
+    const place = url.pathname.match(/\/maps\/place\/([^/]+)/)?.[1];
+    if (place) return `https://maps.google.com/maps?q=${place}&output=embed`;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 /** Today in IST as "YYYY-MM-DD" — the value a <input type="date"> min wants. */
 export function todayIST(): string {
   return new Intl.DateTimeFormat("en-CA", {
