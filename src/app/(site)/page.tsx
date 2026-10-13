@@ -1,4 +1,4 @@
-import { ArrowRight, BedDouble, Mountain, Waves } from "lucide-react";
+import { ArrowRight, BedDouble, Images, Mountain, Star, Waves } from "lucide-react";
 import {
   Card,
   Chip,
@@ -13,8 +13,8 @@ import { RaftingSection } from "@/components/site/rafting-section";
 import { BungeeBrands } from "@/components/site/bungee-brands";
 import { PromoStrip } from "@/components/site/promo-strip";
 import { GallerySection } from "@/components/site/gallery";
-import { HeroQuickBooking } from "@/components/site/hero-quick-booking";
-import { InstagramIcon, SOCIAL_LINKS } from "@/components/icons";
+import { HeroRooms } from "@/components/site/hero-rooms";
+import { FacebookIcon, InstagramIcon, SOCIAL_LINKS } from "@/components/icons";
 import {
   getActivities,
   getAdventures,
@@ -36,6 +36,8 @@ import { formatINR } from "@/lib/format";
 
 // 30s: the shortest read on this page is closures, the monsoon switch.
 export const revalidate = 30;
+
+const INSTAGRAM_REELS = "https://www.instagram.com/ganga_veda.in/reels/";
 
 /**
  * Shown when no admin has ever saved this section, or when running on the
@@ -105,56 +107,7 @@ export default async function LandingPage() {
   const bungeeOpen = isBookable(closures, { service: "bungee" });
   const hotelsOpen = isBookable(closures, { service: "hotel" });
 
-  const headline = settings.heroHeading.split("\n");
   const cheapest = Math.min(...rafting.map((r) => r.priceInr));
-
-  const raftingProduct = rafting[0]
-    ? {
-        kind: "rafting" as const,
-        slug: rafting[0].slug,
-        name: rafting[0].name,
-        priceInr: rafting[0].priceInr,
-        priceUnit: "per person",
-      }
-    : {
-        kind: "rafting" as const,
-        slug: "12-km-rafting-brahmpuri",
-        name: "River Rafting in Rishikesh",
-        priceInr: 600,
-        priceUnit: "per person",
-      };
-
-  const hotelProduct = hotels[0]
-    ? {
-        kind: "hotel" as const,
-        slug: hotels[0].slug,
-        name: hotels[0].name,
-        priceInr: hotels[0].pricePerNightInr,
-        priceUnit: "per night",
-      }
-    : {
-        kind: "hotel" as const,
-        slug: "ganga-vedha-riverside-camp",
-        name: "Hotels & Stays in Rishikesh",
-        priceInr: 2200,
-        priceUnit: "per night",
-      };
-
-  const bungeeProduct = bungeeList[0]
-    ? {
-        kind: "bungee" as const,
-        slug: bungeeList[0].slug,
-        name: bungeeList[0].name,
-        priceInr: bungeeList[0].priceInr,
-        priceUnit: "per jump",
-      }
-    : {
-        kind: "bungee" as const,
-        slug: "maa-ganga-bungy",
-        name: "Bungee Jumping in Rishikesh",
-        priceInr: 3500,
-        priceUnit: "per jump",
-      };
 
   return (
     <>
@@ -167,92 +120,65 @@ export default async function LandingPage() {
           priority
           mark={false}
           scrim={false}
-          className="absolute inset-0 h-full w-full"
+          // Blurred so a hero image that carries its own lettering (the owner's
+          // poster) reads as texture behind the headline instead of competing.
+          className="absolute inset-0 h-full w-full [&_img]:scale-110 [&_img]:blur-sm"
           emptyLabel="Hero photograph pending"
         />
         <div
-          className="absolute inset-0 bg-[linear-gradient(to_top,rgb(5_41_38/0.92)_0%,rgb(5_41_38/0.66)_45%,rgb(5_41_38/0.42)_100%)]"
+          className="absolute inset-0 bg-[linear-gradient(to_top,rgb(5_41_38/0.94)_0%,rgb(5_41_38/0.8)_50%,rgb(5_41_38/0.66)_100%)]"
           aria-hidden
         />
-        <div className="container-page relative flex min-h-[clamp(30rem,72vh,44rem)] flex-col justify-end py-14 lg:py-20">
-          <div className="max-w-4xl">
+        <div className="container-page relative pt-12 pb-10 lg:pt-20 lg:pb-14">
+          <div className="max-w-3xl">
             <p className="text-caption font-semibold uppercase tracking-wide text-jade-300">
-              Where the Ganga meets adventure
+              Tapovan, Rishikesh, Uttarakhand
             </p>
-            <h1 className="mt-3 text-display-xl text-white">
-              {headline[0]}
-              {headline[1] && (
-                <>
-                  <br />
-                  <span className="text-jade-300">{headline[1]}</span>
-                </>
-              )}
+            <h1 className="mt-3 text-display-lg text-white">
+              Welcome to {settings.brandName}
+              <br />
+              <span className="text-jade-300">Hotels &amp; Resorts</span>
             </h1>
-
-            <p className="mt-6 max-w-xl text-subtitle font-normal text-white">
-              Welcome to your complete Rishikesh experience.
+            <p className="mt-4 max-w-xl text-subtitle font-normal text-white/90">
+              Stay by the Ganga in Tapovan, and book rafting, bungee jumping and bike
+              rental with us too.
             </p>
-            <p className="mt-3 max-w-xl text-small text-white/85">
-              River rafting and bungee jumping, the right hotel or resort, and the
-              Himalayan city on a car, bike or scooty rental — with travel services to
-              tie it together.
-            </p>
-            <p className="mt-2 max-w-xl text-small text-white/85">
-              Adventure, family holidays, spiritual journeys, business travel or a
-              weekend getaway — Ganga Vedha helps you{" "}
-              <strong className="font-semibold text-white">
-                plan it, book it, experience it.
-              </strong>
-            </p>
-
-            <p className="mt-6 text-title text-white">
-              Your Rishikesh adventure starts here.
-            </p>
-
-            <HeroQuickBooking
-              raftingProduct={raftingProduct}
-              hotelProduct={hotelProduct}
-              bungeeProduct={bungeeProduct}
-              whatsappNumber={settings.whatsappNumber}
-              className="mt-6"
-            />
-
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <LinkButton href="/adventures" size="lg">
-                Explore Rishikesh
-                <ArrowRight className="size-4" aria-hidden />
-              </LinkButton>
-              <LinkButton
-                href="/hotels"
-                size="lg"
-                variant="outline"
-                className="border-white/30 bg-white/10 text-white hover:border-white/50 hover:bg-white/20"
-              >
-                Where to stay
-              </LinkButton>
-              <LinkButton
-                href={SOCIAL_LINKS.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                size="lg"
-                variant="outline"
-                className="border-white/30 bg-white/10 text-white hover:border-white/50 hover:bg-white/20"
-              >
-                <InstagramIcon className="size-4.5 shrink-0" aria-hidden="true" />
-                <span>See Reel</span>
-              </LinkButton>
-            </div>
-
-            <div className="mt-11 border-t border-white/15 pt-6">
-              <p className="text-caption font-semibold uppercase tracking-wide text-jade-300">
-                One destination. Endless experiences.
-              </p>
-              <p className="mt-2 text-caption font-semibold tracking-wide text-white/70">
-                Rafting &nbsp;•&nbsp; Bungee &nbsp;•&nbsp; Stay &nbsp;•&nbsp; Rentals
-                &nbsp;•&nbsp; Transport &nbsp;•&nbsp; Tours
-              </p>
-            </div>
           </div>
+
+          <div className="mt-8 lg:mt-10">
+            <HeroRooms whatsappNumber={settings.whatsappNumber} open={hotelsOpen} />
+          </div>
+
+          <nav aria-label="See more of Ganga Veda" className="mt-6 flex flex-wrap gap-2 sm:gap-3">
+            {[
+              { href: "/gallery", label: "Gallery", icon: <Images className="size-4" aria-hidden /> },
+              {
+                href: SOCIAL_LINKS.facebook,
+                label: "Facebook",
+                icon: <FacebookIcon className="size-4" aria-hidden="true" />,
+                external: true,
+              },
+              {
+                href: INSTAGRAM_REELS,
+                label: "Instagram Reels",
+                icon: <InstagramIcon className="size-4" aria-hidden="true" />,
+                external: true,
+              },
+              ...(reviews.length > 0
+                ? [{ href: "#reviews", label: "Reviews", icon: <Star className="size-4" aria-hidden /> }]
+                : []),
+            ].map((l) => (
+              <a
+                key={l.label}
+                href={l.href}
+                {...("external" in l ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-white/30 bg-jade-950/40 px-4 text-small font-semibold text-white no-underline backdrop-blur-sm hover:border-white/60 hover:bg-jade-950/60"
+              >
+                {l.icon}
+                {l.label}
+              </a>
+            ))}
+          </nav>
         </div>
       </section>
 
@@ -541,7 +467,7 @@ export default async function LandingPage() {
       )}
 
       {/* ── Reviews ───────────────────────────────────────────────────────── */}
-      <section className="container-page pt-24">
+      <section id="reviews" className="container-page scroll-mt-28 pt-24">
         <SectionHeading as="h2" title="What people say afterwards" />
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {reviews.map((r) => (

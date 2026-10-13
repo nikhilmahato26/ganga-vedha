@@ -16,7 +16,13 @@ import { submitEnquiry } from "@/app/actions/enquiry";
 import { INDIAN_STATES } from "@/lib/enquiry-schema";
 
 export type EnquiryProduct = {
-  kind: "rafting" | "bungee" | "paragliding" | "zipline" | "hotel" | "package" | "rental";
+  /**
+   * `general` is for something sold that has no listing row of its own, such as
+   * a room type in the homepage hero. It travels as a subject line built from
+   * the name and price, so the owner's inbox still says exactly what was asked.
+   */
+  kind: "rafting" | "bungee" | "paragliding" | "zipline" | "hotel" | "package" | "rental" | "general";
+  /** For `general`, only a stable key for the dialog; never sent. */
   slug: string;
   name: string;
   /** `null` for a quote-only product (car rental) — the modal shows "Custom quote". */
@@ -115,7 +121,13 @@ export function EnquiryDialog({
     const res = await submitEnquiry({
       ...values,
       productKind: product.kind,
-      productSlug: product.slug,
+      productSlug: product.kind === "general" ? "" : product.slug,
+      subject:
+        product.kind === "general"
+          ? product.priceInr === null
+            ? product.name
+            : `${product.name}, ${formatINR(product.priceInr)} ${product.priceUnit}`
+          : "",
       source,
       website: "",
     });
