@@ -19,6 +19,7 @@ import {
 } from "@/db/schema";
 import { hasDatabase } from "@/lib/env";
 import { slugify } from "@/lib/format";
+import { HERO_ROOMS_DEFAULT, HERO_ROOMS_KEY, type HeroRoomItem } from "@/lib/hero-rooms";
 import * as seed from "./content.seed";
 import type { MediaSource } from "@/components/ui/media";
 
@@ -552,6 +553,40 @@ export async function getContentBlock(key: string): Promise<ContentBlock | null>
     },
     ["content-block", key],
     { tags: [TAGS.content, `content-block:${key}`], revalidate: 300 },
+  )();
+}
+
+/** A hero room card ready to render: the stored item with its photo resolved. */
+export type HeroRoom = Omit<HeroRoomItem, "mediaId" | "photo"> & { photo: MediaSource | null };
+
+function resolveHeroRooms(
+  items: HeroRoomItem[],
+  mediaById: Map<number, typeof mediaTable.$inferSelect>,
+): HeroRoom[] {
+  return items.map(({ mediaId, photo, ...room }) => ({
+    ...room,
+    // An uploaded photo that has since been deleted falls back to the poster
+    // crop, then to the card's plain stand-in, never to a broken image.
+    photo:
+      toMediaSource(mediaId === null ? undefined : mediaById.get(mediaId)) ??
+      (photo ? { src: photo, alt: "" } : null),
+  }));
+}
+
+export async function getHeroRooms(): Promise<HeroRoom[]> {
+  if (!hasDatabase()) return resolveHeroRooms(HERO_ROOMS_DEFAULT, new Map());
+  return cache(
+    async () => {
+      const [row] = await getDb()
+        .select({ items: contentBlocksTable.items })
+        .from(contentBlocksTable)
+        .where(and(eq(contentBlocksTable.key, HERO_ROOMS_KEY), eq(contentBlocksTable.isActive, true)))
+        .limit(1);
+      const items = row ? (row.items as HeroRoomItem[]) : HERO_ROOMS_DEFAULT;
+      return resolveHeroRooms(items, await getMediaByIds(items.map((r) => r.mediaId)));
+    },
+    ["hero-rooms"],
+    { tags: [TAGS.content, `content-block:${HERO_ROOMS_KEY}`], revalidate: 300 },
   )();
 }
 

@@ -6,6 +6,7 @@ import {
   adventures,
   auditLog,
   closures,
+  contentBlocks,
   destinations,
   enquiries,
   galleryItems,
@@ -19,6 +20,8 @@ import {
   reviews,
   siteSettings,
 } from "@/db/schema";
+import { HERO_ROOMS_DEFAULT, HERO_ROOMS_KEY, type HeroRoomItem } from "@/lib/hero-rooms";
+import type { MediaItem } from "@/lib/media-types";
 
 /**
  * Admin reads. Unlike `@/lib/content`, these are never cached and never
@@ -211,6 +214,33 @@ export async function getMediaById(id: number | null) {
   return row ?? null;
 }
 
+/**
+ * The homepage room cards as the editor needs them: the saved rows, or the
+ * poster defaults before the first save, each with its uploaded photo resolved
+ * for the uploader's preview. A photo deleted from the media library comes back
+ * as no upload, which is also how the live card treats it.
+ */
+export async function getHeroRoomsAdmin(): Promise<(HeroRoomItem & { media: MediaItem | null })[]> {
+  const db = getDb();
+  const [row] = await db
+    .select({ items: contentBlocks.items })
+    .from(contentBlocks)
+    .where(eq(contentBlocks.key, HERO_ROOMS_KEY))
+    .limit(1);
+  const items = row ? (row.items as HeroRoomItem[]) : HERO_ROOMS_DEFAULT;
+  const ids = items.map((r) => r.mediaId).filter((id): id is number => id !== null);
+  const rows = ids.length ? await db.select().from(media).where(inArray(media.id, ids)) : [];
+  const byId = new Map(rows.map((m) => [m.id, m]));
+  return items.map((item) => {
+    const m = item.mediaId === null ? undefined : byId.get(item.mediaId);
+    return {
+      ...item,
+      mediaId: m ? m.id : null,
+      media: m ? { id: m.id, secureUrl: m.secureUrl, altText: m.altText ?? "" } : null,
+    };
+  });
+}
+
 export async function getEntityGallery(
   entityType: "hotel" | "adventure" | "gallery" | "service_line" | "review",
   entityId: number,
@@ -344,6 +374,16 @@ export async function listUnusedMedia() {
         notExists(db.select().from(mediaLinks).where(eq(mediaLinks.mediaId, media.id))),
         notExists(db.select().from(galleryItems).where(eq(galleryItems.mediaId, media.id))),
         notExists(db.select().from(promotions).where(eq(promotions.mediaId, media.id))),
+        // Content-block items name their photo as `{ mediaId }` inside JSON
+        // (the homepage rooms), so no foreign key would catch them.
+        notExists(
+          db
+            .select()
+            .from(contentBlocks)
+            .where(
+              sql`${contentBlocks.items} @> jsonb_build_array(jsonb_build_object('mediaId', ${media.id}))`,
+            ),
+        ),
       ),
     )
     .orderBy(desc(media.createdAt));

@@ -8,7 +8,8 @@ import { contentBlocks } from "@/db/schema";
 import { getVerifiedSession } from "@/lib/auth";
 import { contentTags } from "@/lib/content";
 import { logAudit } from "@/lib/audit";
-import { whyUsBlockSchema } from "@/lib/schemas/content-block";
+import { heroRoomsBlockSchema, whyUsBlockSchema } from "@/lib/schemas/content-block";
+import { HERO_ROOMS_KEY } from "@/lib/hero-rooms";
 
 export type ContentBlockActionState =
   | { ok: true }
@@ -57,5 +58,35 @@ export async function updateWhyUsBlock(input: unknown): Promise<ContentBlockActi
   revalidateTag("content-block:why-choose-us");
   revalidatePath("/");
   await logAudit(session, { action: "update", entityType: "content_block", label: '"Why book with us" section' });
+  return { ok: true };
+}
+
+export async function updateHeroRoomsBlock(input: unknown): Promise<ContentBlockActionState> {
+  const session = await getVerifiedSession();
+  if (!session) redirect("/admin/login");
+
+  const parsed = heroRoomsBlockSchema.safeParse(input);
+  if (!parsed.success) {
+    // Keyed by the full path ("items.2.priceInr") so the editor can mark the
+    // exact room row, not just the list.
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const key = issue.path.join(".") || "form";
+      fieldErrors[key] ??= issue.message;
+    }
+    return { ok: false, error: "Check the highlighted rooms.", fieldErrors };
+  }
+  const { items } = parsed.data;
+  const db = getDb();
+
+  await db
+    .insert(contentBlocks)
+    .values({ key: HERO_ROOMS_KEY, title: "Homepage rooms", items, isActive: true })
+    .onConflictDoUpdate({ target: contentBlocks.key, set: { items, updatedAt: new Date() } });
+
+  revalidateTag(contentTags.content);
+  revalidateTag(`content-block:${HERO_ROOMS_KEY}`);
+  revalidatePath("/");
+  await logAudit(session, { action: "update", entityType: "content_block", label: "Homepage rooms" });
   return { ok: true };
 }

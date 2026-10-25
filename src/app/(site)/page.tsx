@@ -22,6 +22,7 @@ import {
   getContentBlock,
   getDestinations,
   getGalleryItems,
+  getHeroRooms,
   getHotels,
   getPackages,
   getPromotions,
@@ -86,6 +87,7 @@ export default async function LandingPage() {
     destinations,
     rentals,
     promotions,
+    heroRooms,
   ] = await Promise.all([
     getSiteSettings(),
     getRaftingByDistance(),
@@ -100,6 +102,7 @@ export default async function LandingPage() {
     getDestinations(),
     getRentals(),
     getPromotions(),
+    getHeroRooms(),
   ]);
   const whyUs = whyUsBlock ?? WHY_US_FALLBACK;
 
@@ -146,7 +149,7 @@ export default async function LandingPage() {
           </div>
 
           <div className="mt-8 lg:mt-10">
-            <HeroRooms whatsappNumber={settings.whatsappNumber} open={hotelsOpen} />
+            <HeroRooms rooms={heroRooms} whatsappNumber={settings.whatsappNumber} open={hotelsOpen} />
           </div>
 
           <nav aria-label="See more of Ganga Veda" className="mt-6 flex flex-wrap gap-2 sm:gap-3">
