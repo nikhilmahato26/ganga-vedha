@@ -32,12 +32,12 @@ import {
   SectionHeading,
   Tabs,
 } from "@/components/ui";
-import { EnquireButton } from "@/components/site/enquiry";
 import { BookingPanel, SpecGrid } from "@/components/site/detail";
 import { ClosureTrigger } from "@/components/site/chrome";
-import { getClosures, getHotel, getHotels, getSiteSettings } from "@/lib/content";
+import { getClosures, getHotel, getHotels } from "@/lib/content";
 import { isBookable, resolveClosure } from "@/lib/closure";
 import { formatINR } from "@/lib/format";
+import { ROOM_BOOKING_URL } from "@/lib/room-booking";
 
 // 60s: matches the hotels cache window in @/lib/content.
 export const revalidate = 60;
@@ -86,11 +86,7 @@ export default async function HotelDetail({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [hotel, settings, closures] = await Promise.all([
-    getHotel(slug),
-    getSiteSettings(),
-    getClosures(),
-  ]);
+  const [hotel, closures] = await Promise.all([getHotel(slug), getClosures()]);
   if (!hotel) notFound();
 
   const open = isBookable(closures, {
@@ -103,14 +99,6 @@ export default async function HotelDetail({
     entityType: "hotel",
     entityId: hotel.id,
   });
-
-  const product = {
-    kind: "hotel" as const,
-    slug: hotel.slug,
-    name: hotel.name,
-    priceInr: hotel.pricePerNightInr,
-    priceUnit: "per night",
-  };
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -335,13 +323,14 @@ export default async function HotelDetail({
                           <p className="mt-1 text-caption text-ink-faint">per night</p>
                         </div>
                         {open && (
-                          <EnquireButton
-                            source="detail"
-                            whatsappNumber={settings.whatsappNumber}
-                            product={{ ...product, name: `${hotel.name} — ${room.name}`, priceInr: room.pricePerNightInr }}
+                          <LinkButton
+                            href={ROOM_BOOKING_URL}
+                            target="_blank"
+                            rel="noopener"
+                            aria-label={`Book ${room.name}`}
                           >
-                            Enquire
-                          </EnquireButton>
+                            Book
+                          </LinkButton>
                         )}
                       </div>
                     </CardBody>
@@ -386,15 +375,9 @@ export default async function HotelDetail({
             </div>
             <div className="mt-6">
               {open ? (
-                <EnquireButton
-                  block
-                  size="lg"
-                  source="detail"
-                  product={product}
-                  whatsappNumber={settings.whatsappNumber}
-                >
+                <LinkButton href={ROOM_BOOKING_URL} target="_blank" rel="noopener" block size="lg">
                   Check dates
-                </EnquireButton>
+                </LinkButton>
               ) : (
                 closure && (
                   <ClosureTrigger closure={closure}>Not taking bookings — tap to see why</ClosureTrigger>
@@ -402,7 +385,7 @@ export default async function HotelDetail({
               )}
             </div>
             <p className="mt-3 text-center text-caption text-ink-faint">
-              Nothing is charged now — we confirm on WhatsApp first.
+              Opens our booking page with live rooms and rates.
             </p>
           </BookingPanel>
         </aside>
@@ -417,14 +400,9 @@ export default async function HotelDetail({
               </p>
               <p className="mt-1 text-caption text-ink-faint">per night</p>
             </div>
-            <EnquireButton
-              size="lg"
-              source="detail"
-              product={product}
-              whatsappNumber={settings.whatsappNumber}
-            >
+            <LinkButton href={ROOM_BOOKING_URL} target="_blank" rel="noopener" size="lg">
               Check dates
-            </EnquireButton>
+            </LinkButton>
           </div>
         </div>
       )}

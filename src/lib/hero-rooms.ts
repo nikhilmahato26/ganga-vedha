@@ -1,8 +1,8 @@
 /**
  * The room-rate cards in the homepage hero, stored as the items of the
  * `hero-rooms` content block and edited from the admin Hotels page. They are
- * deliberately not hotel rows: they are the owner's own rate card, sold through
- * a general enquiry, and a "per bed" dorm rate has no place in `hotel_rooms`.
+ * deliberately not hotel rows: they are the owner's own rate card, booked on the
+ * Roomnexa engine, and a "per bed" dorm rate has no place in `hotel_rooms`.
  */
 export const HERO_ROOMS_KEY = "hero-rooms";
 

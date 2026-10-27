@@ -14,6 +14,7 @@ import { BungeeBrands } from "@/components/site/bungee-brands";
 import { PromoStrip } from "@/components/site/promo-strip";
 import { GallerySection } from "@/components/site/gallery";
 import { HeroRooms } from "@/components/site/hero-rooms";
+import { RateCard } from "@/components/site/rate-card";
 import { FacebookIcon, InstagramIcon, SOCIAL_LINKS } from "@/components/icons";
 import {
   getActivities,
@@ -149,7 +150,7 @@ export default async function LandingPage() {
           </div>
 
           <div className="mt-8 lg:mt-10">
-            <HeroRooms rooms={heroRooms} whatsappNumber={settings.whatsappNumber} open={hotelsOpen} />
+            <HeroRooms rooms={heroRooms} open={hotelsOpen} />
           </div>
 
           <nav aria-label="See more of Ganga Veda" className="mt-6 flex flex-wrap gap-2 sm:gap-3">
@@ -184,6 +185,15 @@ export default async function LandingPage() {
           </nav>
         </div>
       </section>
+
+      {/* ── Rate card: rentals and adventures at a glance ─────────────────── */}
+      <RateCard
+        rentals={rentals}
+        rafting={rafting}
+        bungee={bungeeList}
+        activities={activities}
+        closures={closures}
+      />
 
       {/* ── Promotions ────────────────────────────────────────────────────── */}
       <PromoStrip promotions={promotions} />
