@@ -1,0 +1,10 @@
+// The website: Cloudflare Pages project "ganga-vedha-web" (static build in dist/ + functions/).
+// No secrets here, ever (ARCHITECTURE.md §05).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ganga-vedha-web",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-09-01",
+  // functions/api/[[path]].ts forwards /api/* to the API Worker through this binding.
+  "services": [{ "binding": "API", "service": "ganga-vedha-api" }]
+}
