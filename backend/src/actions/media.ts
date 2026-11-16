@@ -1,51 +1,31 @@
 import type { Admin } from "../lib/auth";
 import { and, eq, notInArray } from "drizzle-orm";
-import { z } from "zod";
+import { parse } from "../lib/http";
+import {
+  mediaRecordSchema,
+  uploadTicketSchema,
+  type MediaRecordInput,
+  type UploadFolder,
+} from "../../../frontend/src/lib/schemas/media";
 import { getDb } from "../db";
 import { media, mediaLinks } from "../schema";
 import { signUpload, destroyAsset } from "../lib/storage";
 
 
-const signInput = z.object({
-  /** Scopes the Cloudinary folder — never trusted as a path, only slugified. */
-  folder: z.enum([
-    "adventures",
-    "hotels",
-    "reviews",
-    "site",
-    "packages",
-    "rentals",
-    "destinations",
-    "hero",
-    "promotions",
-  ]),
-});
-
 /**
  * Returns a one-shot signed upload ticket. The browser uploads directly to
  * Cloudinary with this signature — the file itself never passes through our
- * server, which is what keeps a 20-photo phone-camera batch from timing out
- * a Vercel function.
+ * server, which keeps a 20-photo phone-camera batch clear of the Worker's
+ * request-body limit.
  */
-export async function getUploadTicket(_admin: Admin, input: z.infer<typeof signInput>) {
-  const { folder } = signInput.parse(input);
+export async function getUploadTicket(_admin: Admin, input: { folder: UploadFolder }) {
+  const { folder } = parse(uploadTicketSchema, input);
   return signUpload({ folder: `ganga-vedha/${folder}` });
 }
 
-const persistInput = z.object({
-  publicId: z.string().min(1),
-  secureUrl: z.url(),
-  width: z.number().int().positive().nullable(),
-  height: z.number().int().positive().nullable(),
-  format: z.string().max(16).nullable(),
-  bytes: z.number().int().nonnegative().nullable(),
-  folder: z.string().max(120).nullable(),
-  altText: z.string().max(300).optional().default(""),
-});
-
 /** Called after a successful Cloudinary upload to record the asset in our own table. */
-export async function createMediaRecord(_admin: Admin, input: z.infer<typeof persistInput>) {
-  const data = persistInput.parse(input);
+export async function createMediaRecord(_admin: Admin, input: MediaRecordInput) {
+  const data = parse(mediaRecordSchema, input);
   const db = getDb();
   const [row] = await db
     .insert(media)

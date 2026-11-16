@@ -1,18 +1,9 @@
 /** Admin actions for media: typed callers of backend/src/actions/media.ts through /api/admin/rpc. */
 import { rpc } from "../rpc";
 import type { Media } from "../db-types";
+import type { MediaRecordInput, UploadFolder } from "../schemas/media";
 
-/** Cloudinary folders an upload may go to (validated again by the API). */
-export type UploadFolder =
-  | "adventures"
-  | "hotels"
-  | "reviews"
-  | "site"
-  | "packages"
-  | "rentals"
-  | "destinations"
-  | "hero"
-  | "promotions";
+export type { MediaRecordInput, UploadFolder };
 
 /** A one-shot signed upload ticket; the browser posts the file straight to Cloudinary with it. */
 export type UploadTicket = {
@@ -22,17 +13,6 @@ export type UploadTicket = {
   signature: string;
   folder: string;
   publicId?: string;
-};
-
-export type MediaRecordInput = {
-  publicId: string;
-  secureUrl: string;
-  width: number | null;
-  height: number | null;
-  format: string | null;
-  bytes: number | null;
-  folder: string | null;
-  altText?: string;
 };
 
 export type MediaRecord = Media;

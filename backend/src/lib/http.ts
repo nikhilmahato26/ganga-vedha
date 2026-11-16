@@ -105,6 +105,9 @@ export const jsonBody: RequestHandler = async (req, _res, next) => {
   }
 }
 
+/** The slice of a Zod error the API reads. Typed structurally: zod is installed in frontend/ only. */
+export type ValidationError = { issues: { path: PropertyKey[]; message: string }[] }
+
 /** The slice of a Zod schema `parse` needs. Typed structurally: zod is installed in frontend/. */
 type Schema<T> = {
   safeParse(input: unknown): { success: true; data: T } | { success: false; error: { issues: { path: PropertyKey[]; message: string }[] } }

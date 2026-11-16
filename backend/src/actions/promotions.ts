@@ -1,4 +1,5 @@
 import type { Admin } from "../lib/auth";
+import type { ValidationError } from "../lib/http";
 import type { PromotionActionState } from "../../../frontend/src/lib/action-types";
 import { eq, gt, lt, sql } from "drizzle-orm";
 import { getDb, nowIso } from "../db";
@@ -9,7 +10,7 @@ import { promotionSchema, type PromotionFormValues } from "../../../frontend/src
 
 
 
-function zodErrorState(err: import("zod").ZodError): PromotionActionState {
+function zodErrorState(err: ValidationError): PromotionActionState {
   const fieldErrors: Record<string, string> = {};
   for (const issue of err.issues) {
     const key = String(issue.path[0] ?? "form");

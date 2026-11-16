@@ -1,4 +1,5 @@
 import type { Admin } from "../lib/auth";
+import type { ValidationError } from "../lib/http";
 import type { AdventureActionState } from "../../../frontend/src/lib/action-types";
 import { and, eq, gt, lt, ne, sql } from "drizzle-orm";
 import { getDb } from "../db";
@@ -8,7 +9,7 @@ import { adventureSchema, type AdventureFormValues } from "../../../frontend/src
 
 
 
-function zodErrorState(err: import("zod").ZodError): AdventureActionState {
+function zodErrorState(err: ValidationError): AdventureActionState {
   const fieldErrors: Record<string, string> = {};
   for (const issue of err.issues) {
     const key = String(issue.path[0] ?? "form");

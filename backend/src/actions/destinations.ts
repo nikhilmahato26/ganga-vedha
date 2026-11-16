@@ -1,4 +1,5 @@
 import type { Admin } from "../lib/auth";
+import type { ValidationError } from "../lib/http";
 import type { DestinationActionState } from "../../../frontend/src/lib/action-types";
 import { and, eq, gt, lt, ne, sql } from "drizzle-orm";
 import { getDb } from "../db";
@@ -9,7 +10,7 @@ import { destinationSchema, type DestinationFormValues } from "../../../frontend
 
 
 
-function zodErrorState(err: import("zod").ZodError): DestinationActionState {
+function zodErrorState(err: ValidationError): DestinationActionState {
   const fieldErrors: Record<string, string> = {};
   for (const issue of err.issues) {
     const key = String(issue.path[0] ?? "form");
