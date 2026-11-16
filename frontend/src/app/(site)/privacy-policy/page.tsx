@@ -12,7 +12,7 @@ import { useLoaderData } from "react-router-dom";
 const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "What personal information Ganga Vedha collects when you enquire or book, why we collect it, who we share it with, and how to have it removed.",
+    "What personal information Ganga Veda collects when you enquire or book, why we collect it, who we share it with, and how to have it removed.",
   alternates: { canonical: "/privacy-policy" },
 };
 

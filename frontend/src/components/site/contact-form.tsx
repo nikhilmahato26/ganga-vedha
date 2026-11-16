@@ -112,8 +112,8 @@ export function ContactForm({
   const waLink = whatsappHref(
     whatsappNumber,
     done
-      ? `Hi Ganga Vedha — I've sent an enquiry about ${done.productName}. My reference is ${done.refCode}.`
-      : "Hi Ganga Vedha — I have a question about a trip.",
+      ? `Hi Ganga Veda — I've sent an enquiry about ${done.productName}. My reference is ${done.refCode}.`
+      : "Hi Ganga Veda — I have a question about a trip.",
   );
 
   if (done) {

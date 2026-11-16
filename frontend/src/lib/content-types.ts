@@ -131,6 +131,8 @@ export type Review = {
   rating: number;
   body: string;
   tripLabel: string | null;
+  /** "google" for a review copied from the Google Business listing; "manual" otherwise. */
+  source?: string;
 };
 
 export type GalleryItem = {
@@ -231,6 +233,10 @@ export type SiteSettings = {
   announcementActive: boolean;
   riverStatusLabel: string;
   gaugeLocation: string;
+  /** The Google Business reviews link and its figures, as the owner last copied them from Google. */
+  googleReviewsUrl?: string | null;
+  googleRating?: number | null;
+  googleReviewCount?: number | null;
 };
 
 export type Promotion = {

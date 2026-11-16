@@ -97,7 +97,7 @@ export function AdminShell({
             className="text-subtitle text-ink"
             style={{ fontVariationSettings: '"wdth" 112' }}
           >
-            Ganga Vedha
+            Ganga Veda
           </span>
         </div>
         <div className="flex-1 overflow-y-auto">
@@ -174,7 +174,7 @@ export function AdminShell({
             className="text-subtitle text-ink"
             style={{ fontVariationSettings: '"wdth" 112' }}
           >
-            Ganga Vedha
+            Ganga Veda
           </span>
         </header>
         <main className="flex-1 p-4 lg:p-8">{children}</main>

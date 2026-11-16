@@ -215,7 +215,7 @@ export function Styleguide() {
       <div className="min-h-dvh bg-canvas">
         <header className="border-b border-hairline bg-canvas-sunk">
           <div className="container-page py-12">
-            <h1 className="text-display-lg text-ink">Ganga Vedha design system</h1>
+            <h1 className="text-display-lg text-ink">Ganga Veda design system</h1>
             <p className="mt-4 measure text-ink-muted">
               Phase 0. The adventure-booking category standard, built to the craft
               level of Klook, GetYourGuide and Viator. Light ground, because the

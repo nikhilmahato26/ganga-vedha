@@ -55,7 +55,7 @@ export async function sendEnquiryNotification(e: EnquiryEmail): Promise<void> {
     const kind = KIND_LABEL[e.productKind] ?? e.productKind;
     const wa = whatsappHref(
       e.phone,
-      `Hi ${e.name}, this is Ganga Vedha about your enquiry (${e.refCode}) for ${e.productName}.`,
+      `Hi ${e.name}, this is Ganga Veda about your enquiry (${e.refCode}) for ${e.productName}.`,
     );
     const rows: [string, string][] = [
       ["Reference", e.refCode],
@@ -117,7 +117,7 @@ export async function sendEnquiryNotification(e: EnquiryEmail): Promise<void> {
       </div>`;
 
     await sendMail(c, {
-      from: `"Ganga Vedha site" <${c.user}>`,
+      from: `"Ganga Veda site" <${c.user}>`,
       to: c.to,
       replyTo: e.email || undefined,
       subject: `New enquiry: ${e.productName} — ${e.name} (${e.refCode})`,

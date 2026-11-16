@@ -28,12 +28,12 @@ export default function LoginPage() {
     <main className="grid min-h-dvh place-items-center bg-canvas-sunk px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <BrandLogo size="xl" alt="Ganga Vedha" priority className="mx-auto mb-4" />
+          <BrandLogo size="xl" alt="Ganga Veda" priority className="mx-auto mb-4" />
           <p
             className="text-title text-ink"
             style={{ fontVariationSettings: '"wdth" 112' }}
           >
-            Ganga Vedha
+            Ganga Veda
           </p>
           <p className="mt-1 text-small text-ink-muted">Admin panel</p>
         </div>

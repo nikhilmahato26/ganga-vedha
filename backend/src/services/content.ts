@@ -169,6 +169,7 @@ function mapReview(row: typeof reviewsTable.$inferSelect): Review {
     rating: row.rating,
     body: row.body,
     tripLabel: row.tripLabel,
+    source: row.source,
   };
 }
 
@@ -227,6 +228,9 @@ function mapSettings(
     announcementActive: row.announcementActive,
     riverStatusLabel: row.riverStatusLabel,
     gaugeLocation: row.gaugeLocation,
+    googleReviewsUrl: row.googleReviewsUrl,
+    googleRating: row.googleRating,
+    googleReviewCount: row.googleReviewCount,
   };
 }
 

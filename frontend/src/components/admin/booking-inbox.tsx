@@ -38,7 +38,7 @@ const STATUS_ORDER: EnquiryStatus[] = ["new", "contacted", "confirmed", "complet
 
 function waMessage(row: Enquiry): string {
   return (
-    `Hi ${row.name}, this is Ganga Vedha regarding your enquiry (${row.refCode}) ` +
+    `Hi ${row.name}, this is Ganga Veda regarding your enquiry (${row.refCode}) ` +
     `for ${row.productNameSnapshot}${row.travelDate ? ` on ${formatDateIST(row.travelDate)}` : ""}. ` +
     `Let's get it confirmed!`
   );

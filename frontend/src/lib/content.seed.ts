@@ -30,7 +30,7 @@ import type {
    ══════════════════════════════════════════════════════════════════════════ */
 
 const SETTINGS: SiteSettings = {
-  brandName: "Ganga Vedha",
+  brandName: "Ganga Veda",
   tagline: "Rishikesh, by the kilometre",
   whatsappNumber: "9876543210",
   phone: "9876543210",
@@ -160,7 +160,7 @@ const ADVENTURES: Adventure[] = [
     whatToBring: WHAT_TO_BRING,
     faqs: baseFaqs(10),
     meetingPoint:
-      "Ganga Vedha base, Tapovan. We drive you up to the Brahmpuri put-in; report 45 minutes before your slot.",
+      "Ganga Veda base, Tapovan. We drive you up to the Brahmpuri put-in; report 45 minutes before your slot.",
     minAge: 10,
     minWeightKg: 30,
     maxWeightKg: 110,
@@ -193,7 +193,7 @@ const ADVENTURES: Adventure[] = [
     whatToBring: WHAT_TO_BRING,
     faqs: baseFaqs(14),
     meetingPoint:
-      "Ganga Vedha base, Tapovan. Shuttle to the Shivpuri put-in; report 45 minutes before your slot.",
+      "Ganga Veda base, Tapovan. Shuttle to the Shivpuri put-in; report 45 minutes before your slot.",
     minAge: 14,
     minWeightKg: 40,
     maxWeightKg: 110,
@@ -226,7 +226,7 @@ const ADVENTURES: Adventure[] = [
     whatToBring: WHAT_TO_BRING,
     faqs: baseFaqs(16),
     meetingPoint:
-      "Ganga Vedha base, Tapovan. Shuttle up to Marine Drive; report an hour before your slot.",
+      "Ganga Veda base, Tapovan. Shuttle up to Marine Drive; report an hour before your slot.",
     minAge: 16,
     minWeightKg: 45,
     maxWeightKg: 110,
@@ -259,7 +259,7 @@ const ADVENTURES: Adventure[] = [
     whatToBring: WHAT_TO_BRING,
     faqs: baseFaqs(10),
     meetingPoint:
-      "Ganga Vedha base, Tapovan. Drive to the Brahmpuri put-in; the drone team meets you there. Report 45 minutes before your slot.",
+      "Ganga Veda base, Tapovan. Drive to the Brahmpuri put-in; the drone team meets you there. Report 45 minutes before your slot.",
     minAge: 10,
     minWeightKg: 30,
     maxWeightKg: 110,
@@ -292,7 +292,7 @@ const ADVENTURES: Adventure[] = [
     whatToBring: WHAT_TO_BRING,
     faqs: baseFaqs(14),
     meetingPoint:
-      "Ganga Vedha base, Tapovan. Shuttle to the Shivpuri put-in; the drone team meets you there. Report 45 minutes before your slot.",
+      "Ganga Veda base, Tapovan. Shuttle to the Shivpuri put-in; the drone team meets you there. Report 45 minutes before your slot.",
     minAge: 14,
     minWeightKg: 40,
     maxWeightKg: 110,
@@ -325,7 +325,7 @@ const ADVENTURES: Adventure[] = [
     whatToBring: WHAT_TO_BRING,
     faqs: baseFaqs(16),
     meetingPoint:
-      "Ganga Vedha base, Tapovan. Shuttle up to Marine Drive; the drone team meets you there. Report an hour before your slot.",
+      "Ganga Veda base, Tapovan. Shuttle up to Marine Drive; the drone team meets you there. Report an hour before your slot.",
     minAge: 16,
     minWeightKg: 45,
     maxWeightKg: 110,
@@ -640,7 +640,7 @@ const HOTELS: Hotel[] = [
   {
     id: 1,
     slug: "ganga-vedha-riverside-camp",
-    name: "Ganga Vedha Riverside Camp",
+    name: "Ganga Veda Riverside Camp",
     tagline: "Swiss tents on the sand at Byasi, forty steps from the water",
     description:
       "Twelve twin-share Swiss tents pitched on a private beach at Byasi, upstream of the crowds. Each tent has a proper bed, an attached washroom and a veranda facing the river. Evenings are a bonfire on the sand and dinner off a single menu; mornings are quiet enough to hear the rapids. It is a ten-minute drive from the Shivpuri put-in, so the 16 km run is an easy add-on.",

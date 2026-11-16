@@ -11,7 +11,7 @@ export default function RootNotFound() {
   return (
     <main className="grid min-h-dvh place-items-center bg-canvas px-4 text-center">
       <div>
-        <BrandLogo size="xl" alt="Ganga Vedha" className="mx-auto" />
+        <BrandLogo size="xl" alt="Ganga Veda" className="mx-auto" />
         <span className="mx-auto mt-6 grid size-16 place-items-center rounded-full bg-jade-100 text-jade-800">
           <Compass className="size-7" aria-hidden />
         </span>
@@ -23,7 +23,7 @@ export default function RootNotFound() {
           href="/"
           className="mt-8 inline-flex h-13 items-center rounded-md bg-cta px-7 text-subtitle font-semibold text-white no-underline hover:bg-cta-hover"
         >
-          Back to Ganga Vedha
+          Back to Ganga Veda
         </Link>
       </div>
     </main>

@@ -15,7 +15,7 @@ import { WHY_US_ICONS, isWhyUsIconKey } from "@/lib/why-us-icons";
 import { useLoaderData } from "react-router-dom";
 
 const metadata: Metadata = {
-  title: "About Ganga Vedha",
+  title: { absolute: "About Ganga Veda Hotels & Resorts, Tapovan, Rishikesh" },
   description:
     "A Rishikesh-based adventure, travel and hospitality operator — rafting and activities we run ourselves, stays and packages across Uttarakhand and Himachal, and a booking process that puts price and availability first.",
   alternates: { canonical: "/about" },

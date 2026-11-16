@@ -128,7 +128,7 @@ function SiteFooter({ settings, stretches }: { settings: SiteSettings; stretches
                 href={SOCIAL_LINKS.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Follow Ganga Vedha on Instagram"
+                aria-label="Follow Ganga Veda on Instagram"
                 className="inline-flex size-9 items-center justify-center rounded-full bg-white/10 text-jade-200 ring-1 ring-white/15 transition hover:bg-white/20 hover:text-white"
               >
                 <InstagramIcon className="size-4.5" aria-hidden="true" />
@@ -137,7 +137,7 @@ function SiteFooter({ settings, stretches }: { settings: SiteSettings; stretches
                 href={SOCIAL_LINKS.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Follow Ganga Vedha on Facebook"
+                aria-label="Follow Ganga Veda on Facebook"
                 className="inline-flex size-9 items-center justify-center rounded-full bg-white/10 text-jade-200 ring-1 ring-white/15 transition hover:bg-white/20 hover:text-white"
               >
                 <FacebookIcon className="size-4.5" aria-hidden="true" />

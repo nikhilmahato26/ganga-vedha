@@ -15,7 +15,9 @@ import { PromoStrip } from "@/components/site/promo-strip";
 import { GallerySection } from "@/components/site/gallery";
 import { HeroRooms } from "@/components/site/hero-rooms";
 import { RateCard } from "@/components/site/rate-card";
-import { FacebookIcon, InstagramIcon, SOCIAL_LINKS } from "@/components/icons";
+import { NearbyPlaces } from "@/components/site/nearby-places";
+import type { Metadata } from "@/components/seo";
+import { FacebookIcon, GoogleIcon, InstagramIcon, SOCIAL_LINKS } from "@/components/icons";
 import {
   getActivities,
   getAdventures,
@@ -72,6 +74,13 @@ const WHY_US_FALLBACK = {
   ],
 } as const;
 
+const metadata: Metadata = {
+  title: { absolute: "Ganga Veda Hotels & Resorts — Hotels in Tapovan, Rishikesh" },
+  description:
+    "Ganga Veda Hotels & Resorts, Tapovan, Rishikesh: affordable rooms near Laxman Jhula and Ram Jhula, plus river rafting, bungee jumping, adventure packages and Uttarakhand tours. Book direct on WhatsApp.",
+  alternates: { canonical: "/" },
+};
+
 export async function loader() {
   const [
     settings,
@@ -104,7 +113,7 @@ export async function loader() {
     getPromotions(),
     getHeroRooms(),
   ]);
-  return { settings, rafting, bungeeList, hotels, reviews, closures, whyUsBlock, galleryItems, activities, packages, destinations, rentals, promotions, heroRooms };
+  return { settings, rafting, bungeeList, hotels, reviews, closures, whyUsBlock, galleryItems, activities, packages, destinations, rentals, promotions, heroRooms, metadata };
 }
 
 export default function LandingPage() {
@@ -386,8 +395,8 @@ export default function LandingPage() {
       <section className="container-page pt-24">
         <SectionHeading
           as="h2"
-          title="Somewhere to sleep after"
-          description="Camps on the sand and rooms in town, both a short shuttle from the put-in."
+          title="Hotels in Rishikesh & Haridwar"
+          description="Affordable, comfortable rooms in Tapovan, Rishikesh — a short walk from Laxman Jhula — and in Haridwar. Book rafting and bungee with us too."
           action={
             <LinkButton href="/hotels" variant="outline">
               All stays
@@ -408,6 +417,7 @@ export default function LandingPage() {
             />
           ))}
         </div>
+        <NearbyPlaces className="mt-10" />
       </section>
 
       {/* ── Destinations ──────────────────────────────────────────────────── */}
@@ -485,18 +495,73 @@ export default function LandingPage() {
 
       {/* ── Reviews ───────────────────────────────────────────────────────── */}
       <section id="reviews" className="container-page scroll-mt-28 pt-24">
-        <SectionHeading as="h2" title="What people say afterwards" />
+        <SectionHeading
+          as="h2"
+          title="What our guests say"
+          description="Real reviews from guests at Ganga Veda Hotels & Resorts, Tapovan — copied from our Google listing."
+          action={
+            settings.googleReviewsUrl ? (
+              <LinkButton
+                href={settings.googleReviewsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="outline"
+              >
+                Read all reviews on Google
+              </LinkButton>
+            ) : undefined
+          }
+        />
+        {settings.googleRating != null && settings.googleReviewCount != null && (
+          <a
+            href={settings.googleReviewsUrl ?? undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-flex items-center gap-3 rounded-lg border border-hairline bg-canvas px-4 py-3 text-ink no-underline transition-colors hover:bg-canvas-sunk"
+          >
+            <GoogleIcon className="size-6" aria-hidden />
+            <span className="tabular text-title leading-none">{settings.googleRating.toFixed(1)}</span>
+            <span className="flex" aria-hidden>
+              {/* Partial stars, like Google's own: 4.7 shows the fifth star 70% filled. */}
+              {[0, 1, 2, 3, 4].map((i) => {
+                const fill = Math.min(1, Math.max(0, (settings.googleRating ?? 0) - i));
+                return (
+                  <span key={i} className="relative size-4">
+                    <Star className="absolute inset-0 size-4 text-ink-faint" />
+                    <span className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${fill * 100}%` }}>
+                      <Star className="size-4 fill-current text-star" />
+                    </span>
+                  </span>
+                );
+              })}
+            </span>
+            <span className="text-small text-ink-muted">
+              {settings.googleReviewCount} Google reviews
+            </span>
+            <span className="sr-only">
+              Rated {settings.googleRating.toFixed(1)} out of 5 from {settings.googleReviewCount} reviews on Google
+            </span>
+          </a>
+        )}
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {reviews.map((r) => (
+          {reviews.slice(0, 8).map((r) => (
             <Card key={r.id} elevation="flat" className="flex flex-col p-6">
               <Rating value={r.rating} />
-              <blockquote className="mt-4 flex-1 text-small text-ink-muted">
+              <blockquote className="mt-4 line-clamp-8 flex-1 text-small text-ink-muted">
                 “{r.body}”
               </blockquote>
-              <footer className="mt-5 border-t border-hairline pt-4">
-                <p className="text-small font-semibold text-ink">{r.authorName}</p>
-                {r.tripLabel && (
-                  <p className="text-caption text-ink-faint">{r.tripLabel}</p>
+              <footer className="mt-5 flex items-center justify-between gap-3 border-t border-hairline pt-4">
+                <div className="min-w-0">
+                  <p className="truncate text-small font-semibold text-ink">{r.authorName}</p>
+                  {r.tripLabel && (
+                    <p className="text-caption text-ink-faint">{r.tripLabel}</p>
+                  )}
+                </div>
+                {r.source === "google" && (
+                  <span className="inline-flex shrink-0 items-center gap-1 text-caption text-ink-faint">
+                    <GoogleIcon className="size-3.5" aria-hidden />
+                    Google
+                  </span>
                 )}
               </footer>
             </Card>

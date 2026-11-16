@@ -27,7 +27,7 @@ export default function ContactPage() {
   const { settings, catalogue } = useLoaderData<typeof loader>();
   const wa = whatsappHref(
     settings.whatsappNumber,
-    "Hi Ganga Vedha — I'd like to plan a trip.",
+    "Hi Ganga Veda — I'd like to plan a trip.",
   );
   const mapSrc = mapEmbedSrc(settings.mapUrl);
 
@@ -125,7 +125,7 @@ export default function ContactPage() {
                     rel="noopener noreferrer"
                     className="text-link hover:underline"
                   >
-                    Ganga Vedha on Facebook
+                    Ganga Veda on Facebook
                   </a>
                 </span>
               </li>
@@ -134,7 +134,7 @@ export default function ContactPage() {
               <div className="mt-5 overflow-hidden rounded-md border border-hairline">
                 <iframe
                   src={mapSrc}
-                  title="Ganga Vedha location on Google Maps"
+                  title="Ganga Veda location on Google Maps"
                   className="h-48 w-full"
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"

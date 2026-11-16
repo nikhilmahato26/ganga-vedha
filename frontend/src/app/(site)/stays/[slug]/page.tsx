@@ -36,7 +36,7 @@ async function generateMetadata({
     title: `${d.name} — travel guide & stays`,
     description: d.tagline || d.intro.slice(0, 150),
     alternates: { canonical: `/stays/${d.slug}` },
-    openGraph: { title: `${d.name} · Ganga Vedha`, description: d.tagline },
+    openGraph: { title: `${d.name} · Ganga Veda`, description: d.tagline },
   };
 }
 

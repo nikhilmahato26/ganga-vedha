@@ -5,12 +5,13 @@ import { HotelCard } from "@/components/site/product-card";
 import { getClosures, getHotels, getSiteSettings } from "@/lib/content";
 import { resolveClosure } from "@/lib/closure";
 import { useLoaderData } from "react-router-dom";
+import { NearbyPlaces } from "@/components/site/nearby-places";
 
 // 60s: matches the hotels cache window in @/lib/content.
 const metadata: Metadata = {
-  title: "Stays in Rishikesh",
+  title: "Hotels in Tapovan, Rishikesh — near Laxman Jhula",
   description:
-    "Riverside camps and guesthouses in Tapovan and Byasi, a short shuttle from the rafting put-in.",
+    "Budget and family rooms at Ganga Veda Hotels & Resorts in Tapovan, Rishikesh, close to Laxman Jhula, Ram Jhula and Tapovan Market — and a stay in Haridwar. Book direct on WhatsApp.",
   alternates: { canonical: "/hotels" },
 };
 
@@ -33,8 +34,8 @@ export default function HotelsIndex() {
       <div className="pt-8">
         <SectionHeading
           as="h1"
-          title="Where to stay"
-          description="Camps on the sand at Byasi and rooms in Tapovan. Both are a short shuttle from the put-in, and both can be bundled with any rafting stretch."
+          title="Hotels in Tapovan, Rishikesh"
+          description="Affordable, comfortable rooms at Ganga Veda Hotels & Resorts in Tapovan — a short walk from Laxman Jhula — and a stay in Haridwar. Add rafting or bungee to any booking."
         />
       </div>
 
@@ -67,6 +68,8 @@ export default function HotelsIndex() {
           ))}
         </div>
       )}
+
+      <NearbyPlaces className="mt-12" />
     </div>
   );
 }

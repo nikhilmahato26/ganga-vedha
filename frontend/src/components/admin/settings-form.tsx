@@ -40,6 +40,9 @@ export function SettingsForm({
   const [announcementActive, setAnnouncementActive] = React.useState(settings.announcementActive);
   const [riverStatusLabel, setRiverStatusLabel] = React.useState(settings.riverStatusLabel);
   const [gaugeLocation, setGaugeLocation] = React.useState(settings.gaugeLocation);
+  const [googleReviewsUrl, setGoogleReviewsUrl] = React.useState(settings.googleReviewsUrl ?? "");
+  const [googleRating, setGoogleRating] = React.useState(settings.googleRating?.toString() ?? "");
+  const [googleReviewCount, setGoogleReviewCount] = React.useState(settings.googleReviewCount?.toString() ?? "");
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,6 +64,9 @@ export function SettingsForm({
       announcementActive,
       riverStatusLabel,
       gaugeLocation,
+      googleReviewsUrl,
+      googleRating,
+      googleReviewCount,
     });
 
     setPending(false);
@@ -139,6 +145,43 @@ export function SettingsForm({
             </Field>
             <Field label="Gauge location" required>
               <Input value={gaugeLocation} onChange={(e) => setGaugeLocation(e.target.value)} required />
+            </Field>
+          </div>
+        </CardBody>
+      </Card>
+
+      <Card elevation="flat">
+        <CardBody className="space-y-5 p-6">
+          <h2 className="text-subtitle text-ink">Google reviews</h2>
+          <p className="text-small text-ink-muted">
+            Shown above the reviews on the home page, with a link to read them all on Google. Copy
+            the rating and the number of reviews from your Google listing when they change — they
+            are never updated automatically. Leave them empty to hide the badge.
+          </p>
+          <Field label="Link to your Google reviews" error={errors.googleReviewsUrl}>
+            <Input
+              type="url"
+              value={googleReviewsUrl}
+              onChange={(e) => setGoogleReviewsUrl(e.target.value)}
+              placeholder="https://share.google/…"
+            />
+          </Field>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field label="Rating on Google" error={errors.googleRating}>
+              <Input
+                inputMode="decimal"
+                value={googleRating}
+                onChange={(e) => setGoogleRating(e.target.value)}
+                placeholder="4.7"
+              />
+            </Field>
+            <Field label="Number of Google reviews" error={errors.googleReviewCount}>
+              <Input
+                inputMode="numeric"
+                value={googleReviewCount}
+                onChange={(e) => setGoogleReviewCount(e.target.value)}
+                placeholder="28"
+              />
             </Field>
           </div>
         </CardBody>

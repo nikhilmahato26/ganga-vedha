@@ -13,7 +13,7 @@ import { useLoaderData } from "react-router-dom";
 const metadata: Metadata = {
   title: "Return and Refund Policy",
   description:
-    "How cancellations and refunds work on Ganga Vedha bookings — the notice periods, what is refundable, what is not, and how long a refund takes to reach you.",
+    "How cancellations and refunds work on Ganga Veda bookings — the notice periods, what is refundable, what is not, and how long a refund takes to reach you.",
   alternates: { canonical: "/refund-policy" },
 };
 

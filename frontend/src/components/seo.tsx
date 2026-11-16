@@ -1,4 +1,5 @@
 import { useMatches } from "react-router-dom";
+import { SEO_KEYWORDS } from "@/lib/seo-keywords";
 
 /** The subset of Next.js page metadata this site uses. Each route's loader returns one. */
 export type Metadata = {
@@ -9,10 +10,10 @@ export type Metadata = {
   robots?: { index?: boolean; follow?: boolean };
 };
 
-const SITE_NAME = "Ganga Vedha";
-const DEFAULT_TITLE = "Ganga Vedha — River rafting, bungee and stays in Rishikesh";
+const SITE_NAME = "Ganga Veda";
+const DEFAULT_TITLE = "Ganga Veda Hotels & Resorts — Hotels in Tapovan, Rishikesh";
 const DEFAULT_DESCRIPTION =
-  "Rafting the Ganga by the kilometre, bungee jumping, and riverside stays in Rishikesh. Every price, grade and limit shown up front — and we tell you when the river is closed.";
+  "Ganga Veda Hotels & Resorts, Tapovan, Rishikesh: affordable rooms near Laxman Jhula and Ram Jhula, plus river rafting, bungee jumping, adventure packages and Uttarakhand tours. Book direct on WhatsApp.";
 /** The public address, for canonical and Open Graph URLs (set per build; defaults to this origin). */
 const SITE_URL = (import.meta.env.VITE_SITE_URL || (typeof window !== "undefined" ? window.location.origin : "")).replace(
   /\/$/,
@@ -41,6 +42,7 @@ export function RouteMeta() {
     <>
       <title>{title}</title>
       <meta name="description" content={description} />
+      <meta name="keywords" content={SEO_KEYWORDS.join(", ")} />
       {canonical && <link rel="canonical" href={canonical} />}
       {noindex && <meta name="robots" content="noindex, nofollow" />}
       <meta property="og:type" content="website" />

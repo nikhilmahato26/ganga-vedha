@@ -37,6 +37,9 @@ export async function updateSettings(admin: Admin, input: unknown): Promise<Sett
       announcementActive: data.announcementActive,
       riverStatusLabel: data.riverStatusLabel,
       gaugeLocation: data.gaugeLocation,
+      googleReviewsUrl: data.googleReviewsUrl || null,
+      googleRating: data.googleRating,
+      googleReviewCount: data.googleReviewCount,
     })
     .where(eq(siteSettings.id, 1));
 

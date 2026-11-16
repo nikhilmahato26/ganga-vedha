@@ -277,7 +277,7 @@ export function SiteHeader({
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [openMenu, setOpenMenu] = React.useState<string | null>(null);
   const navRef = React.useRef<HTMLElement>(null);
-  const wa = whatsappHref(whatsappNumber, "Hi Ganga Vedha — I'd like to book a trip.");
+  const wa = whatsappHref(whatsappNumber, "Hi Ganga Veda — I'd like to book a trip.");
   const closedIndex = useRotatingIndex(closedServices.length);
 
   const closeMenus = React.useCallback(() => setOpenMenu(null), []);
@@ -841,7 +841,7 @@ export function ClosureLink({
 }
 
 export function ContactFabs({ whatsappNumber, phone }: { whatsappNumber: string; phone: string }) {
-  const waHref = whatsappHref(whatsappNumber, "Hi Ganga Vedha — I have a question about booking.");
+  const waHref = whatsappHref(whatsappNumber, "Hi Ganga Veda — I have a question about booking.");
   
   return (
     <div className="whatsapp-fab fixed right-4 bottom-4 z-(--z-sticky) flex flex-col gap-3">
@@ -849,7 +849,7 @@ export function ContactFabs({ whatsappNumber, phone }: { whatsappNumber: string;
         <a
           href={`tel:+91${phone.replace(/\D+/g, '')}`}
           className="grid size-14 place-items-center rounded-full bg-jade-600 text-white shadow-lg transition-transform hover:scale-105"
-          aria-label="Call Ganga Vedha"
+          aria-label="Call Ganga Veda"
         >
           <Phone className="size-6" aria-hidden />
         </a>
@@ -860,7 +860,7 @@ export function ContactFabs({ whatsappNumber, phone }: { whatsappNumber: string;
           target="_blank"
           rel="noopener"
           className="grid size-14 place-items-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-105"
-          aria-label="Message Ganga Vedha on WhatsApp"
+          aria-label="Message Ganga Veda on WhatsApp"
         >
           <MessageCircle className="size-7 fill-current" aria-hidden />
         </a>
@@ -879,7 +879,7 @@ export function SeedBanner() {
         <p className="flex-1">
           <strong className="font-semibold">Demo content.</strong> Prices, ratings,
           review counts and photographs are placeholders for the client to
-          replace from the admin panel — not Ganga Vedha&rsquo;s real figures.
+          replace from the admin panel — not Ganga Veda&rsquo;s real figures.
         </p>
         <button
           type="button"

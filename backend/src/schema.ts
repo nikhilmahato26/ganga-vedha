@@ -148,6 +148,11 @@ export const siteSettings = sqliteTable(
     riverStatusLabel: text('river_status_label').notNull().default('Running today'),
     gaugeLocation: text('gauge_location').notNull().default('Shivpuri'),
     logoMediaId: integer('logo_media_id').references(() => media.id, { onDelete: 'set null' }),
+    /** The Google Business listing's reviews link and its figures, copied by the owner from Google
+     *  (range checked by frontend/src/lib/schemas/settings.ts). */
+    googleReviewsUrl: text('google_reviews_url'),
+    googleRating: real('google_rating'),
+    googleReviewCount: integer('google_review_count'),
     updatedAt: updatedAt(),
   },
   t => [check('site_settings_singleton', sql`${t.id} = 1`)],

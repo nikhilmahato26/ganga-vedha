@@ -6,7 +6,7 @@ import { BrandLogo } from "@/components/brand-logo";
 export default function SiteNotFound() {
   return (
     <div className="container-page flex min-h-[60vh] flex-col items-center justify-center py-20 text-center">
-      <BrandLogo size="xl" alt="Ganga Vedha" />
+      <BrandLogo size="xl" alt="Ganga Veda" />
       <span className="mt-6 grid size-16 place-items-center rounded-full bg-jade-100 text-jade-800">
         <Compass className="size-7" aria-hidden />
       </span>

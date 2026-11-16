@@ -28,7 +28,7 @@ async function generateMetadata({
     title: r.name,
     description: r.summary,
     alternates: { canonical: `/rentals/${r.slug}` },
-    openGraph: { title: `${r.name} · Ganga Vedha`, description: r.summary },
+    openGraph: { title: `${r.name} · Ganga Veda`, description: r.summary },
   };
 }
 

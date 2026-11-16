@@ -138,7 +138,7 @@ export function EnquiryDialog({
   }
 
   const waMessage = done
-    ? `Hi Ganga Vedha — I've sent an enquiry for ${product.name}. My reference is ${done.refCode}.`
+    ? `Hi Ganga Veda — I've sent an enquiry for ${product.name}. My reference is ${done.refCode}.`
     : "";
   const waLink = whatsappHref(whatsappNumber, waMessage);
 

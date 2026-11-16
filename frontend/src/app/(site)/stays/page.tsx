@@ -13,9 +13,9 @@ import { getDestinations, getHotels } from "@/lib/content";
 import { useLoaderData } from "react-router-dom";
 
 const metadata: Metadata = {
-  title: "Stays & destinations across Uttarakhand and Himachal",
+  title: "Best places to stay in Rishikesh, Uttarakhand & Himachal",
   description:
-    "Haridwar, Rishikesh, Dehradun, Mussoorie, Tehri Lake, Nainital, Jim Corbett, Mukteshwar, Manali and Shimla — where to go, what each is best for, and where to stay.",
+    "Accommodation in Rishikesh and across Uttarakhand and Himachal — Haridwar, Dehradun, Mussoorie, Tehri Lake, Nainital, Jim Corbett, Mukteshwar, Manali and Shimla: where to go, what each is best for, and where to stay.",
   alternates: { canonical: "/stays" },
 };
 

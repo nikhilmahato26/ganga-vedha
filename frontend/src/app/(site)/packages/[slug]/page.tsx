@@ -29,7 +29,7 @@ async function generateMetadata({
     title: p.name,
     description: p.summary,
     alternates: { canonical: `/packages/${p.slug}` },
-    openGraph: { title: `${p.name} · Ganga Vedha`, description: p.summary },
+    openGraph: { title: `${p.name} · Ganga Veda`, description: p.summary },
   };
 }
 

@@ -5,10 +5,28 @@ import { RouteMeta } from "@/components/seo";
 /** The app's outermost route: head tags, scroll restoration and same-page #hash scrolling. */
 export default function Root() {
   const { hash, pathname } = useLocation();
+  const navigate = useNavigate();
   useEffect(() => {
     if (!hash) return;
     document.getElementById(decodeURIComponent(hash.slice(1)))?.scrollIntoView();
   }, [hash, pathname]);
+
+  // Many components (LinkButton, cards, footer lists) render plain <a href="/…">, as they did under
+  // Next.js. Route those through the router so moving around the site never reloads the whole app.
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = (e.target as Element | null)?.closest?.("a");
+      if (!a || (a.target && a.target !== "_self") || a.hasAttribute("download")) return;
+      const url = new URL(a.href, window.location.href);
+      if (url.origin !== window.location.origin || url.pathname.startsWith("/api/")) return;
+      if (/\.(xml|txt|png|jpe?g|webp|pdf|ico)$/i.test(url.pathname)) return;
+      e.preventDefault();
+      navigate(url.pathname + url.search + url.hash);
+    }
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, [navigate]);
 
   return (
     <>
