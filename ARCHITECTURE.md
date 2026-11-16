@@ -9,11 +9,11 @@ this file. If you change the wiring, **update this file in the same commit**, an
 now disagrees.
 
 **Current state (2026-11-16):** rebuilt from the original Next.js 15 + Neon + Vercel app onto the
-spasht.dev Cloudflare stack (branch `cloudflare-rebuild`).
+spasht.dev Cloudflare stack, merged to `main`.
 
-- D1 `ganga-vedha-db` exists, its schema is migrated and it holds all Neon data as of 2026-11-16.
+- D1 `ganga-vedha-db` holds all Neon data as of 2026-11-16.
+- The API Worker `ganga-vedha-api` is deployed with its secrets set.
 - The Pages project `ganga-vedha-web` exists.
-- **The API Worker is not deployed yet**: the Cloudflare token lacks *Workers Scripts: Edit* (incident #12).
 - The old Next.js app still sits at the repo root (`src/`, `next.config.ts`, root `package.json`) until the new site is live and checked (section 12).
 
 ---
@@ -48,7 +48,7 @@ flowchart LR
 | Piece | Address | Job |
 |---|---|---|
 | Website (Pages project `ganga-vedha-web`) | `https://ganga-vedha-web.pages.dev` | Public site, admin UI, **the `/api/*` reverse proxy**, `/sitemap.xml`, `/robots.txt` |
-| API (Worker `ganga-vedha-api`) | reached through the Pages service binding `API`; its `workers.dev` URL is not used | Public content API, enquiries, admin login and admin functions. Browsers never call it directly. |
+| API (Worker `ganga-vedha-api`) | **no public URL** (`workers_dev: false`); reachable only through the Pages service binding `API` | Public content API, enquiries, admin login and admin functions. Browsers never call it directly. |
 | Database (D1) | `ganga-vedha-db`, id `73b80766-7b44-4fc0-9dad-24725a3fc68b`, location APAC | All data |
 | Photos | Cloudinary cloud `c5gjzsz1`, folders `ganga-vedha/<entity>` | Every image. **Not R2** (section 10). |
 | Alert email | Gmail SMTP, the owner's address + app password | One email per new enquiry. Optional. |
@@ -71,8 +71,11 @@ How the proxy reaches the Worker:
 
 - **Service binding `API`** (`frontend/wrangler.jsonc`), which is a direct Worker-to-Worker call.
   No public URL is involved, and the Worker sees the visitor's real `cf-connecting-ip`.
-- Fallback: a Pages variable `API_ORIGIN` holding the Worker's URL. With no binding and no
-  `API_ORIGIN`, `/api/*` answers 503 "not connected yet".
+- The Worker has **no public address** (`workers_dev: false`, no routes in `backend/wrangler.jsonc`),
+  so the binding is the only way in. That also means the Worker must exist before the website can
+  deploy (incident #14).
+- Fallback (only if the binding is ever removed): give the Worker a route or a `workers.dev` URL
+  and set a Pages variable `API_ORIGIN` to it. With neither, `/api/*` answers 503 "not connected yet".
 - All of it is one file: `frontend/functions/_api.ts` (`forward()`), used by `functions/api/[[path]].ts`,
   `functions/sitemap.xml.ts` and nothing else.
 
@@ -222,7 +225,9 @@ pnpm dev          # Vite on :5173; frontend/.env.local has VITE_API_URL=http://l
 - **All data is real.** The D1 binding is `"remote": true`, and `pnpm dev` uses `--remote`.
   Anything done in the local admin changes production data. There is no offline copy, and none should
   be created: never `wrangler dev` without `--remote`, never `--local` on D1 commands.
-- `wrangler dev --remote` needs a token with **Workers Scripts: Edit** (it uploads a preview Worker).
+- `wrangler dev --remote` needs a token with **Workers Scripts: Edit** and a `workers.dev`
+  subdomain registered on the account (dashboard → Workers & Pages → *Your subdomain*): the preview
+  runs there, even though the deployed Worker has no public URL.
 - `backend/.wrangler/tmp/` holds only the code bundle being uploaded; safe to delete.
 - Stopping a stuck dev server: the process is `wrangler.js dev`, so `pkill -f "wrangler dev"` misses
   it. Use `lsof -iTCP:8787 -sTCP:LISTEN` and kill that PID, or `pkill -f wrangler`.
@@ -251,6 +256,7 @@ Add this project's incidents at the bottom. Never delete a row: it is why a rule
 | 11 | (Pasha Travels) duplicate package slug gave a 500, not "already used" | Drizzle wraps the D1 `UNIQUE` error in `cause` | Walk the cause chain, answer 409 with a field error (`http.ts`) |
 | 12 | (Ganga Vedha, 2026-11-16) `wrangler deploy` → "No access to the specified resource" on `…/scripts/ganga-vedha-api/secrets`; `wrangler dev --remote` → "edge-preview failed" | The account API token had D1 and Pages edit but only **read** on Workers Scripts | Token needs **Workers Scripts: Edit, D1: Edit, Cloudflare Pages: Edit** (`backend/.env.example`) |
 | 13 | (Ganga Vedha migration) Postgres-only SQL would have failed on D1 | `count(*) filter (…)`, `now() - interval`, jsonb `@>`, `num_nonnulls`, `~` regex in the Neon schema and queries | SQLite equivalents: `sum(case …)`, ISO-string comparisons with `strftime`, `json_each`, `(x IS NOT NULL) + …`, `GLOB` (`backend/src/schema.ts`, `services/admin-data.ts`) |
+| 14 | (Ganga Vedha, 2026-11-16) first CI run: Pages deploy failed "Service binding 'API' references Worker 'ganga-vedha-api' which was not found"; Worker deploy then failed "register a workers.dev subdomain" | The site deployed before the Worker existed; the account had no `workers.dev` subdomain and the Worker no route | Deploy the Worker first (re-run Deploy Frontend after it). Worker has `workers_dev: false`: the binding needs no public URL (02) |
 
 ---
 
@@ -365,14 +371,12 @@ root until the cut-over in section 12. Nothing in `frontend/` or `backend/` impo
 
 ## 12 Open items
 
-- [ ] **Give the Cloudflare token *Workers Scripts: Edit*** (it has D1 and Pages edit), or make a
-      new token with Workers Scripts, D1 and Cloudflare Pages all on Edit. Then **roll it**: the
-      current one was pasted into a chat (05).
-- [ ] Deploy the Worker (`pnpm deploy` in `backend/`), then set its Secrets: `JWT_SECRET` (new,
-      64 random chars), `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `SMTP_USER`, `SMTP_PASS`,
-      `ENQUIRY_NOTIFY_TO` (05).
-- [ ] Deploy the website with `VITE_API_URL=/`; set the GitHub secrets `CLOUDFLARE_API_TOKEN`,
-      `CLOUDFLARE_ACCOUNT_ID` and the variable `VITE_API_URL=/` (06).
+- [x] Token has Workers Scripts, D1 and Pages edit; GitHub secrets and `VITE_API_URL=/` set.
+- [x] Worker deployed; Secrets set: `JWT_SECRET`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`,
+      `SMTP_USER`, `SMTP_PASS` (alerts go to `SMTP_USER`; set `ENQUIRY_NOTIFY_TO` to change that).
+- [ ] **Roll the Cloudflare token**: it was pasted into a chat. Update the GitHub secret and
+      `backend/.env` with the new one (05).
+- [ ] Deploy the website (Actions → Deploy Frontend → Run workflow).
 - [ ] Live checks: admin login on an iPhone and in Chrome, one edit, one photo upload, one test
       enquiry and its email.
 - [ ] Cut-over from Vercel/Neon. Enquiries that reach the old site after 2026-11-16 are not in D1.

@@ -9,6 +9,10 @@
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
+  // No public URL: browsers and the site reach the API only through the Pages service binding
+  // (frontend/wrangler.jsonc), so there is no workers.dev address to call directly (ARCHITECTURE §02).
+  "workers_dev": false,
+  "preview_urls": false,
   // workerd cannot run iconv-lite (pulled in by body-parser); we never call it (BLUEPRINT §5 #23).
   "alias": { "iconv-lite": "./src/stubs/iconv-lite.ts" },
   "vars": {
