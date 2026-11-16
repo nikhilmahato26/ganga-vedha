@@ -1,0 +1,38 @@
+// The API Worker. Secrets (JWT_SECRET, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, SMTP_PASS) are
+// NEVER in this file: they are Worker Secrets in the dashboard (production) or backend/.dev.vars
+// (local). ARCHITECTURE.md §05.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ganga-vedha-api",
+  "main": "src/index.ts",
+  // ≥ 2025-09-01 so nodejs_compat provides http.createServer (BLUEPRINT §5 #24).
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  // workerd cannot run iconv-lite (pulled in by body-parser); we never call it (BLUEPRINT §5 #23).
+  "alias": { "iconv-lite": "./src/stubs/iconv-lite.ts" },
+  "vars": {
+    // Every site address allowed to read with credentials and to write (CORS + originGuard).
+    // A new address (custom domain, www.) must be added here or every save returns 403.
+    "SITE_ORIGIN": "https://ganga-vedha-web.pages.dev",
+    // The public site address, used for links inside alert emails.
+    "SITE_URL": "https://ganga-vedha-web.pages.dev",
+    // Cloudinary account name (public; it appears in every image URL). The API key and secret
+    // are Worker Secrets. Photo uploads answer "not connected yet" until all three are set.
+    "CLOUDINARY_CLOUD_NAME": "c5gjzsz1",
+    // New-enquiry alert email over SMTP (Gmail app password). SMTP_USER and SMTP_PASS are
+    // Worker Secrets; without them enquiries still save, they just aren't emailed.
+    "SMTP_HOST": "smtp.gmail.com",
+    "SMTP_PORT": "465"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ganga-vedha-db",
+      "database_id": "73b80766-7b44-4fc0-9dad-24725a3fc68b",
+      "migrations_dir": "migrations",
+      // Local dev uses this real database: nothing runs or is stored offline (AGENTS.md §04).
+      "remote": true
+    }
+  ]
+}

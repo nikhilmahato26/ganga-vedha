@@ -1,0 +1,13 @@
+# Copy to backend/.dev.vars (gitignored). Read by the RUNNING API during `pnpm dev`.
+# Production: every value below except SITE_ORIGIN/SITE_URL is a Secret on the API Worker
+# (`pnpm exec wrangler secret put NAME`); SITE_ORIGIN and SITE_URL live in wrangler.jsonc vars.
+JWT_SECRET=replace-with-64-random-characters
+SITE_ORIGIN=http://localhost:5173,http://localhost:5174
+SITE_URL=http://localhost:5173
+# Photos. The cloud name is in wrangler.jsonc vars.
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+# New-enquiry alert email via Gmail (optional). A Google app password, not the account password.
+SMTP_USER=
+SMTP_PASS=
+ENQUIRY_NOTIFY_TO=

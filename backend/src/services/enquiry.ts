@@ -1,0 +1,240 @@
+import { waitUntil } from "cloudflare:workers";
+import { and, eq, gt, sql } from "drizzle-orm";
+import { getDb } from "../db";
+import { enquiries } from "../schema";
+import { generateRefCode, normalizePhoneIN } from "../../../frontend/src/lib/format";
+import {
+  enquirySchema,
+  type EnquiryInput,
+  type EnquiryResult,
+} from "../../../frontend/src/lib/enquiry-schema";
+import { sendEnquiryNotification } from "../lib/email";
+import {
+  getAdventure,
+  getClosures,
+  getHotel,
+  getPackage,
+  getRental,
+} from "./content";
+import { isBookable } from "../../../frontend/src/lib/closure";
+
+const WINDOW_MINUTES = 10;
+const MAX_PER_WINDOW = 5;
+
+/**
+ * A per-process in-memory counter gives zero real protection: a serverless
+ * deployment runs many short-lived instances that share no memory, so a
+ * spammer just gets a fresh counter on the next cold start. The rate limit
+ * has to live where every instance can see it — the table itself.
+ */
+async function isRateLimited(phone: string): Promise<boolean> {
+  const db = getDb();
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(enquiries)
+    .where(
+      and(
+        eq(enquiries.phone, phone),
+        gt(enquiries.createdAt, sql`strftime('%Y-%m-%dT%H:%M:%fZ', 'now', ${`-${WINDOW_MINUTES} minutes`})`),
+      ),
+    );
+  return Number(count) >= MAX_PER_WINDOW;
+}
+
+/** What the route knows about the visitor: a keyed hash of their IP and their user agent. */
+export type EnquiryContext = { ipHash: string | null; userAgent: string | null };
+
+export async function submitEnquiry(raw: EnquiryInput, ctx: EnquiryContext): Promise<EnquiryResult> {
+  const parsed = enquirySchema.safeParse(raw);
+  if (!parsed.success) {
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const key = String(issue.path[0] ?? "form");
+      fieldErrors[key] ??= issue.message;
+    }
+    return { ok: false, fieldErrors };
+  }
+  const data = parsed.data;
+
+  // Silently accept the honeypot so a bot never learns it was caught.
+  if (data.website) {
+    return { ok: true, refCode: generateRefCode(), productName: "", persisted: false };
+  }
+
+  const phone = normalizePhoneIN(data.phone)!;
+
+  if (await isRateLimited(phone)) {
+    return {
+      ok: false,
+      fieldErrors: {},
+      formError:
+        "We've already got a few enquiries from this number. Message us on WhatsApp and we'll pick it up there.",
+    };
+  }
+
+  const isAdventureKind =
+    data.productKind === "rafting" ||
+    data.productKind === "bungee" ||
+    data.productKind === "paragliding" ||
+    data.productKind === "zipline";
+
+  // A general contact-form message: no product, no closure check, no price.
+  if (data.productKind === "general") {
+    const refCode = generateRefCode();
+    const productName = data.subject || "General enquiry";
+    const { ipHash, userAgent } = ctx;
+    await getDb()
+        .insert(enquiries)
+        .values({
+          refCode,
+          productKind: "general",
+          productNameSnapshot: productName,
+          subject: data.subject || null,
+          name: data.name,
+          phone,
+          email: data.email || null,
+          state: data.state || null,
+          travelDate: data.travelDate || null,
+          groupSize: data.groupSize,
+          message: data.message || null,
+          source: data.source,
+          ipHash,
+          userAgent,
+        });
+
+    // Emails the owner after the response is sent — never blocks or fails the enquiry.
+    waitUntil(
+      sendEnquiryNotification({
+        refCode,
+        productKind: "general",
+        productName,
+        priceInr: null,
+        name: data.name,
+        phone,
+        email: data.email || null,
+        state: data.state || null,
+        travelDate: data.travelDate || null,
+        groupSize: data.groupSize,
+        message: data.message || null,
+        source: data.source,
+        subject: data.subject || null,
+      }),
+    );
+
+    return { ok: true, refCode, productName, persisted: true };
+  }
+
+  // Resolve the product server-side. Never trust a price or a name that
+  // arrived from the browser.
+  const product =
+    data.productKind === "hotel"
+      ? await getHotel(data.productSlug)
+      : data.productKind === "package"
+        ? await getPackage(data.productSlug)
+        : data.productKind === "rental"
+          ? await getRental(data.productSlug)
+          : await getAdventure(data.productSlug);
+
+  if (!product) {
+    return {
+      ok: false,
+      fieldErrors: {},
+      formError: "That trip is no longer listed. Pick another and we'll sort it out.",
+    };
+  }
+
+  // An enquiry must never be taken for something that cannot run. Packages and
+  // rentals have no service-level closure, but an entity closure still applies
+  // to a rafting/bungee listing.
+  if (isAdventureKind || data.productKind === "hotel") {
+    const service =
+      data.productKind === "hotel"
+        ? "hotel"
+        : data.productKind === "rafting" || data.productKind === "bungee"
+          ? data.productKind
+          : "activity";
+    const closures = await getClosures();
+    const open = isBookable(closures, {
+      service,
+      entityType: data.productKind === "hotel" ? "hotel" : "adventure",
+      entityId: product.id,
+    });
+    if (!open) {
+      return {
+        ok: false,
+        fieldErrors: {},
+        formError:
+          "Bookings for this are closed right now. Leave us a WhatsApp message and we'll tell you the moment they reopen.",
+      };
+    }
+  }
+
+  const refCode = generateRefCode();
+  const priceSnapshot =
+    "pricePerNightInr" in product
+      ? product.pricePerNightInr
+      : "priceInr" in product
+        ? product.priceInr
+        : "perDayInr" in product
+          ? product.perDayInr
+          : null;
+
+  // The stored product_kind: rafting/bungee keep their own; paragliding and
+  // zip-lining collapse to `activity`; everything else is itself.
+  const storedKind: "rafting" | "bungee" | "hotel" | "package" | "rental" | "activity" =
+    data.productKind === "paragliding" || data.productKind === "zipline"
+      ? "activity"
+      : data.productKind;
+
+  {
+    const { ipHash, userAgent } = ctx;
+    await getDb()
+      .insert(enquiries)
+      .values({
+        refCode,
+        productKind: storedKind,
+        adventureId: isAdventureKind ? product.id : null,
+        hotelId: data.productKind === "hotel" ? product.id : null,
+        packageId: data.productKind === "package" ? product.id : null,
+        rentalId: data.productKind === "rental" ? product.id : null,
+        productNameSnapshot: product.name,
+        productPriceSnapshotInr: priceSnapshot,
+        name: data.name,
+        phone,
+        email: data.email || null,
+        state: data.state || null,
+        travelDate: data.travelDate || null,
+        groupSize: data.groupSize,
+        message: data.message || null,
+        source: data.source,
+        ipHash,
+        userAgent,
+      });
+  }
+
+  // Emails the owner after the response is sent — never blocks or fails the enquiry.
+  waitUntil(
+    sendEnquiryNotification({
+      refCode,
+      productKind: storedKind,
+      productName: product.name,
+      priceInr: priceSnapshot,
+      name: data.name,
+      phone,
+      email: data.email || null,
+      state: data.state || null,
+      travelDate: data.travelDate || null,
+      groupSize: data.groupSize,
+      message: data.message || null,
+      source: data.source,
+      subject: null,
+    }),
+  );
+
+  return {
+    ok: true,
+    refCode,
+    productName: product.name,
+    persisted: true,
+  };
+}

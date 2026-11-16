@@ -48,3 +48,12 @@ next-env.d.ts
 # Local env
 .env
 .env.local
+
+# Cloudflare rebuild (frontend/ = Pages, backend/ = Worker)
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+backend/.env
+!.env.example
+!.dev.vars.example

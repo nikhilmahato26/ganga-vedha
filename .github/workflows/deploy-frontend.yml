@@ -1,0 +1,50 @@
+name: Deploy Frontend
+
+# Website: Cloudflare Pages project "ganga-vedha-web" (static build + functions/ incl. the /api
+# proxy). Only frontend/** changes trigger this (ARCHITECTURE.md §06).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/deploy-frontend.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: frontend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            frontend/pnpm-lock.yaml
+            backend/pnpm-lock.yaml
+      # Typecheck follows type-only imports into backend/src (lib/db-types.ts, lib/admin-data.ts).
+      - run: pnpm --dir ../backend install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm build
+        env:
+          # "/" = call the API through this site's own /api proxy. Set as a repo *variable*.
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_SITE_URL: ${{ vars.VITE_SITE_URL }}
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: frontend
+          command: pages deploy dist --project-name=ganga-vedha-web --branch=main
