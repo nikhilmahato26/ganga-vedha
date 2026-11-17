@@ -47,7 +47,7 @@ flowchart LR
 
 | Piece | Address | Job |
 |---|---|---|
-| Website (Pages project `ganga-vedha-web`) | `https://ganga-vedha-web.pages.dev` | Public site, admin UI, **the `/api/*` reverse proxy**, `/sitemap.xml`, `/robots.txt` |
+| Website (Pages project `ganga-vedha-web`) | **`https://www.gangaveda.in`** (canonical; `gangaveda.in` 301s to it via `functions/_middleware.ts`), also `https://ganga-vedha-web.pages.dev` | Public site, admin UI, **the `/api/*` reverse proxy**, `/sitemap.xml`, `/robots.txt` |
 | API (Worker `ganga-vedha-api`) | **no public URL** (`workers_dev: false`); reachable only through the Pages service binding `API` | Public content API, enquiries, admin login and admin functions. Browsers never call it directly. |
 | Database (D1) | `ganga-vedha-db`, id `73b80766-7b44-4fc0-9dad-24725a3fc68b`, location APAC | All data |
 | Photos | Cloudinary cloud `c5gjzsz1`, folders `ganga-vedha/<entity>` | Every image. **Not R2** (section 10). |
@@ -262,6 +262,12 @@ Add this project's incidents at the bottom. Never delete a row: it is why a rule
 
 ## 09 Moving to a custom domain
 
+**Ganga Vedha's domain:** `gangaveda.in`, registered at Hostinger. Until 2026-11-17 its DNS was at
+Hostinger (`dns-parking.com`), pointing at Vercel. It moves to Cloudflare DNS in this account. The
+only record to carry over is the TXT `google-site-verification=…` (Search Console); there is no
+email on the domain. `www.gangaveda.in` is the canonical address (the one on the Google listing).
+
+
 With `VITE_API_URL=/`, the proxy works unchanged on any address.
 
 1. Add the domain to the client's Cloudflare account (Cloudflare Registrar, or move nameservers).
@@ -388,4 +394,10 @@ root until the cut-over in section 12. Nothing in `frontend/` or `backend/` impo
       keep the Neon database read-only for a month as a backup, then delete it.
 - [ ] Pre-render public pages at build time, or add per-route `<title>`/description injection in a
       Pages Function, so non-JS crawlers and link previews see real titles (10).
-- [ ] Custom domain (09).
+- [ ] Custom domain (09). Done so far: `SITE_ORIGIN` lists both addresses; apex→www redirect;
+      Neon checked on 2026-11-17 with nothing new since the copy, so no re-sync is needed. Left:
+      1. Add `gangaveda.in` in the Cloudflare dashboard (the token can't create zones).
+      2. Add both Pages custom domains.
+      3. Switch the nameservers at Hostinger.
+      4. `SITE_URL` and the `VITE_SITE_URL` variable = `https://www.gangaveda.in`.
+      5. Remove the domain from the Vercel project.

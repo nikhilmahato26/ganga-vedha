@@ -18,7 +18,7 @@
   "vars": {
     // Every site address allowed to read with credentials and to write (CORS + originGuard).
     // A new address (custom domain, www.) must be added here or every save returns 403.
-    "SITE_ORIGIN": "https://ganga-vedha-web.pages.dev",
+    "SITE_ORIGIN": "https://www.gangaveda.in,https://gangaveda.in,https://ganga-vedha-web.pages.dev",
     // The public site address, used for links inside alert emails.
     "SITE_URL": "https://ganga-vedha-web.pages.dev",
     // Cloudinary account name (public; it appears in every image URL). The API key and secret
